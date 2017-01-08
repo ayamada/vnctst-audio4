@@ -27,7 +27,7 @@
     - `tail -F figwheel_server.log` を別コンソールで実行
 
 5. ブラウザを開く
-    - `open http://localhost:8003/`
+    - `open http://localhost:8004/`
 
 6. ソースをいじって開発
 
@@ -103,7 +103,7 @@
     - ついでに、このタイミングでリリース版の動作確認を取っておくとベター
 
 3. ringサーバから`index.html`を取得
-    - `curl http://localhost:8003/ > resources/public/index.html`
+    - `curl http://localhost:8004/ > resources/public/index.html`
     - このタイミングでコミットしておくとよい。
         - コミットメッセージは `'Update index.html'` とかで。
 

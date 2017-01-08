@@ -83,7 +83,7 @@
                                    [hiccup "1.0.5"]]
                     :resource-paths ["resources"]
                     :plugins [[lein-ring "0.10.0"]]
-                    :ring {:port 8003
+                    :ring {:port 8004
                            :handler vnctst.audio4.demo.server/handler}}
              :for-js {:dependencies ~dependencies-cljs-prod
                       :plugins ~plugins-cljs-prod}
@@ -110,6 +110,6 @@
                        }}
   :figwheel {:http-server-root "public"
              :server-ip "0.0.0.0"
-             :server-port 9003
+             :server-port 9004
              :server-logfile "figwheel_server.log"}
   )
