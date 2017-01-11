@@ -3,9 +3,10 @@
   (:require [vnctst.audio4.state :as state]
             [vnctst.audio4.util :as util]
             [vnctst.audio4.device :as device]
-            ;[vnctst.audio4.common :as common]
-            ;[vnctst.audio4.se :as se]
+            [vnctst.audio4.background :as background]
+            ;[vnctst.audio4.loader :as loader]
             ;[vnctst.audio4.bgm :as bgm]
+            ;[vnctst.audio4.se :as se]
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
@@ -14,6 +15,10 @@
 (defn- init-force! []
   (device/init! (state/get :disable-webaudio?)
                 (state/get :disable-htmlaudio?))
+  (background/start-supervise!)
+  ;(loader/init!)
+  ;(bgm/init!)
+  ;(se/init!)
   ;; TODO
   true)
 
@@ -151,8 +156,10 @@
    ;; TODO: 既存プリロードの全破棄が必要(再生中のものはどうする？)
    :autoext-list (fn [k v]
                    (state/set! k v))
-   ;; TODO: 既にバックグラウンドの時のみ、特別扱いが必要
+   ;; NB: 既にバックグラウンドの時のみ、強制的に再生開始させる必要がある
    :dont-stop-on-background? (fn [k v]
+                               ;(when (and v (state/get :in-background?))
+                               ;  (bgm/sync-background! false))
                                (state/set! k v))
    ;; NB: モバイル環境の場合、既に再生中のものを全て止める必要がある
    :disable-mobile? (fn [k v]
