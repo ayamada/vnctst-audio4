@@ -10,6 +10,14 @@
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
+;;; NB: vnctst-audio3ではBGM系とSE系とでデバイスを分けていたが、
+;;;     プリロードを共通化するにあたって、一つに戻した。
+;;;     これにより、vnctst-audio3で実現されていた
+;;;     「BGMはHtmlAudioで、SEはWebAudioで」のような指定が
+;;;     できなくなった事に注意。
+;;;     (この指定ができるとうれしいのは古いandroidだけなので、
+;;;     今はもう無視するという方向にした為)
+
 ;;; TODO: init! を実行する前にサードパーティー製のデバイスを設定する事で、
 ;;;       そのデバイスを優先して利用できる仕組みを組み込みたい
 
@@ -34,7 +42,7 @@
 
 ;;; TODO: 一部の古いモバイル系は :dumb 固定にしたい。しかしどう判定する？
 
-(defn- determine-se-device-keys [never-use-webaudio? never-use-htmlaudio?]
+(defn- determine-device-keys [never-use-webaudio? never-use-htmlaudio?]
   (let [r (if (or
                 (:android util/terminal-type)
                 (:ios util/terminal-type))
@@ -49,17 +57,6 @@
     r))
 
 
-(defn- determine-bgm-device-keys
-  [never-use-webaudio? never-use-htmlaudio?]
-  ;; androidのchromeではWebAudioのデコードに時間がかかるらしいので、
-  ;; これのみ特別扱いして、WebAudioを使わせないようにする
-  ;; …という事だったが、最近の端末では問題ないようなので、
-  ;; 最初からSEと同じ扱いにする事にした
-  ;; (以前は (and (:android util/terminal-type) (:chrome util/terminal-type))
-  ;; で判定し、 [:html-audio-single :dumb] を固定で返すようにしていた)
-  (determine-se-device-keys never-use-webaudio? never-use-htmlaudio?))
-
-
 (defn- resolve-device [device-keys]
   (loop [device-keys device-keys]
     (when-let [k (first device-keys)]
@@ -70,12 +67,9 @@
 
 ;;; 適切にデバイスの判定と初期化を行い、stateに保存する
 (defn init! [& [never-use-webaudio? never-use-htmlaudio?]]
-  (let [se-device (resolve-device (determine-se-device-keys never-use-webaudio? never-use-htmlaudio?))
-        bgm-device (resolve-device (determine-bgm-device-keys never-use-webaudio? never-use-htmlaudio?))]
-    (assert se-device)
-    (assert bgm-device)
-    (state/set! :se-device se-device)
-    (state/set! :bgm-device bgm-device)
+  (let [device (resolve-device (determine-device-keys never-use-webaudio? never-use-htmlaudio?))]
+    (assert device)
+    (state/set! :device device)
     true))
 
 
@@ -87,12 +81,8 @@
 
 ;;; デバイス関数を実行する
 
-(defn se-call! [k & args]
+(defn call! [k & args]
   (check-device-fn-keyword! k)
-  (apply (get (state/get :se-device) k) args))
-
-(defn bgm-call! [k & args]
-  (check-device-fn-keyword! k)
-  (apply (get (state/get :bgm-device) k) args))
+  (apply (get (state/get :device) k) args))
 
 

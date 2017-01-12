@@ -7,7 +7,7 @@
   {:volume-master 0.5
    :volume-bgm 0.5
    :volume-se 0.5
-   :autoext-list ["ogg" "mp3"]
+   :autoext-list ["ogg" "mp3" "m4a"]
    :debug? false
    :dont-stop-on-background? false
    :disable-mobile? false

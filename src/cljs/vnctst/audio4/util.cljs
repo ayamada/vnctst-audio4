@@ -5,6 +5,7 @@
             ))
 
 
+
 ;;; percentage utilities
 
 (defn float->percent [f]
@@ -82,24 +83,6 @@
 
 
 
-;;; iOSでは、タッチイベントをトリガーにして再生を行う事による
-;;; アンロック処理が必要となる
-;;; unlock-fnは、アンロックに成功したら真を返す事。
-;;; (偽値を返す事で、次にまたリトライを行う)
-;;; アンロックは一回行えば、それ以降は行わなくてもよい(らしい)
-;(defn register-ios-unlock-fn! [unlock-fn]
-;  (let [event-name "touchstart"
-;        h (atom nil)]
-;    (reset! h (fn [e]
-;                (when (unlock-fn)
-;                  (js/document.removeEventListener event-name @h))))
-;    (js/document.addEventListener event-name @h)))
-
-
-
-
-
-
 
 
 (def can-play?
@@ -164,6 +147,78 @@
                 (when (unlock-fn)
                   (js/document.removeEventListener event-name @h))))
     (js/document.addEventListener event-name @h)))
+
+
+
+(def autoext-table
+  {"ogg" "audio/ogg"
+   "mp3" "audio/mpeg"
+   "m4a" "audio/mp4"})
+
+(defn- get-resolved-autoext-list []
+  (if-let [resolved-autoext-list (state/get :resolved-autoext-list)]
+    resolved-autoext-list
+    (let [autoext-list (state/get :autoext-list)
+          autoext-list (map (fn [entry]
+                              (if (string? entry)
+                                (if-let [mime (get autoext-table entry)]
+                                  [entry mime]
+                                  (throw (ex-info (str "Extension "
+                                                       (pr-str entry)
+                                                       " could not resolve"
+                                                       " mime."
+                                                       " Must specify"
+                                                       " [" (pr-str entry)
+                                                       " \"mime/type\"]"
+                                                       " form.")
+                                                  {})))
+                                (if (and
+                                      (vector? entry)
+                                      (= 2 (count entry))
+                                      (string? (first entry))
+                                      (string? (second entry)))
+                                  entry
+                                  (throw (ex-info (str "Invalid entry "
+                                                       (pr-str entry))
+                                                  {})))))
+                            autoext-list)
+          autoext-list (filter (fn [[ext mime]]
+                                 (can-play? mime))
+                               autoext-list)]
+      (state/set! :resolved-autoext-list autoext-list)
+      autoext-list)))
+
+
+(defn expand-pathes [path-key]
+  (cond
+    (empty? path-key) nil
+    (keyword? path-key) (if-let [dir (namespace path-key)]
+                          (expand-pathes (str dir "/" (name path-key) ".*"))
+                          (expand-pathes (str (name path-key) ".*")))
+    (not (string? path-key)) (expand-pathes (str path-key))
+    :else (let [[_ basename] (re-find #"^(.*)\.\*$" path-key)]
+            (if-not basename
+              [path-key]
+              (if-let [resolved-autoext-list (get-resolved-autoext-list)]
+                (mapv (fn [[ext mime]]
+                        (str basename "." ext))
+                      resolved-autoext-list)
+                nil)))))
+
+
+;;; 簡易プリロードスケジューラ
+(defn run-preload-process! [proc queue resolver]
+  (when-not @proc
+    (reset! proc true)
+    (go-loop []
+      (if (empty? @queue)
+        (reset! proc nil)
+        (let [one (first @queue)]
+          (swap! queue rest)
+          (<! (resolver one))
+          (recur))))))
+
+
 
 
 

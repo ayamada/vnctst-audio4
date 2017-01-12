@@ -4,8 +4,8 @@
             [vnctst.audio4.util :as util]
             [vnctst.audio4.device :as device]
             [vnctst.audio4.background :as background]
-            ;[vnctst.audio4.loader :as loader]
-            ;[vnctst.audio4.bgm :as bgm]
+            [vnctst.audio4.cache :as cache]
+            [vnctst.audio4.bgm :as bgm]
             ;[vnctst.audio4.se :as se]
             [cljs.core.async :as async :refer [>! <!]]
             ))
@@ -16,10 +16,6 @@
   (device/init! (state/get :disable-webaudio?)
                 (state/get :disable-htmlaudio?))
   (background/start-supervise!)
-  ;(loader/init!)
-  ;(bgm/init!)
-  ;(se/init!)
-  ;; TODO
   true)
 
 (defonce initialized? (atom false))
@@ -41,14 +37,26 @@
 
 ;;; Play / Stop
 
+(defn stop-bgm! [& [bgm-channel-id fade-sec]]
+  (init!)
+  (if (nil? bgm-channel-id)
+    nil ; TODO: 全BGM停止を行う
+    (let []
+      ;; TODO
+      (cache/cancel-load-by-stop-bgm!)
+      true)))
+
 
 (defn bgm! [path & optional-args]
   (init!)
-  (let [options (optional-args->map optional-args)
-        ]
-    ;; TODO
-    true))
-
+  (let [options (optional-args->map optional-args)]
+    (if (empty? path) ; pathがnilの時はstop-bgm!を呼ぶ
+      (stop-bgm! (:channel options))
+      (let [
+            ]
+        ;; TODO
+        (cache/cancel-load-by-stop-se! path)
+        true))))
 
 
 (defn bgm-oneshot! [path & optional-args]
@@ -58,34 +66,33 @@
 
 
 
-(defn stop-bgm! [& [bgm-channel-id fade-sec]]
-  (init!)
-  ;; TODO
-  true)
-
-
-
-
-(defn se! [path & optional-args]
-  (init!)
-  (let [options (optional-args->map optional-args)
-        ]
-    ;; TODO
-    true))
-
-
-(defn alarm! [& [path & optional-args]]
-  (init!)
-  (let [options (optional-args->map optional-args)
-        ]
-    ;; TODO
-    true))
 
 
 (defn stop-se! [& [se-channel-obj fade-sec]]
   (init!)
-  ;; TODO
-  true)
+  (if (nil? se-channel-obj)
+    nil ; TODO: 全SE停止を行う
+    (let []
+      ;; TODO
+      true)))
+
+
+(defn se! [path & optional-args]
+  (init!)
+  (when-not (empty? path) ; pathがnilの時は何もしない
+    (let [options (optional-args->map optional-args)]
+      ;; TODO
+      true)))
+
+
+(defn alarm! [& [path & optional-args]]
+  (init!)
+  (when-not (empty? path) ; pathがnilの時は何もしない
+    (let [options (optional-args->map optional-args)
+          ]
+      ;; TODO
+      true)))
+
 
 
 
@@ -110,32 +117,37 @@
 
 (defn load! [path]
   (init!)
-  ;; TODO
-  true)
+  (when-not (empty? path)
+    (cache/load! path)
+    true))
 
 
 (defn unload! [path]
   (init!)
-  ;; TODO
-  true)
+  (when-not (empty? path)
+    ;; TODO: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
+    ;;       これを鳴らしているチャンネルがないかどうか調べ、
+    ;;       もしあれば即座に停止させる必要がある。
+    ;;       この処理はcache側には入れられない(モジュール参照の都合で)
+    (cache/unload! path)
+    true))
 
 
 (defn loaded? [path]
-  (init!)
-  ;; TODO
-  nil)
+  (cache/loaded? path))
 
 
 (defn error? [path]
-  (init!)
-  ;; TODO
-  nil)
+  (cache/error? path))
 
 
 (defn unload-all! []
   (init!)
-  ;; TODO
-  nil)
+  (cache/unload-all!)
+  true)
+
+
+
 
 
 ;;; Settings
@@ -153,13 +165,17 @@
                  (state/set! k v))
    :volume-se (fn [k v]
                 (state/set! k v))
-   ;; TODO: 既存プリロードの全破棄が必要(再生中のものはどうする？)
+   ;; NB: 既存プリロードの全破棄が必要
    :autoext-list (fn [k v]
+                   (stop-bgm! nil 0)
+                   (stop-se! nil 0)
+                   (unload-all!)
+                   (state/set! :resolved-autoext-list nil)
                    (state/set! k v))
    ;; NB: 既にバックグラウンドの時のみ、強制的に再生開始させる必要がある
    :dont-stop-on-background? (fn [k v]
-                               ;(when (and v (state/get :in-background?))
-                               ;  (bgm/sync-background! false))
+                               (when (and v (state/get :in-background?))
+                                 (bgm/sync-background! false))
                                (state/set! k v))
    ;; NB: モバイル環境の場合、既に再生中のものを全て止める必要がある
    :disable-mobile? (fn [k v]
