@@ -58,6 +58,9 @@
     (loaded? path)
     (not (boolean (get @loaded-audiosource-table path)))))
 
+;;; ロードされたasを取得する
+(defn get-as [path]
+  (get @loaded-audiosource-table path))
 
 
 

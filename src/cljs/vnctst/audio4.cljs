@@ -15,6 +15,7 @@
 (defn- init-force! []
   (device/init! (state/get :disable-webaudio?)
                 (state/get :disable-htmlaudio?))
+  (reset! background/background-handle bgm/sync-background!)
   (background/start-supervise!)
   true)
 
@@ -39,12 +40,8 @@
 
 (defn stop-bgm! [& [bgm-channel-id fade-sec]]
   (init!)
-  (if (nil? bgm-channel-id)
-    nil ; TODO: 全BGM停止を行う
-    (let []
-      ;; TODO
-      (cache/cancel-load-by-stop-bgm! (or bgm-channel-id 0))
-      true)))
+  (bgm/stop! bgm-channel-id (or fade-sec (state/get :default-bgm-fade-sec)))
+  true)
 
 
 (defn bgm! [path & optional-args]
@@ -52,10 +49,8 @@
   (let [options (optional-args->map optional-args)]
     (if (empty? path) ; pathがnilの時はstop-bgm!を呼ぶ
       (stop-bgm! (:channel options))
-      (let [
-            ]
-        ;; TODO
-        true))))
+      (bgm/play! path options)))
+  true)
 
 
 (defn bgm-oneshot! [path & optional-args]
@@ -71,7 +66,8 @@
   (init!)
   (if (nil? se-channel-obj)
     nil ; TODO: 全SE停止を行う
-    (let []
+    (let [path nil ; TODO
+          ]
       ;; TODO
       (cache/cancel-load-by-stop-se! path)
       true)))
@@ -87,11 +83,9 @@
 
 (defn alarm! [& [path & optional-args]]
   (init!)
-  (when-not (empty? path) ; pathがnilの時は何もしない
-    (let [options (optional-args->map optional-args)
-          ]
-      ;; TODO
-      true)))
+  (let [options (merge {:alarm? true}
+                       (optional-args->map optional-args))]
+    (se! path options)))
 
 
 
@@ -160,11 +154,16 @@
    :default-se-fade-sec state/set!
    ;; TODO: volume系はsync操作が必要
    :volume-master (fn [k v]
-                    (state/set! k v))
+                    (state/set! k v)
+                    ;(se/sync-volume!)
+                    (bgm/sync-volume!))
    :volume-bgm (fn [k v]
-                 (state/set! k v))
+                 (state/set! k v)
+                 (bgm/sync-volume!))
    :volume-se (fn [k v]
-                (state/set! k v))
+                (state/set! k v)
+                ;(se/sync-volume!)
+                )
    ;; NB: 既存プリロードの全破棄が必要
    :autoext-list (fn [k v]
                    (stop-bgm! nil 0)

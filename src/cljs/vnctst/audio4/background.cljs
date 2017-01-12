@@ -16,7 +16,8 @@
                     (state/set! :in-background? bg?)
                     (when @background-handle
                       (@background-handle bg?))))]
-      (js/document.addEventListener event-name h))))
+      (js/document.addEventListener event-name h)
+      (h nil))))
 
 
 
