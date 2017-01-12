@@ -374,3 +374,17 @@
 
 
 
+
+
+(defn stop-for-unload! [path]
+  (doseq [ch (keys @channel-state-table)]
+    (let [state (get @channel-state-table ch)]
+      (when (= path (get-in @state [:current-param :key]))
+        (stop! ch 0)))))
+
+
+
+
+
+
+

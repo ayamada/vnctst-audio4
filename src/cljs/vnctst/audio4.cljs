@@ -123,6 +123,8 @@
     ;;       これを鳴らしているチャンネルがないかどうか調べ、
     ;;       もしあれば即座に停止させる必要がある。
     ;;       この処理はcache側には入れられない(モジュール参照の都合で)
+    (bgm/stop-for-unload! path)
+    ;(se/stop-for-unload! path)
     (cache/unload! path)
     true))
 
