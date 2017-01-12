@@ -12,7 +12,7 @@
 
 ;;; BGMのロード後再生の為に、pathを記憶しておく必要がある
 ;;; (これは複数のロードによる書き換えの為に必要となる)
-(defonce ^:private last-loading-bgm-path (atom nil))
+(defonce ^:private last-loading-bgm-path (atom {}))
 
 
 ;;; ロード済(エラー含む)のasを保持するテーブル
@@ -70,10 +70,10 @@
 ;;;   - pathが既にロード済なら即座にdone-fnが実行される
 ;;;   - このdone-fnは後から書き換えが行われ、実行されない場合がある
 ;;;     - 具体的には以下のパターンとなる
-;;;       - done-typeが:bgmかつ、ロード中に play-bgm! が実行された場合
-;;;       - done-typeが:bgmかつ、ロード中に stop-bgm! が実行された場合
+;;;       - bgm-channelがnil以外かつ、ロード中に play-bgm! が実行された場合
+;;;       - bgm-channelがnil以外かつ、ロード中に stop-bgm! が実行された場合
 ;;;         - この場合はstop-bgm!サイドからcancel-load-by-stop-bgm!が呼ばれる
-;;;       - done-typeが:seかつ、ロード中に stop-se! が実行された場合
+;;;       - bgm-channelがnilかつ、ロード中に stop-se! が実行された場合
 ;;;         - この場合はstop-se!サイドからcancel-load-by-stop-se!が呼ばれる
 ;;;       - ロード中に unload! が実行された場合
 ;;;   - このdone-fnは「ロード成功後に再生を開始する為のもの」であるので、
@@ -81,7 +81,9 @@
 ;;;;    「ロードの成功/失敗に関わらず、完了時に指定関数を実行してほしい」場合は
 ;;;;    done-fnを使わずに、自前で定期的に loaded? error? を呼んで
 ;;;;    チェックするgoスレッドを走らせる事。
-(defn load-internal! [path & [done-fn done-type]]
+;;; - ロード完了後にBGMを再生する場合は、bgm-channel引数の指定が必須(nil不可)。
+;;;   SEの場合はnilを指定すればよい。
+(defn load-internal! [path & [done-fn bgm-channel]]
   (if (or
         (loaded? path)
         (and
@@ -94,18 +96,18 @@
       ;; BGMのロードの場合、last-loading-bgm-pathを更新する必要がある。
       ;; また同時に、既にロード中のBGMがあるなら、先にそれのdone-fnを
       ;; 取り消す必要もある
-      (when (= :bgm done-type)
-        (when-let [loading-bgm-path @last-loading-bgm-path]
+      (when bgm-channel
+        (when-let [loading-bgm-path (get @last-loading-bgm-path bgm-channel)]
           (when-let [info (get @loading-info-table loading-bgm-path)]
             (swap! loading-info-table
                    assoc loading-bgm-path
                    (assoc info :done-fn nil))))
-        (swap! last-loading-bgm-path path))
+        (swap! last-loading-bgm-path assoc bgm-channel path))
       (if-let [info (get @loading-info-table path)]
         ;; このpathは既にロード中。登録されているdone-fnを上書きするだけで完了
         (swap! loading-info-table
                assoc path
-               (assoc info :done-fn done-fn :done-type done-type))
+               (assoc info :done-fn done-fn :bgm-channel bgm-channel))
         (do
           ;; このpathは未ロードもしくはキューに入っている。
           ;; キューに入っている場合はこのタイミングでキューから削除しておく
@@ -119,7 +121,7 @@
                     info {:path path
                           :left-real-pathes (rest real-pathes)
                           :done-fn done-fn
-                          :done-type done-type}
+                          :bgm-channel bgm-channel}
                     h-ok (fn [as]
                            ;; NB: done-fnは後から書き換えられる可能性があるので
                            ;;     ここで改めて最新のものを取得する
@@ -128,8 +130,8 @@
                              (swap! loaded-audiosource-table assoc path as)
                              (swap! loading-info-table dissoc path)
                              (util/logging :loaded path real-path)
-                             (when (= :bgm (:done-type info))
-                               (reset! last-loading-bgm-path nil))
+                             (when-let [bgm-channel (:bgm-channel info)]
+                               (swap! last-loading-bgm-path dissoc bgm-channel))
                              (when-let [f (:done-fn info)]
                                (f))))
                     h-err (atom nil)]
@@ -145,8 +147,8 @@
                                             h-ok
                                             @h-err)
                               (do
-                                (when (= :bgm (:done-type info))
-                                  (reset! last-loading-bgm-path nil))
+                                (when-let [bgm-channel (:bgm-channel info)]
+                                  (swap! last-loading-bgm-path dissoc bgm-channel))
                                 ;; NB: エラー時は「エントリはあるが値はnil」
                                 ;;     という形式で示す。
                                 ;;     うっかりここをdissocに書き換えない事。
@@ -163,13 +165,13 @@
 
 
 
-(defn cancel-load-by-stop-bgm! []
-  (when-let [path @last-loading-bgm-path]
+(defn cancel-load-by-stop-bgm! [bgm-channel]
+  (when-let [path (get @last-loading-bgm-path bgm-channel)]
     (when-let [info (get @loading-info-table path)]
       (swap! loading-info-table
              assoc path
              (assoc info :done-fn nil)))
-    (reset! last-loading-bgm-path nil)))
+    (swap! last-loading-bgm-path dissoc bgm-channel)))
 
 (defn cancel-load-by-stop-se! [path]
   (when-let [info (get @loading-info-table path)]
@@ -208,6 +210,8 @@
 
 
 ;;; NB: まだ鳴っている最中に呼ばないようにする事
+;;;     (必要なら、unload!を呼ぶ前に再生を停止させておく事。
+;;;     この停止処理はcacheモジュール内では困難)
 (defn unload! [path]
   (if (loaded? path)
     ;; ロード済

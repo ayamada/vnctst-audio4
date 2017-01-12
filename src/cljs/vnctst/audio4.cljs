@@ -43,7 +43,7 @@
     nil ; TODO: 全BGM停止を行う
     (let []
       ;; TODO
-      (cache/cancel-load-by-stop-bgm!)
+      (cache/cancel-load-by-stop-bgm! (or bgm-channel-id 0))
       true)))
 
 
@@ -55,7 +55,6 @@
       (let [
             ]
         ;; TODO
-        (cache/cancel-load-by-stop-se! path)
         true))))
 
 
@@ -74,6 +73,7 @@
     nil ; TODO: 全SE停止を行う
     (let []
       ;; TODO
+      (cache/cancel-load-by-stop-se! path)
       true)))
 
 
