@@ -122,7 +122,7 @@
                                         (pr-str path)))
               (let [start-real-path (first real-pathes)
                     info {:path path
-                          :left-real-pathes (rest real-pathes)
+                          :left-real-pathes (atom real-pathes)
                           :done-fn done-fn
                           :bgm-channel bgm-channel}
                     h-ok (fn [as]
@@ -132,7 +132,7 @@
                                  real-path (first @(:left-real-pathes info))]
                              (swap! loaded-audiosource-table assoc path as)
                              (swap! loading-info-table dissoc path)
-                             (util/logging :loaded path real-path)
+                             (util/logging :loaded path :as real-path)
                              (when-let [bgm-channel (:bgm-channel info)]
                                (swap! last-loading-bgm-path dissoc bgm-channel))
                              (when-let [f (:done-fn info)]
@@ -140,9 +140,11 @@
                     h-err (atom nil)]
                 (reset! h-err
                         (fn [msg]
-                          (let [left-real-pathes (get-in @loading-info-table [path :left-real-pathes])
+                          (let [left-real-pathes (get-in @loading-info-table
+                                                         [path
+                                                          :left-real-pathes])
                                 real-path (first @left-real-pathes)]
-                            (util/logging :error path real-path msg)
+                            (util/logging :error path :as real-path :by msg)
                             (swap! left-real-pathes rest)
                             (if-let [next-real-path (first @left-real-pathes)]
                               (device/call! :load-audio-source!
@@ -151,7 +153,8 @@
                                             @h-err)
                               (do
                                 (when-let [bgm-channel (:bgm-channel info)]
-                                  (swap! last-loading-bgm-path dissoc bgm-channel))
+                                  (swap! last-loading-bgm-path
+                                         dissoc bgm-channel))
                                 ;; NB: エラー時は「エントリはあるが値はnil」
                                 ;;     という形式で示す。
                                 ;;     うっかりここをdissocに書き換えない事。

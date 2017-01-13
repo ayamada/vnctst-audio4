@@ -9,12 +9,13 @@
 
 (defonce display-js-mode? (atom false))
 
-(def init-options
-  [:fallback-ext "mp3"
-   :dont-stop-on-background? false
-   :always-mute-at-mobile? false
-   :debug? true
-   :never-use-webaudio? false
+(def config-options
+  [:debug? true
+   ])
+
+(def preload-pathes
+  ["se/launch.*"
+   "se/shootout.*"
    ])
 
 (def button-assign
@@ -175,33 +176,22 @@
 
 
 (defn- sync-button-labels! []
-  ;(when-let [dom (js/document.getElementById "init-info")]
-  ;  (let [msg (if @display-js-mode?
-  ;              (str "vnctst.audio3.js.init({"
-  ;                   (string/join ", "
-  ;                                (map (fn [[k v]]
-  ;                                       (str "\"" (name k) "\": " (pr-str v)))
-  ;                                     (seq (apply hash-map init-options))))
-  ;                   "})")
-  ;              (str "(vnctst.audio3/init! "
-  ;                   (string/join " " (map pr-str init-options))
-  ;                   ")")
-  ;              )]
-  ;    (set! (.. dom -textContent) msg)))
-  ;(when-let [dom (js/document.getElementById "preload-info")]
-  ;  (let [msg (string/join (if @display-js-mode? ", " " ")
-  ;                         (map (if @display-js-mode?
-  ;                                #(str "{"
-  ;                                      (namespace %)
-  ;                                      ":"
-  ;                                      (pr-str (name %))
-  ;                                      "}")
-  ;                                pr-str)
-  ;                              (concat audio3/preset-bgm-keys
-  ;                                      audio3/preset-me-keys
-  ;                                      audio3/preset-bgs-keys
-  ;                                      audio3/preset-se-keys)))]
-  ;    (set! (.. dom -textContent) msg)))
+  (when-let [dom (js/document.getElementById "config-info")]
+    (let [msg (if @display-js-mode?
+                (str "vnctst.audio4.js.setConfig("
+                     (string/join ", "
+                                  (map #(if (keyword? %)
+                                          (pr-str (name %))
+                                          (pr-str %))
+                                       config-options))
+                     ")")
+                (str "(vnctst.audio4/set-config! "
+                     (string/join " " (map pr-str config-options))
+                     ")"))]
+      (set! (.. dom -textContent) msg)))
+  (when-let [dom (js/document.getElementById "preload-info")]
+    (let [msg (string/join ", " (map pr-str preload-pathes))]
+      (set! (.. dom -textContent) msg)))
   (doseq [[k m] (seq button-assign)]
     (when-let [dom (js/document.getElementById (name k))]
       ;(js/addEventListener dom "click" (:fn m))
@@ -233,26 +223,20 @@
 
 (defn ^:export bootstrap []
   (sync-button-labels!)
-  ;(apply audio3/init! init-options)
+  (apply audio4/set-config! config-options)
   ;; プリセットのプリロードとロード待ちを行う
-  #_
-  (let [bgm-keys (concat audio3/preset-bgm-keys
-                         audio3/preset-bgs-keys
-                         audio3/preset-me-keys)
-        se-keys audio3/preset-se-keys
-        target-num (+ (count bgm-keys)
-                      (count se-keys))
+  (let [target-num (count preload-pathes)
         display-progress! #(display-msg! (str "Loading ... "
                                               %
                                               " / "
                                               target-num))]
     (display-version!)
-    (audio3/preload-all-preset!)
     (display-progress! 0)
+    (doseq [path preload-pathes]
+      (audio4/load! path))
     (go-loop []
       (<! (async/timeout 200))
-      (let [c (+ (count (filter audio3/preloaded-bgm? bgm-keys))
-                 (count (filter audio3/loaded-se? se-keys)))]
+      (let [c (count (filter audio4/loaded? preload-pathes))]
         (display-progress! c)
         (if (< c target-num)
           (recur)

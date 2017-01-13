@@ -204,12 +204,14 @@
    })
 
 
-(defn set-config! [k v]
+(defn set-config! [k v & kvs]
   (init!)
   (let [config-fn (config-fns k)]
     (assert config-fn (str "Invalid config key " k))
     (config-fn k v)
-    true))
+    (if (empty? kvs)
+      true
+      (apply set-config! kvs))))
 
 
 (defn config [k]

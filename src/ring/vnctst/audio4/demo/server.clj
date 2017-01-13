@@ -55,7 +55,7 @@
               [:meta {:http-equiv "Cache-Control", :content "no-cache"}]
               [:title title]
               ;[:link {:href "css/reset.css", :rel "stylesheet", :type "text/css"}]
-              ;[:link {:href (prevent-cache "css/default.css"), :rel "stylesheet", :type "text/css"}]
+              [:link {:href (prevent-cache "css/default.css"), :rel "stylesheet", :type "text/css"}]
               [:style {:type "text/css"}
                "button {font-family:monospace; padding:0.5em; margin:0.2em}\n"
                "code {padding:0.5em; margin:0.5em}"]
@@ -75,23 +75,23 @@
               [:div#main {:style "display: none"}
                [:div#version "Version:"]
                [:hr]
-               ;; init実行時の情報表示
-               ;[:div
-               ; [:span "以下の引数で初期化を実行しました："]
-               ; [:br]
-               ; [:code#init-info "(init-info)"]
-               ; [:br]
-               ; [:br]
-               ; [:span "以下のプリセットの事前ロードを実行しました："]
-               ; [:br]
-               ; [:code#preload-info "(preload-info)"]
-               ; ]
-               [:hr]
                ;; cljs/js切り替えボタン
                [:div
                 [:button {:onclick "vnctst.audio4.demo.jsmode(false)"} "cljs向けの表示にする"]
                 [:br]
                 [:button {:onclick "vnctst.audio4.demo.jsmode(true)"} "js向けの表示にする"]
+                ]
+               [:hr]
+               ;; init実行時の情報表示
+               [:div
+                [:span "以下の設定を実行しました："]
+                [:br]
+                [:code#config-info "(config-info)"]
+                [:br]
+                [:br]
+                [:span "以下の音源ファイルの事前ロードを実行しました："]
+                [:br]
+                [:code#preload-info "(preload-info)"]
                 ]
                [:hr]
                ;; BGM/ME
