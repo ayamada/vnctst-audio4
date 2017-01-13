@@ -189,16 +189,22 @@
       autoext-list)))
 
 
-(defn expand-pathes [path-key]
+(defn path-key->path [path-key]
+  (if-not (keyword? path-key)
+    path-key
+    (if-let [dir (namespace path-key)]
+      (str dir "/" (name path-key) ".*")
+      (str (name path-key) ".*"))))
+
+
+(defn expand-pathes [path]
   (cond
-    (empty? path-key) nil
-    (keyword? path-key) (if-let [dir (namespace path-key)]
-                          (expand-pathes (str dir "/" (name path-key) ".*"))
-                          (expand-pathes (str (name path-key) ".*")))
-    (not (string? path-key)) (expand-pathes (str path-key))
-    :else (let [[_ basename] (re-find #"^(.*)\.\*$" path-key)]
+    (empty? path) nil
+    (keyword? path) (expand-pathes (path-key->path path))
+    (not (string? path)) (expand-pathes (str path))
+    :else (let [[_ basename] (re-find #"^(.*)\.\*$" path)]
             (if-not basename
-              [path-key]
+              [path]
               (if-let [resolved-autoext-list (get-resolved-autoext-list)]
                 (mapv (fn [[ext mime]]
                         (str basename "." ext))

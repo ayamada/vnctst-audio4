@@ -49,7 +49,7 @@
   (let [options (optional-args->map optional-args)]
     (if (empty? path) ; pathがnilの時はstop-bgm!を呼ぶ
       (stop-bgm! (:channel options))
-      (bgm/play! path options)))
+      (bgm/play! (util/path-key->path path) options)))
   true)
 
 
@@ -77,6 +77,7 @@
   (init!)
   (when-not (empty? path) ; pathがnilの時は何もしない
     (let [options (optional-args->map optional-args)]
+      ;(se/play! (util/path-key->path path) options)
       ;; TODO
       true)))
 
@@ -112,29 +113,30 @@
 (defn load! [path]
   (init!)
   (when-not (empty? path)
-    (cache/load! path)
+    (cache/load! (util/path-key->path path))
     true))
 
 
 (defn unload! [path]
   (init!)
   (when-not (empty? path)
-    ;; TODO: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
-    ;;       これを鳴らしているチャンネルがないかどうか調べ、
-    ;;       もしあれば即座に停止させる必要がある。
-    ;;       この処理はcache側には入れられない(モジュール参照の都合で)
-    (bgm/stop-for-unload! path)
-    ;(se/stop-for-unload! path)
-    (cache/unload! path)
-    true))
+    (let [path (util/path-key->path path)]
+      ;; TODO: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
+      ;;       これを鳴らしているチャンネルがないかどうか調べ、
+      ;;       もしあれば即座に停止させる必要がある。
+      ;;       この処理はcache側には入れられない(モジュール参照の都合で)
+      (bgm/stop-for-unload! path)
+      ;(se/stop-for-unload! path)
+      (cache/unload! path)
+      true)))
 
 
 (defn loaded? [path]
-  (cache/loaded? path))
+  (cache/loaded? (util/path-key->path path)))
 
 
 (defn error? [path]
-  (cache/error? path))
+  (cache/error? (util/path-key->path path)))
 
 
 (defn unload-all! []
