@@ -99,7 +99,7 @@
 
 
 
-(defn- _play-immediately! [ch state as param]
+(defn- _play-immediately! [bgm-ch state as param]
   (let [ac (device/call! :spawn-audio-channel as)
         volume (:volume param)
         pitch (:pitch param)
@@ -119,17 +119,17 @@
     ;; また、バックグラウンド時は明示的な再開ポイントのリセットが必要
     ;; (非バックグラウンド時はイベントリスナで設定されるので不要)
     (if (state/get :in-background?)
-      (swap! resume-pos-table assoc ch 0)
+      (swap! resume-pos-table assoc bgm-ch 0)
       (device/call! :play! ac 0 (not oneshot?) i-volume i-pitch i-pan false))))
 
 
 
 ;;; NB: ロード中にキャンセルされたり、別の音源の再生要求が入る可能性がある
-(defn- _load+play! [ch state path volume pitch pan oneshot?]
+(defn- _load+play! [bgm-ch state path volume pitch pan oneshot?]
   (let [previous-loading-key (:key (:next-param @state))
         h-done (fn [as]
                  (when-let [next-param (:next-param @state)]
-                   (_play-immediately! ch state as next-param)))
+                   (_play-immediately! bgm-ch state as next-param)))
         param {:key path
                :volume volume
                :pan pan
@@ -141,7 +141,7 @@
       ;; プリロード済なら、それを利用する
       (when-let [as (cache/get-as path)]
         (h-done as))
-      (cache/load-internal! path h-done ch))))
+      (cache/load-internal! path h-done bgm-ch))))
 
 
 
@@ -159,7 +159,7 @@
 
 
 
-(defn- run-fader! [ch state]
+(defn- run-fader! [bgm-ch state]
   (when-not (:fade-process @state)
     (let [interval-msec fade-granularity-msec
           c (async/chan)]
@@ -196,7 +196,7 @@
                       (let [next-param (:next-param @state)]
                         (_stop-immediately! state)
                         (when next-param
-                          (_load+play! ch
+                          (_load+play! bgm-ch
                                        state
                                        (:key next-param)
                                        (:volume next-param)
@@ -316,8 +316,8 @@
 
 (defn stop! [channel fade-sec]
   (if (nil? channel)
-    (doseq [ch (keys @channel-state-table)]
-      (stop! ch fade-sec))
+    (doseq [bgm-ch (keys @channel-state-table)]
+      (stop! bgm-ch fade-sec))
     (let [state (resolve-state! channel)
           fade-msec (int (* 1000 fade-sec))]
       (sync-playing-state! state)
@@ -338,19 +338,19 @@
 
 
 ;;; バックグラウンドに入ったので、stateの再生を停止する
-(defn- background-on! [ch state pos]
+(defn- background-on! [bgm-ch state pos]
   ;; acが存在する場合は基本的には論理再生中。
   ;; ただし、:oneshot?再生終了時はその限りではなく、個別に対応する必要がある
   (when-let [ac (:ac (:current-param @state))]
     ;; NB: :oneshot?のみ、acが存在して再生終了状態になっているケースがある
     (if (device/call! :playing? ac)
       (do
-        (swap! resume-pos-table assoc ch (device/call! :pos ac))
+        (swap! resume-pos-table assoc bgm-ch (device/call! :pos ac))
         (device/call! :stop! ac))
-      (swap! resume-pos-table dissoc ch))))
+      (swap! resume-pos-table dissoc bgm-ch))))
 
 ;;; バックグラウンドが解除されたので、復帰させるべき曲があれば、再生を再開する
-(defn- background-off! [ch state pos]
+(defn- background-off! [bgm-ch state pos]
   (when pos
     (let [param (:current-param @state)]
       (when-let [ac (:ac param)]
@@ -362,25 +362,25 @@
                                          :bgm volume pitch pan)
               i-volume (* i-volume (:fade-factor @state))]
           (device/call! :play! ac pos (not oneshot?) i-volume i-pitch i-pan false)))
-      (swap! resume-pos-table dissoc ch))))
+      (swap! resume-pos-table dissoc bgm-ch))))
 
 (defn sync-background! [now-background?]
-  (doseq [ch (keys @channel-state-table)]
-    (let [state (resolve-state! ch)
-          pos (get @resume-pos-table ch)]
+  (doseq [bgm-ch (keys @channel-state-table)]
+    (let [state (resolve-state! bgm-ch)
+          pos (get @resume-pos-table bgm-ch)]
       (if now-background?
-        (background-on! ch state pos)
-        (background-off! ch state pos)))))
+        (background-on! bgm-ch state pos)
+        (background-off! bgm-ch state pos)))))
 
 
 
 
 
 (defn stop-for-unload! [path]
-  (doseq [ch (keys @channel-state-table)]
-    (let [state (get @channel-state-table ch)]
+  (doseq [bgm-ch (keys @channel-state-table)]
+    (let [state (get @channel-state-table bgm-ch)]
       (when (= path (get-in @state [:current-param :key]))
-        (stop! ch 0)))))
+        (stop! bgm-ch 0)))))
 
 
 

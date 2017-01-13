@@ -71,6 +71,7 @@
 ;;; - ロードは即座に開始される(ネットワーク帯域を圧迫する可能性あり)
 ;;; - ロード完了時に実行されるdone-fnが指定可能
 ;;;   - pathが既にロード済なら即座にdone-fnが実行される
+;;;   - done-fnには引数としてasが渡される
 ;;;   - このdone-fnは後から書き換えが行われ、実行されない場合がある
 ;;;     - 具体的には以下のパターンとなる
 ;;;       - bgm-channelがnil以外かつ、ロード中に play-bgm! が実行された場合
@@ -94,7 +95,8 @@
           (:mobile util/terminal-type)))
     ;; 既にロード済。done-fnを実行して終了
     (when done-fn
-      (done-fn))
+      (when-let [as (get @loaded-audiosource-table path)]
+        (done-fn as)))
     (do
       ;; BGMのロードの場合、last-loading-bgm-pathを更新する必要がある。
       ;; また同時に、既にロード中のBGMがあるなら、先にそれのdone-fnを
@@ -136,7 +138,7 @@
                              (when-let [bgm-channel (:bgm-channel info)]
                                (swap! last-loading-bgm-path dissoc bgm-channel))
                              (when-let [f (:done-fn info)]
-                               (f))))
+                               (f as))))
                     h-err (atom nil)]
                 (reset! h-err
                         (fn [msg]

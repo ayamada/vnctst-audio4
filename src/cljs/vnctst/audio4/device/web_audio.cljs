@@ -141,14 +141,15 @@
           playtime (- play-end-time play-start-time)
           normalized-playtime (* playtime pitch)
           pos-tmp (+ started-pos normalized-playtime)]
-      (loop [p pos-tmp]
-        (if (<= duration p)
-          (recur (- p duration))
-          p)))
+      (if-not (pos duration)
+        0
+        (loop [p pos-tmp]
+          (if (<= duration p)
+            (recur (- p duration))
+            p))))
     0))
 
 (defn pos [ch]
-  (p 'pos (:url @ch))
   (_pos ch))
 
 (defn- safe-disconnect! [node]

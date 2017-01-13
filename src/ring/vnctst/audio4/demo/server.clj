@@ -33,7 +33,7 @@
 (defn- demo-button [id]
   (let [id (name id)
         desc-id (str (name id) "-desc")]
-    [:span [:button {:id id} " "] " - " [:span {:id desc-id} " "]]))
+    [:span [:button {:id id} " "] " : " [:span {:id desc-id} " "]]))
 
 (defn render-app [req]
   (let [github-url "https://github.com/ayamada/vnctst-audio4"
@@ -49,8 +49,8 @@
              [:head
               [:meta {:http-equiv "X-UA-Compatible", :content "IE=edge"}]
               [:meta {:charset "UTF-8"}]
-              [:meta {:name "viewport", :content "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"}]
-              [:meta {:name "apple-mobile-web-app-capable" :content "yes"}]
+              ;[:meta {:name "viewport", :content "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"}]
+              ;[:meta {:name "apple-mobile-web-app-capable" :content "yes"}]
               [:meta {:http-equiv "Pragma", :content "no-cache"}]
               [:meta {:http-equiv "Cache-Control", :content "no-cache"}]
               [:title title]
@@ -94,65 +94,7 @@
                 [:code#preload-info "(preload-info)"]
                 ]
                [:hr]
-               ;; BGM/ME
-               ;[:div
-               ; "BGM / ME :"
-               ; [:br]
-               ; "- BGMとして再生された音源はループ再生される(勝手に終了しない)"
-               ; [:br]
-               ; "- MEとして再生された音源はループ再生されない"
-               ; "(曲の最後に到達すると普通に終了する)"
-               ; [:br]
-               ; [:br]
-               ; (demo-button :stop-bgm)
-               ; [:br]
-               ; (demo-button :stop-bgm-0)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :play-bgm-va3)
-               ; [:br]
-               ; (demo-button :play-bgm-drop)
-               ; [:br]
-               ; (demo-button :play-bgm-drop-2)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :play-me-unmei)
-               ; [:br]
-               ; (demo-button :play-me-unmei-2)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :play-bgm-drop-ogg)
-               ; [:br]
-               ; (demo-button :play-bgm-drop-mp3)
-               ; [:br]
-               ; (demo-button :play-me-unmei-ogg)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :play-bgm-nil)
-               ; [:br]
-               ; (demo-button :play-me-nil)
-               ; ]
-               ;[:hr]
-               ;;; BGS
-               ;[:div
-               ; "BGS :"
-               ; [:br]
-               ; "- BGSとして再生された音源はBGM同様、ループ再生される。"
-               ; "BGSの再生/停止はBGM/MEの状態に干渉しない(同時に再生できる)"
-               ; [:br]
-               ; [:br]
-               ; (demo-button :stop-bgs)
-               ; [:br]
-               ; (demo-button :stop-bgs-0)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :play-bgs-noise)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :play-bgs-nil)
-               ; ]
-               ;[:hr]
-               ;;; SE
+               ;; SE
                ;[:div
                ; "SE :"
                ; [:br]
@@ -168,24 +110,120 @@
                ; (demo-button :play-se-yarare-ogg)
                ; ]
                ;[:hr]
-               ;;; misc
-               ;[:div
-               ; "Misc :"
-               ; [:br]
-               ; [:br]
-               ; (demo-button :set-volume-master-25)
-               ; [:br]
-               ; (demo-button :set-volume-master-50)
-               ; [:br]
-               ; (demo-button :set-volume-master-100)
-               ; [:br]
-               ; [:br]
-               ; (demo-button :can-play-ogg)
-               ; [:br]
-               ; (demo-button :can-play-mp3)
-               ; [:br]
-               ; (demo-button :can-play-m4a)
-               ; ]
+               ;; BGM
+               [:div
+                "BGM :"
+                [:br]
+                "- BGMの再生"
+                [:br]
+                [:br]
+                (demo-button :bgm-va32)
+                [:br]
+                (demo-button :bgm-rdl)
+                [:br]
+                [:br]
+                (demo-button :stop-bgm)
+                [:br]
+                ;(demo-button :stop-bgm-0)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :play-bgm-va3)
+                ;[:br]
+                ;(demo-button :play-bgm-drop)
+                ;[:br]
+                ;(demo-button :play-bgm-drop-2)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :play-me-unmei)
+                ;[:br]
+                ;(demo-button :play-me-unmei-2)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :play-bgm-drop-ogg)
+                ;[:br]
+                ;(demo-button :play-bgm-drop-mp3)
+                ;[:br]
+                ;(demo-button :play-me-unmei-ogg)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :play-bgm-nil)
+                ;[:br]
+                ;(demo-button :play-me-nil)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :stop-bgs)
+                ;[:br]
+                ;(demo-button :stop-bgs-0)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :play-bgs-noise)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :play-bgs-nil)
+                ]
+               [:hr]
+               ;; configure
+               [:div
+                "Configure :"
+                [:br]
+                "- 全体に影響する設定項目の値の取得および変更"
+                [:br]
+                [:br]
+                (demo-button :config-volume-master)
+                [:br]
+                [:br]
+                (demo-button :set-config-volume-master-25)
+                [:br]
+                (demo-button :set-config-volume-master-50)
+                [:br]
+                (demo-button :set-config-volume-master-100)
+                [:br]
+                [:br]
+                (demo-button :set-config-volume-bgm-100)
+                [:br]
+                (demo-button :set-config-volume-se-100)
+                [:br]
+                (demo-button :set-config-debug?-true)
+                [:br]
+                (demo-button :set-config-se-chattering-sec-0)
+                [:br]
+                (demo-button :set-config-default-bgm-fade-sec-2)
+                [:br]
+                (demo-button :set-config-default-se-fade-sec-1)
+                [:br]
+                (demo-button :set-config-autoext-list)
+                [:br]
+                (demo-button :set-config-dont-stop-on-background?-true)
+                [:br]
+                (demo-button :set-config-disable-mobile?-true)
+                [:br]
+                (demo-button :set-config-disable-webaudio?-true)
+                [:br]
+                (demo-button :set-config-disable-htmlaudio?-true)
+                ]
+               [:hr]
+               ;; misc
+               [:div
+                "Misc :"
+                [:br]
+                "- その他の補助的な機能"
+                [:br]
+                [:br]
+                (demo-button :can-play-ogg)
+                [:br]
+                (demo-button :can-play-mp3)
+                [:br]
+                (demo-button :can-play-m4a)
+                [:br]
+                (demo-button :can-play)
+                [:br]
+                [:br]
+                (demo-button :terminal-type)
+                [:br]
+                (demo-button :float->percent)
+                [:br]
+                (demo-button :percent->float)
+                ]
                ;; footer
                [:hr]
                address

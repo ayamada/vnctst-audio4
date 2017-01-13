@@ -10,6 +10,17 @@
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
+
+
+
+;;; 最も最近に鳴らしたSEのチャンネルobjを保持する
+(defonce a-last-played-se-channel-obj (atom nil))
+(defn last-played-se-channel-obj [] @a-last-played-se-channel-obj)
+
+
+
+
+
 ;;; Internal
 
 (defn- init-force! []
@@ -76,10 +87,12 @@
 (defn se! [path & optional-args]
   (init!)
   (when-not (empty? path) ; pathがnilの時は何もしない
-    (let [options (optional-args->map optional-args)]
-      ;(se/play! (util/path-key->path path) options)
-      ;; TODO
-      true)))
+    ;; TODO
+    ;(let [options (optional-args->map optional-args)
+    ;      se-channel-obj (se/play! (util/path-key->path path) options)]
+    ;  (reset! a-last-played-se-channel-obj se-channel-obj)
+    ;  se-channel-obj)
+    ))
 
 
 (defn alarm! [& [path & optional-args]]
