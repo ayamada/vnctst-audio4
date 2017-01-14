@@ -49,7 +49,7 @@
 
 ;;; Play / Stop
 
-(defn stop-bgm! [& [bgm-channel-id fade-sec]]
+(defn stop-bgm! [& [fade-sec bgm-channel-id]]
   (init!)
   (bgm/stop! bgm-channel-id (or fade-sec (state/get :default-bgm-fade-sec)))
   true)

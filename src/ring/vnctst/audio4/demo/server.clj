@@ -35,11 +35,20 @@
         desc-id (str (name id) "-desc")]
     [:span [:button {:id id} " "] " : " [:span {:id desc-id} " "]]))
 
+(defn- demo-button2 [id]
+  (let [id (name id)
+        desc-id (str (name id) "-desc")]
+    [:dl
+     [:dt [:button {:id id} " "]]
+     [:dd [:span {:id desc-id} " "]]]))
+
 (defn render-app [req]
   (let [github-url "https://github.com/ayamada/vnctst-audio4"
-        address [:p [:a {:href github-url
-                         :target "_blank"}
-                     "(vnctst-audio4 github repos)"]]]
+        link-home (fn [label]
+                    [:a {:href github-url
+                       :target "_blank"}
+                     label])
+        address [:p (link-home "(vnctst-audio4 github repos)")]]
     {:status 200
      :headers {"Content-Type" "text/html; charset=UTF-8"
                "Pragma" "no-cache"
@@ -77,9 +86,11 @@
                [:hr]
                ;; cljs/js切り替えボタン
                [:div
-                [:button {:onclick "vnctst.audio4.demo.jsmode(false)"} "cljs向けの表示にする"]
+                [:button {:onclick "vnctst.audio4.demo.jsmode(false)"}
+                 "cljs向けの表示にする"]
                 [:br]
-                [:button {:onclick "vnctst.audio4.demo.jsmode(true)"} "js向けの表示にする"]
+                [:button {:onclick "vnctst.audio4.demo.jsmode(true)"}
+                 "js向けの表示にする"]
                 ]
                [:hr]
                ;; init実行時の情報表示
@@ -93,7 +104,48 @@
                 [:br]
                 [:code#preload-info "(preload-info)"]
                 ]
-               ;; TODO: ここの項目順は、README通りの順にしたい(つまり、最初に「最も簡単な方法」があり、徐々に複雑になっていく順)
+               [:hr]
+               [:div
+                [:h2 "前書き"]
+                [:ul
+                 [:li (str "これは、ゲーム向けの音響ファイル再生ライブラリ"
+                           "である「vnctst-audio4」のオンラインデモです。")]
+                 [:li
+                  "vnctst-audio4についての詳細は、"
+                  (link-home "vnctst-audio4のgithubリポジトリ")
+                  "を参照してください。"]
+                 [:li (str "vnctst-audio4には「cljs版」と「js版」があります。"
+                           "サンプルコードの表記を変更したい場合は上の方にある"
+                           "ボタンを押してください。")]
+                 [:li (str "サンプルボタンに書いてある以外の操作も可能です。"
+                           "ブラウザのデバッグコンソールを開き、"
+                           "サンプルボタンを参考にjs式を入力してください。")]
+                 [:li (str "このデモでは、ページのロード時に debug? フラグを"
+                           "有効化している為、"
+                           "再生や停止等の操作を行うとデバッグコンソールに"
+                           "ログが表示されます。これを確認したい場合も"
+                           "デバッグコンソールを開いておくとよいでしょう。")]
+                 ]]
+               [:hr]
+               [:div
+                [:h2 "最もシンプルな使い方"]
+                [:h3 "BGMを鳴らす"]
+                (demo-button2 :bgm-va32)
+                (demo-button2 :bgm-rnr)
+                (demo-button2 :bgm-oneshot-ny2017)
+                [:h3 "BGMを止める"]
+                (demo-button2 :stop-bgm)
+                (demo-button2 :stop-bgm-3)
+                (demo-button2 :stop-bgm-0)
+                [:h3 "SEを鳴らす"]
+                (demo-button2 :se-shootout)
+                (demo-button2 :se-launch)
+                ]
+               [:hr]
+               [:div
+                [:h2 "最もシンプルな使い方(SE編)"]
+                [:h3 "SEを鳴らす"]
+                ]
                [:hr]
                ;; SE
                ;[:div
@@ -118,13 +170,13 @@
                 "- BGMの再生"
                 [:br]
                 [:br]
-                (demo-button :bgm-va32)
-                [:br]
-                (demo-button :bgm-rnr)
-                [:br]
-                [:br]
-                (demo-button :stop-bgm)
-                [:br]
+                ;(demo-button :bgm-va32)
+                ;[:br]
+                ;(demo-button :bgm-rnr)
+                ;[:br]
+                ;[:br]
+                ;(demo-button :stop-bgm)
+                ;[:br]
                 ;(demo-button :stop-bgm-0)
                 ;[:br]
                 ;[:br]
