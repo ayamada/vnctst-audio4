@@ -141,7 +141,7 @@
           playtime (- play-end-time play-start-time)
           normalized-playtime (* playtime pitch)
           pos-tmp (+ started-pos normalized-playtime)]
-      (if-not (pos duration)
+      (if-not (pos? duration)
         0
         (loop [p pos-tmp]
           (if (<= duration p)

@@ -345,11 +345,12 @@
   ;; ただし、:oneshot?再生終了時はその限りではなく、個別に対応する必要がある
   (when-let [ac (:ac (:current-param @state))]
     ;; NB: :oneshot?のみ、acが存在して再生終了状態になっているケースがある
-    (if (device/call! :playing? ac)
-      (do
-        (swap! resume-pos-table assoc bgm-ch (device/call! :pos ac))
-        (device/call! :stop! ac))
-      (swap! resume-pos-table dissoc bgm-ch))))
+    (let [playing? (device/call! :playing? ac)]
+      (if-not playing?
+        (swap! resume-pos-table dissoc bgm-ch)
+        (let [pos (device/call! :pos ac)]
+          (swap! resume-pos-table assoc bgm-ch pos)
+          (device/call! :stop! ac))))))
 
 ;;; バックグラウンドが解除されたので、復帰させるべき曲があれば、再生を再開する
 (defn- background-off! [bgm-ch state pos]
