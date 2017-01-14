@@ -84,15 +84,6 @@
               [:div#main {:style "display: none"}
                [:div#version "Version:"]
                [:hr]
-               ;; cljs/js切り替えボタン
-               [:div
-                [:button {:onclick "vnctst.audio4.demo.jsmode(false)"}
-                 "cljs向けの表示にする"]
-                [:br]
-                [:button {:onclick "vnctst.audio4.demo.jsmode(true)"}
-                 "js向けの表示にする"]
-                ]
-               [:hr]
                ;; init実行時の情報表示
                [:div
                 [:span "以下の設定を実行しました："]
@@ -103,6 +94,15 @@
                 [:span "以下の音源ファイルの事前ロードを実行しました："]
                 [:br]
                 [:code#preload-info "(preload-info)"]
+                ]
+               [:hr]
+               ;; cljs/js切り替えボタン
+               [:div
+                [:button {:onclick "vnctst.audio4.demo.jsmode(false)"}
+                 "cljs向けの表示にする"]
+                [:br]
+                [:button {:onclick "vnctst.audio4.demo.jsmode(true)"}
+                 "js向けの表示にする"]
                 ]
                [:hr]
                [:div
@@ -143,8 +143,8 @@
                 ]
                [:hr]
                [:div
-                [:h2 "最もシンプルな使い方(SE編)"]
-                [:h3 "SEを鳴らす"]
+                [:h2 ""]
+                [:h3 ""]
                 ]
                [:hr]
                ;; SE

@@ -92,14 +92,18 @@
    :desc "現在再生中のBGMを即座に停止させる。"
    })
 
+(defba :se-shootout
+  {:fn #(vnctst.audio4/se! "se/shootout.*")
+   :cljs "(vnctst.audio4/se! \"se/shootout.*\")"
+   :js "vnstst.audio4.js.se(\"se/shootout.*\")"
+   :desc (str "\"se/shootout.ogg\" もしくは \"se/shootout.mp3\" を"
+              "SEとして再生し、その再生チャネルを返り値として返す"
+              "(再生チャネルは通常そのまま捨てて構わない)。"
+              "SEとしての再生では、音源の多重再生が可能となる。"
+              )})
+
 ;;; TODO: 以下を使うボタンの追加が残っている(追加が完了したら消していく事)
 ;bgm/noise.*
-;bgm/ny2017.*
-;bgm/va32.*
-;bgm/rnr.*
-;
-;se/launch.*
-;se/shootout.*
 ;
 ;stop-bgm!
 ;bgm!
