@@ -44,7 +44,7 @@
                (aget js/window "webkitAudio"))
           audio (when ac
                   (try
-                    (new ac "")
+                    (new ac)
                     (catch :default e
                       nil)))]
       (when audio

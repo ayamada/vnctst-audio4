@@ -42,16 +42,16 @@
 
 ;;; TODO: 一部の古いモバイル系は :dumb 固定にしたい。しかしどう判定する？
 
-(defn- determine-device-keys [never-use-webaudio? never-use-htmlaudio?]
+(defn- determine-device-keys [disable-webaudio? disable-htmlaudio?]
   (let [r (if (or
                 (:android util/terminal-type)
                 (:ios util/terminal-type))
             [:web-audio :html-audio-single :dumb]
             [:web-audio :html-audio-multi :dumb])
-        r (if never-use-webaudio?
+        r (if disable-webaudio?
             (vec (remove #{:web-audio} r))
             r)
-        r (if never-use-htmlaudio?
+        r (if disable-htmlaudio?
             (vec (remove #{:html-audio-single :html-audio-multi} r))
             r)]
     r))
@@ -66,8 +66,8 @@
 
 
 ;;; 適切にデバイスの判定と初期化を行い、stateに保存する
-(defn init! [& [never-use-webaudio? never-use-htmlaudio?]]
-  (let [device (resolve-device (determine-device-keys never-use-webaudio? never-use-htmlaudio?))]
+(defn init! [& [disable-webaudio? disable-htmlaudio?]]
+  (let [device (resolve-device (determine-device-keys disable-webaudio? disable-htmlaudio?))]
     (assert device)
     (state/set! :device device)
     true))
