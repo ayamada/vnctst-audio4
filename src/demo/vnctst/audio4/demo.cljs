@@ -53,10 +53,10 @@
                              "予め設置しておく必要がある。"
                              )
                   }
-   :bgm-rdl {:fn #(vnctst.audio4/bgm! "bgm/rdl.*")
-                  :cljs "(vnctst.audio4/bgm! \"bgm/rdl.*\")"
-                  :js "vnctst.audio4.js.bgm(\"bgm/rdl.*\")"
-                  :desc (str "\"bgm/rdl.{ogg,mp3}\" をBGMとして再生する。"
+   :bgm-rnr {:fn #(vnctst.audio4/bgm! "bgm/rnr.*")
+                  :cljs "(vnctst.audio4/bgm! \"bgm/rnr.*\")"
+                  :js "vnctst.audio4.js.bgm(\"bgm/rnr.*\")"
+                  :desc (str "\"bgm/rnr.{ogg,mp3}\" をBGMとして再生する。"
                              "もし既に別のBGMが再生中の場合は、そのBGMの"
                              "フェードアウトを開始し、フェードアウトが"
                              "完了してから再生が開始される。"

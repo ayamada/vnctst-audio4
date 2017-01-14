@@ -93,6 +93,7 @@
                 [:br]
                 [:code#preload-info "(preload-info)"]
                 ]
+               ;; TODO: ここの項目順は、README通りの順にしたい(つまり、最初に「最も簡単な方法」があり、徐々に複雑になっていく順)
                [:hr]
                ;; SE
                ;[:div
@@ -119,7 +120,7 @@
                 [:br]
                 (demo-button :bgm-va32)
                 [:br]
-                (demo-button :bgm-rdl)
+                (demo-button :bgm-rnr)
                 [:br]
                 [:br]
                 (demo-button :stop-bgm)
