@@ -134,7 +134,7 @@
                                  real-path (first @(:left-real-pathes info))]
                              (swap! loaded-audiosource-table assoc path as)
                              (swap! loading-info-table dissoc path)
-                             (util/logging :loaded path :as real-path)
+                             (util/logging-verbose :loaded path :as real-path)
                              (when-let [bgm-channel (:bgm-channel info)]
                                (swap! last-loading-bgm-path dissoc bgm-channel))
                              (when-let [f (:done-fn info)]

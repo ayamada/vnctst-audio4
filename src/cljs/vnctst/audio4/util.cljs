@@ -77,6 +77,13 @@
   (when (state/get :debug?)
     (apply logging-force msgs)))
 
+;;; :debug? debug-verbose? フラグがオンの時のみ、コンソールにログ出力する
+(defn logging-verbose [& msgs]
+  (when (and
+          (state/get :debug?)
+          (state/get :debug-verbose?))
+    (apply logging-force msgs)))
+
 
 
 

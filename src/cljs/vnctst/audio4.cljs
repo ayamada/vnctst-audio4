@@ -82,12 +82,7 @@
   (if (nil? se-channel-id)
     (doseq [sid (se/playing-se-channel-ids)]
       (stop-se! fade-sec sid))
-    (let [path nil ; TODO
-          ]
-      ;; TODO
-      (se/stop! se-channel-id (or fade-sec (state/get :default-se-fade-sec)))
-      ;(cache/cancel-load-by-stop-se! path)
-      ))
+    (se/stop! se-channel-id (or fade-sec (state/get :default-se-fade-sec))))
   true)
 
 
@@ -145,10 +140,10 @@
   (init!)
   (when-not (empty? path)
     (let [path (util/path-key->path path)]
-      ;; TODO: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
-      ;;       これを鳴らしているチャンネルがないかどうか調べ、
-      ;;       もしあれば即座に停止させる必要がある。
-      ;;       この処理はcache側には入れられない(モジュール参照の都合で)
+      ;; NB: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
+      ;;     これを鳴らしているチャンネルがないかどうか調べ、
+      ;;     もしあれば即座に停止させる必要がある。
+      ;;     この処理はcache側には入れられない(モジュール参照の都合で)
       (bgm/stop-for-unload! path)
       (se/unload! path)
       (cache/unload! path)
@@ -177,20 +172,20 @@
 (def ^:private config-fns
   {;; これらはstateの変更のみで対応可能
    :debug? state/set!
+   :debug-verbose? state/set!
    :se-chattering-sec state/set!
    :default-bgm-fade-sec state/set!
    :default-se-fade-sec state/set!
-   ;; TODO: volume系はsync操作が必要
    :volume-master (fn [k v]
                     (state/set! k v)
-                    ;(se/sync-volume!)
+                    (se/sync-volume!)
                     (bgm/sync-volume!))
    :volume-bgm (fn [k v]
                  (state/set! k v)
                  (bgm/sync-volume!))
    :volume-se (fn [k v]
                 (state/set! k v)
-                ;(se/sync-volume!)
+                (se/sync-volume!)
                 )
    ;; NB: 既存プリロードの全破棄が必要
    :autoext-list (fn [k v]

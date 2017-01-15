@@ -167,7 +167,7 @@
           [i-volume i-pitch i-pan] r
           combined-key [path volume pitch pan]
           doit! (fn [state]
-                  (util/logging :se/play (:path @state))
+                  (util/logging-verbose :se/play (:path @state))
                   (update-played-same-se! combined-key)
                   (device/call!
                     :play! (:ac @state) 0 false i-volume i-pitch i-pan alarm?)
@@ -223,7 +223,7 @@
   ;;     うっかり実行してしまわない事！
   (swap! fade-targets dissoc sid)
   (when-let [ac (:ac @state)]
-    (util/logging :se/stop (:path @state))
+    (util/logging-verbose :se/stop (:path @state))
     (device/call! :stop! ac)))
 
 
@@ -280,7 +280,7 @@
         ;; この場合は「ロード後の再生」をキャンセルする必要がある。
         ;; この場合はフェード秒を無視する(再生前でありフェードの意味がない)
         (let [new-state (assoc state :dont-play? true)]
-          (util/logging :se/stop (:path @state))
+          (util/logging-verbose :se/stop (:path @state))
           (swap! playing-state-pool assoc se-channel-id new-state)))
       true)))
 

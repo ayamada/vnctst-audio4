@@ -109,7 +109,7 @@
                         :fade-process nil
                         :current-param new-param
                         :next-param nil})
-    (util/logging :bgm/play (:path new-param))
+    (util/logging-verbose :bgm/play (:path new-param))
     ;; バックグラウンド時は再生しないようにする。
     ;; また、バックグラウンド時は明示的な再開ポイントのリセットが必要
     ;; (非バックグラウンド時はイベントリスナで設定されるので不要)
@@ -145,7 +145,7 @@
   (when @state
     (let [param (:current-param @state)]
       (when-let [ac (:ac param)]
-        (util/logging :bgm/stop (:path param))
+        (util/logging-verbose :bgm/stop (:path param))
         ;; バックグラウンド中は既に再生停止している。
         ;; 二重に停止させないようにする
         (when-not (state/get :in-background?)

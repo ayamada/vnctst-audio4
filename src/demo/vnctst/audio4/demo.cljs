@@ -12,6 +12,7 @@
 
 (def config-options
   [:debug? true
+   :debug-verbose? true
    ])
 
 (def preload-pathes
@@ -22,6 +23,11 @@
 (def button-assign (atom {}))
 (defn- defba [k m]
   (swap! button-assign assoc k m))
+
+
+
+
+;;; Main
 
 (defba :bgm-va32
   {:fn #(vnctst.audio4/bgm! "bgm/va32.*")
@@ -79,7 +85,7 @@
    :js "vnstst.audio4.js.stopBgm()"
    :desc (str "現在再生中のBGMをデフォルト秒数(1秒)かけてフェード終了させる。"
               "再生中でない場合は何も起きない。"
-              "この「デフォルト秒数」は後述の設定機能で変更可能。"
+              "この「デフォルト秒数」は後述の設定項目から変更可能。"
               )})
 
 (defba :stop-bgm-3
@@ -101,9 +107,9 @@
    :cljs "(vnctst.audio4/se! \"se/launch.*\")"
    :js "vnstst.audio4.js.se(\"se/launch.*\")"
    :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
-              "SEとして再生し、そのSE再生チャネルidを返り値として返す"
-              "(SE再生チャネルidはそのまま捨てても問題ない)。"
-              "SEとしての再生では、音源の多重再生が可能となる。"
+              "SEとして再生する。"
+              "SEとしての再生では、音源の多重再生が可能となる"
+              "(ボタンを連打しても前の音が途切れたりしない)。"
               )})
 
 (defba :se-shootout
@@ -111,7 +117,194 @@
    :cljs "(vnctst.audio4/se! \"se/shootout.*\")"
    :js "vnstst.audio4.js.se(\"se/shootout.*\")"
    :desc (str "\"se/shootout.ogg\" もしくは \"se/shootout.mp3\" を"
-              "SEとして再生し、そのSE再生チャネルidを返り値として返す。")})
+              "SEとして再生する。")})
+
+
+;;; Configure
+
+
+(defba :config-volume-master
+  {:fn #(js/alert (vnctst.audio4/config :volume-master))
+   :cljs "(vnctst.audio4/config :volume-master)"
+   :js "vnctst.audio4.js.getConfig(\"volume-master\")"
+   :desc (str "各種の設定値を取得する。"
+              "このボタンで指定している volume-master はマスター音量の現在値"
+              "(詳細については次の音量設定の項目を参照)。"
+              "引数を変更する事で様々な設定値の取得が行えるが、"
+              "項目数が多いので以下ではボタン化を省略している。"
+              "確認したい場合はコンソールから実行してみるとよい。"
+              )})
+
+(defba :set-config-volume-master-100
+  {:fn #(vnctst.audio4/set-config! :volume-master 1.0)
+   :cljs "(vnctst.audio4/set-config! :volume-master 1.0)"
+   :js "vnctst.audio4.js.setConfig(\"volume-master\", 1.0)"
+   :desc ""})
+
+(defba :set-config-volume-master-25
+  {:fn #(vnctst.audio4/set-config! :volume-master 0.25)
+   :cljs "(vnctst.audio4/set-config! :volume-master 0.25)"
+   :js "vnctst.audio4.js.setConfig(\"volume-master\", 0.25)"
+   :desc (str "マスター音量を設定する"
+              "(音量値は0.0～1.0の範囲、初期値は0.5)。"
+              "マスター音量はBGMとSEの両方に影響する。"
+              )})
+
+(defba :set-config-volume-bgm-100
+  {:fn #(vnctst.audio4/set-config! :volume-bgm 1.0)
+   :cljs "(vnctst.audio4/set-config! :volume-bgm 1.0)"
+   :js "vnctst.audio4.js.setConfig(\"volume-bgm\", 1.0)"
+   :desc ""})
+
+(defba :set-config-volume-bgm-25
+  {:fn #(vnctst.audio4/set-config! :volume-bgm 0.25)
+   :cljs "(vnctst.audio4/set-config! :volume-bgm 0.25)"
+   :js "vnctst.audio4.js.setConfig(\"volume-bgm\", 0.25)"
+   :desc (str "BGM音量を設定する"
+              "(音量値は0.0～1.0の範囲、初期値は0.5)。"
+              "実際のBGMの再生音量は、この項目とマスター音量から決定される。"
+              "初期状態ではマスター音量0.5(50%)かつBGM音量0.5(50%)なので、"
+              "実際のBGMの再生音量は0.25(25%)相当となる。"
+              "このデフォルト音量では小さすぎると思うなら、"
+              "もっと大き目の値を設定するとよい。"
+              )})
+
+(defba :set-config-volume-se-100
+  {:fn #(vnctst.audio4/set-config! :volume-se 1.0)
+   :cljs "(vnctst.audio4/set-config! :volume-se 1.0)"
+   :js "vnctst.audio4.js.setConfig(\"volume-se\", 1.0)"
+   :desc ""})
+
+(defba :set-config-volume-se-25
+  {:fn #(vnctst.audio4/set-config! :volume-se 0.25)
+   :cljs "(vnctst.audio4/set-config! :volume-se 0.25)"
+   :js "vnctst.audio4.js.setConfig(\"volume-se\", 0.25)"
+   :desc (str "SE音量を設定する"
+              "(音量値は0.0～1.0の範囲、初期値は0.5)。"
+              "詳細は上のBGM音量の解説文と大体同じ。"
+              )})
+
+(defba :set-config-debug?-false
+  {:fn #(vnctst.audio4/set-config! :debug? false)
+   :cljs "(vnctst.audio4/set-config! :debug? false)"
+   :js "vnctst.audio4.js.setConfig(\"debug?\", false)"
+   :desc ""})
+
+(defba :set-config-debug?-true
+  {:fn #(vnctst.audio4/set-config! :debug? true)
+   :cljs "(vnctst.audio4/set-config! :debug? true)"
+   :js "vnctst.audio4.js.setConfig(\"debug?\", true)"
+   :desc (str "デバッグログをコンソールへ出力したい場合はtrueを設定する"
+              "(初期値はfalse、ただしこのデモでは最初からtrueにしてある)。"
+              "このvnctst-audio4では「雑に扱っても問題が起こらない」事を"
+              "方針としているので、ファイルのロードに失敗したりしていても"
+              "再生時にエラーは投げられない。単に何も再生されないだけとなる。"
+              "しかしこれでは開発時に不便な為、この設定をtrueにする事で、"
+              "エラー等が起こった際に、その内容をコンソールへと"
+              "出力するようにした。"
+              )})
+
+(defba :set-config-debug-verbose?-false
+  {:fn #(vnctst.audio4/set-config! :debug-verbose? false)
+   :cljs "(vnctst.audio4/set-config! :debug-verbose? false)"
+   :js "vnctst.audio4.js.setConfig(\"debug-verbose?\", false)"
+   :desc ""})
+
+(defba :set-config-debug-verbose?-true
+  {:fn #(vnctst.audio4/set-config! :debug-verbose? true)
+   :cljs "(vnctst.audio4/set-config! :debug-verbose? true)"
+   :js "vnctst.audio4.js.setConfig(\"debug-verbose?\", true)"
+   :desc (str "些細なデバッグログもコンソールへ出力したい場合はtrueを設定する"
+              "(初期値はfalse、ただしこのデモでは最初からtrueにしてある)。"
+              "この設定は前述の debug? が有効な時にしか意味を持たない。"
+              "これを有効にする事で、前述のエラー以外に、"
+              "「このBGMの再生が開始された」「このSEの再生が停止された」"
+              "といった、些細な情報までコンソールに出力されるようになる。"
+              "多くの場合は邪魔にしかならないので、"
+              "開発時であっても普段はfalseにしておき、"
+              "再生/停止タイミング等をきちんと調べたい時のみtrueにするとよい。"
+              )})
+
+(defba :set-config-se-chattering-sec-0
+  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0)
+   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0)"
+   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0)"
+   :desc (str "同一SE連打防止機能の閾値(秒)を設定する。"
+              "0を設定すると無効化できる"
+              "(初期値は0.05)")
+   })
+
+(defba :set-config-default-bgm-fade-sec-2
+  {:fn #(vnctst.audio4/set-config! :default-bgm-fade-sec 2)
+   :cljs "(vnctst.audio4/set-config! :default-bgm-fade-sec 2)"
+   :js "vnctst.audio4.js.setConfig(\"default-bgm-fade-sec\", 2)"
+   :desc (str "デフォルトのBGMフェード秒数を設定する。"
+              "0を設定するとフェードなしになる"
+              "(初期値は1)")
+   })
+
+(defba :set-config-default-se-fade-sec-1
+  {:fn #(vnctst.audio4/set-config! :default-se-fade-sec 1)
+   :cljs "(vnctst.audio4/set-config! :default-se-fade-sec 1)"
+   :js "vnctst.audio4.js.setConfig(\"default-se-fade-sec\", 1)"
+   :desc (str "デフォルトのSEフェード秒数を設定する。"
+              "0を設定するとフェードなしになる"
+              "(初期値は0)")
+   })
+
+(defba :set-config-autoext-list
+  {:fn #(vnctst.audio4/set-config! :autoext-list ["m4a" "mp3" "ogg" ["wav" "audio/wav"]])
+   :cljs "(vnctst.audio4/set-config! :autoext-list [\"m4a\" \"mp3\" \"ogg\" [\"wav\" \"audio/wav\"])"
+   :js "vnctst.audio4.js.setConfig(\"autoext-list\", [\"m4a\", \"mp3\", \"ogg\", [\"wav\", \"audio/wav\"])"
+   :desc (str "「filename.*」指定による拡張子自動選択機能(autoext)の"
+              "拡張子の候補リストを設定する。"
+              "autoext指定した音源ファイルのロード時には、"
+              "このリストの順でトライされる。"
+              "なお ogg, mp3, m4a 以外の拡張子を指定する際には、"
+              "上記のwavのように、"
+              "一緒にmime-typeも指定する必要があるので注意"
+              "(もちろんブラウザが対応していなければ再生はできない)。"
+              "初期値は [\"ogg\" \"mp3\" \"m4a\"] 。"
+              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
+              "また全てのロード済音源もアンロードされる。")
+   })
+
+(defba :set-config-dont-stop-on-background?-true
+  {:fn #(vnctst.audio4/set-config! :dont-stop-on-background? true)
+   :cljs "(vnctst.audio4/set-config! :dont-stop-on-background? true)"
+   :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", true)"
+   :desc (str "ブラウザのタブをバックグラウンドにした際にBGMが自動的に"
+              "一時停止されるが、この機能を無効にしたい場合にtrueを設定する"
+              "(初期値はfalse)")
+   })
+
+(defba :set-config-disable-mobile?-true
+  {:fn #(vnctst.audio4/set-config! :disable-mobile? true)
+   :cljs "(vnctst.audio4/set-config! :disable-mobile? true)"
+   :js "vnctst.audio4.js.setConfig(\"disable-mobile?\", true)"
+   :desc (str "trueを設定する事で、モバイル環境での音源再生を禁止する"
+              "(初期値はfalse)。")
+   })
+
+(defba :set-config-disable-webaudio?-true
+  {:fn #(vnctst.audio4/set-config! :disable-webaudio? true)
+   :cljs "(vnctst.audio4/set-config! :disable-webaudio? true)"
+   :js "vnctst.audio4.js.setConfig(\"disable-webaudio?\", true)"
+   :desc (str "trueを設定する事で、WebAudioによる音源再生を禁止する"
+              "(初期値はfalse)。"
+              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
+              "また全てのロード済音源もアンロードされる。")
+   })
+
+(defba :set-config-disable-htmlaudio?-true
+  {:fn #(vnctst.audio4/set-config! :disable-htmlaudio? true)
+   :cljs "(vnctst.audio4/set-config! :disable-htmlaudio? true)"
+   :js "vnctst.audio4.js.setConfig(\"disable-htmlaudio?\", true)"
+   :desc (str "trueを設定する事で、HtmlAudioによる音源再生を禁止する"
+              "(初期値はfalse)。"
+              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
+              "また全てのロード済音源もアンロードされる。")
+   })
 
 ;;; TODO: 以下を使うボタンの追加が残っている(追加が完了したら消していく事)
 ;bgm/noise.*
@@ -230,145 +423,6 @@
    ;               :desc "BGSをフェード停止させる"
    ;               }
 
-;;; Configure
-(defba :config-volume-master
-  {:fn #(js/alert (vnctst.audio4/config :volume-master))
-   :cljs "(vnctst.audio4/config :volume-master)"
-   :js "vnctst.audio4.js.getConfig(\"volume-master\")"
-   :desc (str "各種の設定値を取得する。"
-              "この volume-master は、マスター音量の現在値。"
-              "後述の他の設定値の取得もこれで行える"
-              "(それぞれのボタンを用意するのは面倒なので、"
-              "あとは自分でコンソール等から試してください)")
-   })
-
-(defba :set-config-volume-master-25
-  {:fn #(vnctst.audio4/set-config! :volume-master 0.25)
-   :cljs "(vnctst.audio4/set-config! :volume-master 0.25)"
-   :js "vnctst.audio4.js.setConfig(\"volume-master\", 0.25)"
-   :desc (str "マスター音量を25%に設定する"
-              "(音量値は0.0～1.0の範囲、初期値は0.5)")
-   })
-
-(defba :set-config-volume-master-50
-  {:fn #(vnctst.audio4/set-config! :volume-master 0.5)
-   :cljs "(vnctst.audio4/set-config! :volume-master 0.5)"
-   :js "vnctst.audio4.js.setConfig(\"volume-master\", 0.5)"
-   :desc "マスター音量を50%に設定する"
-   })
-
-(defba :set-config-volume-master-100
-  {:fn #(vnctst.audio4/set-config! :volume-master 1.0)
-   :cljs "(vnctst.audio4/set-config! :volume-master 1.0)"
-   :js "vnctst.audio4.js.setConfig(\"volume-master\", 1.0)"
-   :desc "マスター音量を100%に設定する"
-   })
-
-(defba :set-config-volume-bgm-100
-  {:fn #(vnctst.audio4/set-config! :volume-bgm 1.0)
-   :cljs "(vnctst.audio4/set-config! :volume-bgm 1.0)"
-   :js "vnctst.audio4.js.setConfig(\"volume-bgm\", 1.0)"
-   :desc (str "BGM音量を100%に設定する"
-              "(音量値は0.0～1.0の範囲、初期値は0.5)")
-   })
-
-(defba :set-config-volume-se-100
-  {:fn #(vnctst.audio4/set-config! :volume-se 1.0)
-   :cljs "(vnctst.audio4/set-config! :volume-se 1.0)"
-   :js "vnctst.audio4.js.setConfig(\"volume-se\", 1.0)"
-   :desc (str "SE音量を100%に設定する"
-              "(音量値は0.0～1.0の範囲、初期値は0.5)")
-   })
-
-(defba :set-config-debug?-true
-  {:fn #(vnctst.audio4/set-config! :debug? true)
-   :cljs "(vnctst.audio4/set-config! :debug? true)"
-   :js "vnctst.audio4.js.setConfig(\"debug?\", true)"
-   :desc (str "デバッグコンソールへの出力を有効化する"
-              "(初期値はfalse、ただしこのデモでは最初からtrueにしてある)")
-   })
-
-(defba :set-config-se-chattering-sec-0
-  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0)
-   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0)"
-   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0)"
-   :desc (str "同一SE連打防止機能の閾値(秒)を設定する。"
-              "0を設定すると無効化できる"
-              "(初期値は0.05)")
-   })
-
-(defba :set-config-default-bgm-fade-sec-2
-  {:fn #(vnctst.audio4/set-config! :default-bgm-fade-sec 2)
-   :cljs "(vnctst.audio4/set-config! :default-bgm-fade-sec 2)"
-   :js "vnctst.audio4.js.setConfig(\"default-bgm-fade-sec\", 2)"
-   :desc (str "デフォルトのBGMフェード秒数を設定する。"
-              "0を設定するとフェードなしになる"
-              "(初期値は1)")
-   })
-
-(defba :set-config-default-se-fade-sec-1
-  {:fn #(vnctst.audio4/set-config! :default-se-fade-sec 1)
-   :cljs "(vnctst.audio4/set-config! :default-se-fade-sec 1)"
-   :js "vnctst.audio4.js.setConfig(\"default-se-fade-sec\", 1)"
-   :desc (str "デフォルトのSEフェード秒数を設定する。"
-              "0を設定するとフェードなしになる"
-              "(初期値は0)")
-   })
-
-(defba :set-config-autoext-list
-  {:fn #(vnctst.audio4/set-config! :autoext-list ["m4a" "mp3" "ogg" ["wav" "audio/wav"]])
-   :cljs "(vnctst.audio4/set-config! :autoext-list [\"m4a\" \"mp3\" \"ogg\" [\"wav\" \"audio/wav\"])"
-   :js "vnctst.audio4.js.setConfig(\"autoext-list\", [\"m4a\", \"mp3\", \"ogg\", [\"wav\", \"audio/wav\"])"
-   :desc (str "「filename.*」指定による拡張子自動選択機能(autoext)の"
-              "拡張子の候補リストを設定する。"
-              "autoext指定した音源ファイルのロード時には、"
-              "このリストの順でトライされる。"
-              "なお ogg, mp3, m4a 以外の拡張子を指定する際には、"
-              "上記のwavのように、"
-              "一緒にmime-typeも指定する必要があるので注意"
-              "(もちろんブラウザが対応していなければ再生はできない)。"
-              "初期値は [\"ogg\" \"mp3\" \"m4a\"] 。"
-              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
-              "また全てのロード済音源もアンロードされる。")
-   })
-
-(defba :set-config-dont-stop-on-background?-true
-  {:fn #(vnctst.audio4/set-config! :dont-stop-on-background? true)
-   :cljs "(vnctst.audio4/set-config! :dont-stop-on-background? true)"
-   :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", true)"
-   :desc (str "ブラウザのタブをバックグラウンドにした際にBGMが自動的に"
-              "一時停止されるが、この機能を無効にしたい場合にtrueを設定する"
-              "(初期値はfalse)")
-   })
-
-(defba :set-config-disable-mobile?-true
-  {:fn #(vnctst.audio4/set-config! :disable-mobile? true)
-   :cljs "(vnctst.audio4/set-config! :disable-mobile? true)"
-   :js "vnctst.audio4.js.setConfig(\"disable-mobile?\", true)"
-   :desc (str "trueを設定する事で、モバイル環境での音源再生を禁止する"
-              "(初期値はfalse)。")
-   })
-
-(defba :set-config-disable-webaudio?-true
-  {:fn #(vnctst.audio4/set-config! :disable-webaudio? true)
-   :cljs "(vnctst.audio4/set-config! :disable-webaudio? true)"
-   :js "vnctst.audio4.js.setConfig(\"disable-webaudio?\", true)"
-   :desc (str "trueを設定する事で、WebAudioによる音源再生を禁止する"
-              "(初期値はfalse)。"
-              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
-              "また全てのロード済音源もアンロードされる。")
-   })
-
-(defba :set-config-disable-htmlaudio?-true
-  {:fn #(vnctst.audio4/set-config! :disable-htmlaudio? true)
-   :cljs "(vnctst.audio4/set-config! :disable-htmlaudio? true)"
-   :js "vnctst.audio4.js.setConfig(\"disable-htmlaudio?\", true)"
-   :desc (str "trueを設定する事で、HtmlAudioによる音源再生を禁止する"
-              "(初期値はfalse)。"
-              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
-              "また全てのロード済音源もアンロードされる。")
-   })
-
 ;;; Misc
 (defba :can-play-ogg
   {:fn #(js/alert (vnctst.audio4/can-play-ogg?))
@@ -475,6 +529,10 @@
     (set! (.. dom -textContent) (str "Version: "
                                      audio4-js/version))))
 
+(defn- show-floating-header! []
+  (when-let [dom (js/document.getElementById "floating-header")]
+    (set! (.. dom -style -display) "block")))
+
 (defn- show-buttons! []
   (when-let [dom (js/document.getElementById "main")]
     (set! (.. dom -style -display) "block")))
@@ -504,6 +562,7 @@
         (if (< c target-num)
           (recur)
           (do
+            (show-floating-header!)
             (show-buttons!)
             (display-msg! "Loaded.")))))))
 
