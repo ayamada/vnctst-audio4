@@ -138,8 +138,8 @@
                 (demo-button2 :stop-bgm-3)
                 (demo-button2 :stop-bgm-0)
                 [:h3 "SEを鳴らす"]
-                (demo-button2 :se-shootout)
                 (demo-button2 :se-launch)
+                (demo-button2 :se-shootout)
                 ]
                [:hr]
                [:div

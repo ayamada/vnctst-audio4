@@ -6,7 +6,7 @@
             [vnctst.audio4.background :as background]
             [vnctst.audio4.cache :as cache]
             [vnctst.audio4.bgm :as bgm]
-            ;[vnctst.audio4.se :as se]
+            [vnctst.audio4.se :as se]
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
@@ -14,8 +14,8 @@
 
 
 ;;; 最も最近に鳴らしたSEのチャンネルobjを保持する
-(defonce a-last-played-se-channel-obj (atom nil))
-(defn last-played-se-channel-obj [] @a-last-played-se-channel-obj)
+(defonce a-last-played-se-channel-id (atom nil))
+(defn last-played-se-channel-id [] @a-last-played-se-channel-id)
 
 
 
@@ -28,6 +28,7 @@
                 (state/get :disable-htmlaudio?))
   (reset! background/background-handle bgm/sync-background!)
   (background/start-supervise!)
+  (se/run-playing-audiochannel-pool-watcher!)
   true)
 
 (defonce initialized? (atom false))
@@ -58,9 +59,12 @@
 (defn bgm! [path & optional-args]
   (init!)
   (let [options (optional-args->map optional-args)]
-    (if (empty? path) ; pathがnilの時はstop-bgm!を呼ぶ
-      (stop-bgm! (:channel options))
-      (bgm/play! (util/path-key->path path) options)))
+    (when-not (and
+                (state/get :disable-mobile?)
+                (:mobile util/terminal-type))
+      (if (empty? path) ; pathがnilの時はstop-bgm!を呼ぶ
+        (stop-bgm! (:channel options))
+        (bgm/play! (util/path-key->path path) options))))
   true)
 
 
@@ -73,26 +77,30 @@
 
 
 
-(defn stop-se! [& [se-channel-obj fade-sec]]
+(defn stop-se! [& [fade-sec se-channel-id]]
   (init!)
-  (if (nil? se-channel-obj)
-    nil ; TODO: 全SE停止を行う
+  (if (nil? se-channel-id)
+    (doseq [sid (se/playing-se-channel-ids)]
+      (stop-se! fade-sec sid))
     (let [path nil ; TODO
           ]
       ;; TODO
-      (cache/cancel-load-by-stop-se! path)
-      true)))
+      (se/stop! se-channel-id (or fade-sec (state/get :default-se-fade-sec)))
+      ;(cache/cancel-load-by-stop-se! path)
+      ))
+  true)
 
 
 (defn se! [path & optional-args]
   (init!)
-  (when-not (empty? path) ; pathがnilの時は何もしない
-    ;; TODO
-    ;(let [options (optional-args->map optional-args)
-    ;      se-channel-obj (se/play! (util/path-key->path path) options)]
-    ;  (reset! a-last-played-se-channel-obj se-channel-obj)
-    ;  se-channel-obj)
-    ))
+  (when-not (and
+              (state/get :disable-mobile?)
+              (:mobile util/terminal-type))
+    (when-not (empty? path) ; pathがnilの時は何もしない
+      (let [options (optional-args->map optional-args)
+            se-channel-id (se/play! (util/path-key->path path) options)]
+        (reset! a-last-played-se-channel-id se-channel-id)
+        se-channel-id))))
 
 
 (defn alarm! [& [path & optional-args]]
@@ -126,8 +134,11 @@
 (defn load! [path]
   (init!)
   (when-not (empty? path)
-    (cache/load! (util/path-key->path path))
-    true))
+    (when-not (and
+                (state/get :disable-mobile?)
+                (:mobile util/terminal-type))
+      (cache/load! (util/path-key->path path))
+      true)))
 
 
 (defn unload! [path]
@@ -139,7 +150,7 @@
       ;;       もしあれば即座に停止させる必要がある。
       ;;       この処理はcache側には入れられない(モジュール参照の都合で)
       (bgm/stop-for-unload! path)
-      ;(se/stop-for-unload! path)
+      (se/unload! path)
       (cache/unload! path)
       true)))
 

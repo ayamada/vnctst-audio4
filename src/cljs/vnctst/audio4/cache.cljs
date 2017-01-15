@@ -181,6 +181,8 @@
              (assoc info :done-fn nil)))
     (swap! last-loading-bgm-path dissoc bgm-channel)))
 
+;;; NB: これは使わなかった
+;;;     (SEの場合、:done-fnの中で個別に再生SE判定を行う必要がある為)
 (defn cancel-load-by-stop-se! [path]
   (when-let [info (get @loading-info-table path)]
     (swap! loading-info-table

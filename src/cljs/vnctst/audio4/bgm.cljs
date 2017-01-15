@@ -7,8 +7,6 @@
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
-;;; NB: va3と違い多チャンネルが利用可能となった為、多くの変数や関数で
-;;;     チャンネル名を指定する必要が出てきた
 
 
 
@@ -21,7 +19,7 @@
 ;;; - :fade-factor ; 通常は 1.0、フェード中のみ変化する
 ;;; - :fade-delta ; 通常は0。基本となるフェード量が設定される
 ;;; - :fade-process ; フェードを進めるgoスレッド、通常はnil
-;;; - :current-param ; :key :volume :pan :pitch :oneshot? :as :ac を持つ map
+;;; - :current-param ; :path :volume :pan :pitch :oneshot? :as :ac を持つ map
 ;;; - :next-param ; 「次の曲」。内容は :current-param と同様。「ロード中」を
 ;;;   示すのもこれで表現される
 (defonce channel-state-table (atom {}))
@@ -58,10 +56,6 @@
 
 
 
-
-(defn- dispose-ac! [ac]
-  (when ac
-    (device/call! :dispose-audio-channel! ac)))
 
 
 
@@ -115,7 +109,7 @@
                         :fade-process nil
                         :current-param new-param
                         :next-param nil})
-    (util/logging :bgm/play (:key new-param))
+    (util/logging :bgm/play (:path new-param))
     ;; バックグラウンド時は再生しないようにする。
     ;; また、バックグラウンド時は明示的な再開ポイントのリセットが必要
     ;; (非バックグラウンド時はイベントリスナで設定されるので不要)
@@ -127,11 +121,11 @@
 
 ;;; NB: ロード中にキャンセルされたり、別の音源の再生要求が入る可能性がある
 (defn- _load+play! [bgm-ch state path volume pitch pan oneshot?]
-  (let [previous-loading-key (:key (:next-param @state))
+  (let [previous-loading-key (:path (:next-param @state))
         h-done (fn [as]
                  (when-let [next-param (:next-param @state)]
                    (_play-immediately! bgm-ch state as next-param)))
-        param {:key path
+        param {:path path
                :volume volume
                :pan pan
                :pitch pitch
@@ -151,12 +145,12 @@
   (when @state
     (let [param (:current-param @state)]
       (when-let [ac (:ac param)]
-        (util/logging :bgm/stop (:key param))
+        (util/logging :bgm/stop (:path param))
         ;; バックグラウンド中は既に再生停止している。
         ;; 二重に停止させないようにする
         (when-not (state/get :in-background?)
           (device/call! :stop! ac))
-        (dispose-ac! ac))
+        (device/call! :dispose-audio-channel! ac))
       (reset! state nil))))
 
 
@@ -200,7 +194,7 @@
                         (when next-param
                           (_load+play! bgm-ch
                                        state
-                                       (:key next-param)
+                                       (:path next-param)
                                        (:volume next-param)
                                        (:pitch next-param)
                                        (:pan next-param)
@@ -229,7 +223,7 @@
 (defn- same-bgm? [state path volume pitch pan]
   (when-let [param (:current-param @state)]
     (and
-      (= (:key param) path)
+      (= (:path param) path)
       (= (:pitch param) pitch)
       true)))
 
@@ -294,7 +288,7 @@
       :else (let [fade-msec (int (* 1000
                                     (or (state/get :default-bgm-fade-sec) 0)))
                   fade-delta (- (/ fade-granularity-msec fade-msec))
-                  next-param {:key path
+                  next-param {:path path
                               :volume volume
                               :pan pan
                               :pitch pitch
@@ -382,7 +376,7 @@
 (defn stop-for-unload! [path]
   (doseq [bgm-ch (keys @channel-state-table)]
     (let [state (get @channel-state-table bgm-ch)]
-      (when (= path (get-in @state [:current-param :key]))
+      (when (= path (get-in @state [:current-param :path]))
         (stop! bgm-ch 0)))))
 
 
