@@ -8,41 +8,63 @@
 ;;;   (keywordやmapが扱えない対策として)
 
 
-(def ^:export version (project-clj/get :version))
 
+
+
+(defn ^:export stopBgm [& [fade-sec ch]]
+  (audio4/stop-bgm! fade-sec ch))
+
+(defn ^:export bgm [path & [opt]]
+  (audio4/bgm! path (js->clj opt :keywordize-keys true)))
+
+(defn ^:export bgmOneshot [path & [opt]]
+  (audio4/bgm-oneshot! path (js->clj opt :keywordize-keys true)))
+
+(defn ^:export me [path & [opt]]
+  (audio4/me! path (js->clj opt :keywordize-keys true)))
+
+(defn ^:export bgs [path & [opt]]
+  (audio4/bgs! path (js->clj opt :keywordize-keys true)))
+
+
+
+
+(defn ^:export stopSe [& [fade-sec ch]]
+  (audio4/stop-se! fade-sec ch))
+
+(defn ^:export se [path & [opt]]
+  (audio4/se! path (js->clj opt :keywordize-keys true)))
+
+(defn ^:export alarm [path & [opt]]
+  (audio4/alarm! path (js->clj opt :keywordize-keys true)))
+
+
+
+
+(defn ^:export load [path] (audio4/load! path))
+(defn ^:export unload [path] (audio4/unload! path))
+(defn ^:export unloadAll [] (audio4/unload-all!))
+(defn ^:export isLoaded [path] (audio4/loaded? path))
+(defn ^:export isError [path] (audio4/error? path))
+
+
+
+(defn ^:export getConfig [k] (audio4/config (keyword k)))
+(defn ^:export setConfig [k v]
+  ;; TODO: 一部のkに応じて、vの値を改変する必要あり！あとで…
+  ;; 具体的には、 autoext-list の場合に対応が必要となる
+  (audio4/set-config! (keyword k) v))
 
 ;(defn ^:export init [& [option]]
 ;  (if-let [option (when option
 ;                    (js->clj option :keywordize-keys true))]
-;    (audio3/init! option)
-;    (audio3/init!)))
-;
-;
-;
-;(def ^:export getVolumeMaster audio3/get-volume-master)
-;(def ^:export getVolumeBgm audio3/get-volume-bgm)
-;(def ^:export getVolumeBgs audio3/get-volume-bgs)
-;(def ^:export getVolumeMe audio3/get-volume-me)
-;(def ^:export getVolumeSe audio3/get-volume-se)
-;
-;(def ^:export setVolumeMaster audio3/set-volume-master!)
-;(def ^:export setVolumeBgm audio3/set-volume-bgm!)
-;(def ^:export setVolumeBgs audio3/set-volume-bgs!)
-;(def ^:export setVolumeMe audio3/set-volume-me!)
-;(def ^:export setVolumeSe audio3/set-volume-se!)
-;
-;
-;
-;(defn ^:export stopBgm [& [fade-sec]] (audio3/stop-bgm! fade-sec))
-;(defn ^:export stopBgs [& [fade-sec]] (audio3/stop-bgs! fade-sec))
-;(defn ^:export stopMe [& [fade-sec]] (audio3/stop-me! fade-sec))
-;(defn ^:export stopSe [chan & [fade-sec]] (audio3/stop-se! chan fade-sec))
-;
+;    (audio4/init! option)
+;    (audio4/init!)))
 ;
 ;
 ;;;; jsではclojureのキーワードを簡単に指定できないので、
 ;;;; (play! :se/hoge) のようなものを簡潔に表現できない。そこで、
-;;;; vnctst.audio3.js.play({se: "hoge"}) と指定できるようにする
+;;;; vnctst.audio4.js.play({se: "hoge"}) と指定できるようにする
 ;(defn- conv-kp [key-or-path]
 ;  (if-not (= js/Object (type key-or-path))
 ;    key-or-path
@@ -56,16 +78,16 @@
 ;
 ;
 ;(defn ^:export bgm [key-or-path & [vol pitch pan]]
-;  (audio3/bgm! (conv-kp key-or-path) vol pitch pan))
+;  (audio4/bgm! (conv-kp key-or-path) vol pitch pan))
 ;
 ;(defn ^:export bgs [key-or-path & [vol pitch pan]]
-;  (audio3/bgs! (conv-kp key-or-path) vol pitch pan))
+;  (audio4/bgs! (conv-kp key-or-path) vol pitch pan))
 ;
 ;(defn ^:export me [key-or-path & [vol pitch pan]]
-;  (audio3/me! (conv-kp key-or-path) vol pitch pan))
+;  (audio4/me! (conv-kp key-or-path) vol pitch pan))
 ;
 ;(defn ^:export se [key-or-path & [vol pitch pan]]
-;  (audio3/se! (conv-kp key-or-path) vol pitch pan))
+;  (audio4/se! (conv-kp key-or-path) vol pitch pan))
 ;
 ;(def ^:export playBgm bgm)
 ;(def ^:export playBgs bgs)
@@ -73,66 +95,69 @@
 ;(def ^:export playSe se)
 ;
 ;(defn ^:export alarm [key-or-path & [vol pitch pan]]
-;  (audio3/alarm! (conv-kp key-or-path) vol pitch pan))
+;  (audio4/alarm! (conv-kp key-or-path) vol pitch pan))
 ;
 ;(defn ^:export play [k & [vol pitch pan]]
 ;  (let [k (conv-kp k)]
 ;    (assert (keyword? k)) ; 文字列指定不可
-;    (audio3/play! k vol pitch pan)))
+;    (audio4/play! k vol pitch pan)))
 ;
 ;
 ;
 ;
 ;
-;(defn ^:export isPlayingBgm [] (audio3/playing-bgm?))
-;(defn ^:export isPlayingBgs [] (audio3/playing-bgs?))
-;(defn ^:export isPlayingMe [] (audio3/playing-me?))
+;(defn ^:export isPlayingBgm [] (audio4/playing-bgm?))
+;(defn ^:export isPlayingBgs [] (audio4/playing-bgs?))
+;(defn ^:export isPlayingMe [] (audio4/playing-me?))
 ;
 ;
 ;(defn ^:export preloadBgm [key-or-path]
-;  (audio3/preload-bgm! (conv-kp key-or-path)))
+;  (audio4/preload-bgm! (conv-kp key-or-path)))
 ;(def ^:export preloadBgs preloadBgm)
 ;(def ^:export preloadMe preloadBgm)
 ;
 ;(defn ^:export unloadBgm [key-or-path]
-;  (audio3/unload-bgm! (conv-kp key-or-path)))
+;  (audio4/unload-bgm! (conv-kp key-or-path)))
 ;(def ^:export unloadBgs unloadBgm)
 ;(def ^:export unloadMe unloadBgm)
 ;
 ;(defn ^:export isPreloadedBgm [key-or-path]
-;  (audio3/preloaded-bgm? (conv-kp key-or-path)))
+;  (audio4/preloaded-bgm? (conv-kp key-or-path)))
 ;(defn ^:export isSucceededToPreloadBgm [key-or-path]
-;  (audio3/succeeded-to-preload-bgm? (conv-kp key-or-path)))
+;  (audio4/succeeded-to-preload-bgm? (conv-kp key-or-path)))
 ;
 ;
 ;
 ;
 ;(defn ^:export isPreloadSe [key-or-path]
-;  (audio3/preload-se! (conv-kp key-or-path)))
+;  (audio4/preload-se! (conv-kp key-or-path)))
 ;(defn ^:export isUnloadSe [key-or-path]
-;  (audio3/unload-se! (conv-kp key-or-path)))
+;  (audio4/unload-se! (conv-kp key-or-path)))
 ;(defn ^:export isLoadedSe [key-or-path]
-;  (audio3/loaded-se? (conv-kp key-or-path)))
+;  (audio4/loaded-se? (conv-kp key-or-path)))
 ;(defn ^:export isSucceededToLoadSe [key-or-path]
-;  (audio3/succeeded-to-load-se? (conv-kp key-or-path)))
+;  (audio4/succeeded-to-load-se? (conv-kp key-or-path)))
 
 
 
 
 
 
+
+(def ^:export version (project-clj/get :version))
 
 ;; jsでsetを表現しづらいので、これは一旦非公開とする
-;(def terminal-type util/terminal-type)
+(defn ^:export hasTerminalType [k]
+  (get audio4/terminal-type (keyword k)))
 
-;(defn ^:export canPlay [mime] (audio3/can-play? mime))
-;(defn ^:export canPlayOgg [] (audio3/can-play-ogg?))
-;(defn ^:export canPlayMp3 [] (audio3/can-play-mp3?))
-;(defn ^:export canPlayM4a [] (audio3/can-play-m4a?))
+(defn ^:export canPlay [mime] (audio4/can-play? mime))
+(defn ^:export canPlayOgg [] (audio4/can-play-ogg?))
+(defn ^:export canPlayMp3 [] (audio4/can-play-mp3?))
+(defn ^:export canPlayM4a [] (audio4/can-play-m4a?))
 ;
 ;;;; 0.0～1.0 の値と 0～100 のパーセント値を相互変換する。ボリューム値用。
-;(def ^:export floatToPercent audio3/float->percent)
-;(def ^:export percentToFloat audio3/percent->float)
+(def ^:export floatToPercent audio4/float->percent)
+(def ^:export percentToFloat audio4/percent->float)
 
 
 
