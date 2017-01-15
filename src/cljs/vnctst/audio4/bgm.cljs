@@ -361,13 +361,16 @@
           (device/call! :play! ac pos (not oneshot?) i-volume i-pitch i-pan false)))
       (swap! resume-pos-table dissoc bgm-ch))))
 
-(defn sync-background! [now-background?]
-  (doseq [bgm-ch (keys @channel-state-table)]
-    (let [state (resolve-state! bgm-ch)
-          pos (get @resume-pos-table bgm-ch)]
-      (if now-background?
-        (background-on! bgm-ch state pos)
-        (background-off! bgm-ch state pos)))))
+(defn sync-background! [now-background? &[force?]]
+  (when (or
+          force?
+          (not (state/get :dont-stop-on-background?)))
+    (doseq [bgm-ch (keys @channel-state-table)]
+      (let [state (resolve-state! bgm-ch)
+            pos (get @resume-pos-table bgm-ch)]
+        (if now-background?
+          (background-on! bgm-ch state pos)
+          (background-off! bgm-ch state pos))))))
 
 
 

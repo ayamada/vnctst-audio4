@@ -196,8 +196,12 @@
                    (state/set! k v))
    ;; NB: 既にバックグラウンドの時のみ、強制的に再生開始させる必要がある
    :dont-stop-on-background? (fn [k v]
-                               (when (and v (state/get :in-background?))
-                                 (bgm/sync-background! false))
+                               (when (and
+                                       (not
+                                         (state/get :dont-stop-on-background?))
+                                       v
+                                       (state/get :in-background?))
+                                 (bgm/sync-background! false true))
                                (state/set! k v))
    ;; NB: モバイル環境の場合、既に再生中のものを全て止める必要がある
    :disable-mobile? (fn [k v]

@@ -253,6 +253,22 @@
               "0を設定するとフェードなしで即座に停止するようになる。"
               )})
 
+(defba :set-config-dont-stop-on-background?-false
+  {:fn #(vnctst.audio4/set-config! :dont-stop-on-background? false)
+   :cljs "(vnctst.audio4/set-config! :dont-stop-on-background? false)"
+   :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", false)"
+   :desc ""})
+
+(defba :set-config-dont-stop-on-background?-true
+  {:fn #(vnctst.audio4/set-config! :dont-stop-on-background? true)
+   :cljs "(vnctst.audio4/set-config! :dont-stop-on-background? true)"
+   :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", true)"
+   :desc (str "vnctst-audio4は、ブラウザのタブをバックグラウンドにした際に"
+              "BGMが自動的に一時停止される機能を持っている。"
+              "この項目にtrueを設定する事で、この機能を無効化できる"
+              "(初期値はfalse)"
+              )})
+
 (defba :set-config-se-chattering-sec-0
   {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0)
    :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0)"
@@ -298,15 +314,6 @@
               "また全てのロード済音源もアンロードされる"
               "(ロード/アンロードについては後述)。"
               )})
-
-(defba :set-config-dont-stop-on-background?-true
-  {:fn #(vnctst.audio4/set-config! :dont-stop-on-background? true)
-   :cljs "(vnctst.audio4/set-config! :dont-stop-on-background? true)"
-   :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", true)"
-   :desc (str "ブラウザのタブをバックグラウンドにした際にBGMが自動的に"
-              "一時停止されるが、この機能を無効にしたい場合にtrueを設定する"
-              "(初期値はfalse)")
-   })
 
 (defba :set-config-disable-mobile?-true
   {:fn #(vnctst.audio4/set-config! :disable-mobile? true)
