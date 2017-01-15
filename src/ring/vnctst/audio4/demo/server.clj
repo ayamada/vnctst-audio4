@@ -165,7 +165,7 @@
                  (demo-button2 :set-config-debug-verbose?-false)
                  (demo-button2 :set-config-debug-verbose?-true)
                  [:h3 "あまり使われない項目"]
-                 [:p "読み飛ばしても問題ありません"]
+                 [:p "ここは読み飛ばしても問題ありません"]
                  (demo-button2 :set-config-default-bgm-fade-sec-0)
                  (demo-button2 :set-config-default-bgm-fade-sec-05)
                  (demo-button2 :set-config-default-se-fade-sec-0)
@@ -176,7 +176,6 @@
                  (demo-button2 :set-config-se-chattering-sec-05)
                  (demo-button2 :set-config-autoext-list-a)
                  (demo-button2 :set-config-autoext-list-b)
-                 ;;
                  (demo-button2 :set-config-disable-mobile?-false)
                  (demo-button2 :set-config-disable-mobile?-true)
                  (demo-button2 :set-config-disable-htmlaudio?-false)
@@ -185,95 +184,35 @@
                  (demo-button2 :set-config-disable-webaudio?-true)
                  ]
                 [:hr]
-                ;; SE
-                ;[:div
-                ; "SE :"
-                ; [:br]
-                ; "- SEは多数の音源を多重に並列再生できる。"
-                ; "また、BGM/ME/BGSの状態に干渉しない(同時に再生できる)"
-                ; [:br]
-                ; [:br]
-                ; (demo-button :play-se-jump)
-                ; [:br]
-                ; (demo-button :play-se-yarare)
-                ; [:br]
-                ; [:br]
-                ; (demo-button :play-se-yarare-ogg)
-                ; ]
-                ;[:hr]
-                ;; BGM
                 [:div
-                 "BGM :"
-                 [:br]
-                 "- BGMの再生"
-                 [:br]
-                 [:br]
-                 ;(demo-button :bgm-va32)
-                 ;[:br]
-                 ;(demo-button :bgm-rnr)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :stop-bgm)
-                 ;[:br]
-                 ;(demo-button :stop-bgm-0)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :play-bgm-va3)
-                 ;[:br]
-                 ;(demo-button :play-bgm-drop)
-                 ;[:br]
-                 ;(demo-button :play-bgm-drop-2)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :play-me-unmei)
-                 ;[:br]
-                 ;(demo-button :play-me-unmei-2)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :play-bgm-drop-ogg)
-                 ;[:br]
-                 ;(demo-button :play-bgm-drop-mp3)
-                 ;[:br]
-                 ;(demo-button :play-me-unmei-ogg)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :play-bgm-nil)
-                 ;[:br]
-                 ;(demo-button :play-me-nil)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :stop-bgs)
-                 ;[:br]
-                 ;(demo-button :stop-bgs-0)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :play-bgs-noise)
-                 ;[:br]
-                 ;[:br]
-                 ;(demo-button :play-bgs-nil)
+                 [:h2 "やや複雑な操作"]
+                 [:p "必要なら設定するとよいでしょう"]
+                 [:h3 "プリロード / アンロード"]
+                 ;;
+                 [:h3 "BGMの再生オプション"]
+                 ;;
+                 [:h3 "SEの再生オプション"]
+                 ;;
+                 [:h3 ""]
+                 [:h3 ""]
+                 [:h3 ""]
                  ]
                 [:hr]
-                [:hr]
-                ;; misc
                 [:div
-                 "Misc :"
-                 [:br]
-                 "- その他の補助的な機能"
-                 [:br]
-                 [:br]
+                 [:h2 "一括プリロード"]
+                 [:p "この機能はcljs版のみの提供です"]
+                 [:h3 "TODO"]
+                 ]
+                [:hr]
+                [:div
+                 [:h2 "その他の補助的な機能"]
+                 [:p ""]
                  (demo-button :can-play-ogg)
-                 [:br]
                  (demo-button :can-play-mp3)
-                 [:br]
                  (demo-button :can-play-m4a)
-                 [:br]
                  (demo-button :can-play)
-                 [:br]
-                 [:br]
                  (demo-button :terminal-type)
-                 [:br]
                  (demo-button :float->percent)
-                 [:br]
                  (demo-button :percent->float)
                  ]
                 ;; footer

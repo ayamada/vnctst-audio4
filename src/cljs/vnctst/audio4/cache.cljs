@@ -227,14 +227,18 @@
     ;; ロード済
     (when-let [as (get @loaded-audiosource-table path)]
       (device/call! :dispose-audio-source! as)
+      (util/logging-verbose :unloaded path)
       (swap! loaded-audiosource-table dissoc path))
     ;; 未ロードもしくはロードキュー待ち
     (do
       ;; ロード待ち各種から消しておく
       (when-let [info (get @loading-info-table path)]
-        ;; ロード完了ハンドルをunload!で上書きする
+        (util/logging-verbose :unloaded path)
+        ;; ロード完了ハンドルを消す
+        ;; NB: 完了時にunload!してはいけない。
+        ;;     遅延実行なので次のload!とrace conditionを起こす可能性がある
         (swap! loading-info-table
-               assoc path (assoc info :done-fn #(unload! path))))
+               assoc path (assoc info :done-fn nil)))
       (swap! preload-request-queue
              #(remove (fn [p] (= path p)) %))))
   true)

@@ -265,7 +265,7 @@
    :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", true)"
    :desc (str "vnctst-audio4は、ブラウザのタブをバックグラウンドにした際に"
               "BGMが自動的に一時停止される機能を持っている。"
-              "この項目にtrueを設定する事で、この機能を無効化できる"
+              "この項目にtrueを設定する事で、その機能を無効化できる"
               "(初期値はfalse)"
               )})
 
@@ -315,13 +315,26 @@
               "(ロード/アンロードについては後述)。"
               )})
 
+(defba :set-config-disable-mobile?-false
+  {:fn #(vnctst.audio4/set-config! :disable-mobile? false)
+   :cljs "(vnctst.audio4/set-config! :disable-mobile? false)"
+   :js "vnctst.audio4.js.setConfig(\"disable-mobile?\", false)"
+   :desc ""})
+
 (defba :set-config-disable-mobile?-true
   {:fn #(vnctst.audio4/set-config! :disable-mobile? true)
    :cljs "(vnctst.audio4/set-config! :disable-mobile? true)"
    :js "vnctst.audio4.js.setConfig(\"disable-mobile?\", true)"
-   :desc (str "trueを設定する事で、モバイル環境での音源再生を禁止する"
-              "(初期値はfalse)。")
-   })
+   :desc (str "trueを設定する事で、モバイル環境での音源再生の一切を禁止する"
+              "(初期値はfalse)。"
+              "非モバイル環境では何も起こらない。"
+              )})
+
+(defba :set-config-disable-webaudio?-false
+  {:fn #(vnctst.audio4/set-config! :disable-webaudio? false)
+   :cljs "(vnctst.audio4/set-config! :disable-webaudio? false)"
+   :js "vnctst.audio4.js.setConfig(\"disable-webaudio?\", false)"
+   :desc ""})
 
 (defba :set-config-disable-webaudio?-true
   {:fn #(vnctst.audio4/set-config! :disable-webaudio? true)
@@ -329,9 +342,23 @@
    :js "vnctst.audio4.js.setConfig(\"disable-webaudio?\", true)"
    :desc (str "trueを設定する事で、WebAudioによる音源再生を禁止する"
               "(初期値はfalse)。"
-              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
-              "また全てのロード済音源もアンロードされる。")
-   })
+              "初期状態では、WebAudioが利用可能ならWebAudioを使い、"
+              "そうでなければHtmlAudioが利用可能ならHtmlAudioを使い、"
+              "どちらも使えなければ再生は無効される、"
+              "という優先順位になっている。"
+              "通常はこのままでも問題ないが、"
+              "「HtmlAudioでの動作確認を取りたい」等には、"
+              "この設定項目を有効にするとよい。"
+              "この値を変更した場合は内部状態をリセットする必要がある為、"
+              "全ての再生中音源は停止され、"
+              "また全てのロード済音源もアンロードされる。"
+              )})
+
+(defba :set-config-disable-htmlaudio?-false
+  {:fn #(vnctst.audio4/set-config! :disable-htmlaudio? false)
+   :cljs "(vnctst.audio4/set-config! :disable-htmlaudio? false)"
+   :js "vnctst.audio4.js.setConfig(\"disable-htmlaudio?\", false)"
+   :desc ""})
 
 (defba :set-config-disable-htmlaudio?-true
   {:fn #(vnctst.audio4/set-config! :disable-htmlaudio? true)
@@ -339,9 +366,11 @@
    :js "vnctst.audio4.js.setConfig(\"disable-htmlaudio?\", true)"
    :desc (str "trueを設定する事で、HtmlAudioによる音源再生を禁止する"
               "(初期値はfalse)。"
-              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
-              "また全てのロード済音源もアンロードされる。")
-   })
+              "概要については上の disable-htmlaudio? の項目を参照。"
+              "この値を変更した場合は内部状態をリセットする必要がある為、"
+              "全ての再生中音源は停止され、"
+              "また全てのロード済音源もアンロードされる。"
+              )})
 
 ;;; TODO: 以下を使うボタンの追加が残っている(追加が完了したら消していく事)
 ;bgm/noise.*
