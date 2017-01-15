@@ -229,28 +229,50 @@
   {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0)
    :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0)"
    :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0)"
-   :desc (str "同一SE連打防止機能の閾値(秒)を設定する。"
-              "0を設定すると無効化できる"
-              "(初期値は0.05)")
-   })
+   :desc ""})
 
-(defba :set-config-default-bgm-fade-sec-2
-  {:fn #(vnctst.audio4/set-config! :default-bgm-fade-sec 2)
-   :cljs "(vnctst.audio4/set-config! :default-bgm-fade-sec 2)"
-   :js "vnctst.audio4.js.setConfig(\"default-bgm-fade-sec\", 2)"
-   :desc (str "デフォルトのBGMフェード秒数を設定する。"
-              "0を設定するとフェードなしになる"
-              "(初期値は1)")
-   })
+(defba :set-config-se-chattering-sec-05
+  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0.5)
+   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0.5)"
+   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0.5)"
+   :desc (str "同一SE連打防止機能の閾値(秒)を設定する(初期値は0.05)。"
+              "0を設定すると無効化できる。"
+              "ゲームでは同じSEが複数同時に発生する事がよくあるが、"
+              "これを何も考えずに行うと音が重なって音量の増幅が起こり、"
+              "爆音や音割れの原因となってしまう"
+              "(艦これの爆撃や雷撃などで顕著)。"
+              "vnctst-audio4ではこの問題を防ぐ為に、"
+              "この設定秒数以内での同一SEの再生は"
+              "一つだけになるように内部で制限されている。"
+              )})
 
-(defba :set-config-default-se-fade-sec-1
-  {:fn #(vnctst.audio4/set-config! :default-se-fade-sec 1)
-   :cljs "(vnctst.audio4/set-config! :default-se-fade-sec 1)"
-   :js "vnctst.audio4.js.setConfig(\"default-se-fade-sec\", 1)"
-   :desc (str "デフォルトのSEフェード秒数を設定する。"
-              "0を設定するとフェードなしになる"
-              "(初期値は0)")
-   })
+(defba :set-config-default-bgm-fade-sec-0
+  {:fn #(vnctst.audio4/set-config! :default-bgm-fade-sec 0)
+   :cljs "(vnctst.audio4/set-config! :default-bgm-fade-sec 0)"
+   :js "vnctst.audio4.js.setConfig(\"default-bgm-fade-sec\", 0)"
+   :desc ""})
+
+(defba :set-config-default-bgm-fade-sec-05
+  {:fn #(vnctst.audio4/set-config! :default-bgm-fade-sec 0.5)
+   :cljs "(vnctst.audio4/set-config! :default-bgm-fade-sec 0.5)"
+   :js "vnctst.audio4.js.setConfig(\"default-bgm-fade-sec\", 0.5)"
+   :desc (str "デフォルトのBGMフェード秒数を設定する(初期値は1)。"
+              "0を設定するとフェードなしで即座に停止するようになる。"
+              )})
+
+(defba :set-config-default-se-fade-sec-0
+  {:fn #(vnctst.audio4/set-config! :default-se-fade-sec 0)
+   :cljs "(vnctst.audio4/set-config! :default-se-fade-sec 0)"
+   :js "vnctst.audio4.js.setConfig(\"default-se-fade-sec\", 0)"
+   :desc ""})
+
+(defba :set-config-default-se-fade-sec-05
+  {:fn #(vnctst.audio4/set-config! :default-se-fade-sec 0.5)
+   :cljs "(vnctst.audio4/set-config! :default-se-fade-sec 0.5)"
+   :js "vnctst.audio4.js.setConfig(\"default-se-fade-sec\", 0.5)"
+   :desc (str "デフォルトのSEフェード秒数を設定する(初期値は0)。"
+              "0を設定するとフェードなしで即座に停止するようになる。"
+              )})
 
 (defba :set-config-autoext-list
   {:fn #(vnctst.audio4/set-config! :autoext-list ["m4a" "mp3" "ogg" ["wav" "audio/wav"]])

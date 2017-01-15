@@ -148,7 +148,7 @@
                 [:div
                  [:h2 "設定項目"]
                  [:p
-                  "項目は多いですが、実際にいじるのは"
+                  "項目は多いですが、実際にいじる必要があるのは"
                   "音量設定とデバッグ出力ぐらいです"]
                  [:h3 "現在の設定項目の値を取得する"]
                  (demo-button2 :config-volume-master)
@@ -164,34 +164,24 @@
                  (demo-button2 :set-config-debug?-true)
                  (demo-button2 :set-config-debug-verbose?-false)
                  (demo-button2 :set-config-debug-verbose?-true)
-                 [:h3 ""]
-                 [:h3 ""]
-                ;; configure
-                [:div
-                 "Configure :"
-                 [:br]
-                 "- 全体に影響する設定項目の値の取得および変更"
-                 [:br]
-                 [:br]
-                 [:br]
-                 [:br]
-                 [:br]
-                 [:br]
-                 (demo-button :set-config-se-chattering-sec-0)
-                 (demo-button :set-config-default-bgm-fade-sec-2)
-                 [:br]
-                 (demo-button :set-config-default-se-fade-sec-1)
-                 [:br]
-                 (demo-button :set-config-autoext-list)
-                 [:br]
-                 (demo-button :set-config-dont-stop-on-background?-true)
-                 [:br]
-                 (demo-button :set-config-disable-mobile?-true)
-                 [:br]
-                 (demo-button :set-config-disable-webaudio?-true)
-                 [:br]
-                 (demo-button :set-config-disable-htmlaudio?-true)
-                 ]
+                 [:h3 "その他"]
+                 (demo-button2 :set-config-se-chattering-sec-0)
+                 (demo-button2 :set-config-se-chattering-sec-05)
+                 (demo-button2 :set-config-default-bgm-fade-sec-0)
+                 (demo-button2 :set-config-default-bgm-fade-sec-05)
+                 (demo-button2 :set-config-default-se-fade-sec-0)
+                 (demo-button2 :set-config-default-se-fade-sec-05)
+                 ;;
+                 (demo-button2 :set-config-autoext-list-a)
+                 (demo-button2 :set-config-autoext-list-b)
+                 (demo-button2 :set-config-dont-stop-on-background?-false)
+                 (demo-button2 :set-config-dont-stop-on-background?-true)
+                 (demo-button2 :set-config-disable-mobile?-false)
+                 (demo-button2 :set-config-disable-mobile?-true)
+                 (demo-button2 :set-config-disable-webaudio?-false)
+                 (demo-button2 :set-config-disable-webaudio?-true)
+                 (demo-button2 :set-config-disable-htmlaudio?-false)
+                 (demo-button2 :set-config-disable-htmlaudio?-true)
                  ]
                 [:hr]
                 ;; SE
