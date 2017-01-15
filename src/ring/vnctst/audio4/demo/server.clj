@@ -186,34 +186,24 @@
                 [:hr]
                 [:div
                  [:h2 "やや複雑な操作"]
-                 [:p "必要なら設定するとよいでしょう"]
                  [:h3 "プリロード / アンロード"]
-                 ;;
+                 ;; TODO
                  [:h3 "BGMの再生オプション"]
-                 ;;
+                 ;; TODO
                  [:h3 "SEの再生オプション"]
-                 ;;
-                 [:h3 ""]
-                 [:h3 ""]
-                 [:h3 ""]
-                 ]
-                [:hr]
-                [:div
-                 [:h2 "一括プリロード"]
-                 [:p "この機能はcljs版のみの提供です"]
-                 [:h3 "TODO"]
+                 ;; TODO
                  ]
                 [:hr]
                 [:div
                  [:h2 "その他の補助的な機能"]
-                 [:p ""]
-                 (demo-button :can-play-ogg)
-                 (demo-button :can-play-mp3)
-                 (demo-button :can-play-m4a)
-                 (demo-button :can-play)
-                 (demo-button :terminal-type)
-                 (demo-button :float->percent)
-                 (demo-button :percent->float)
+                 (demo-button2 :version-js)
+                 (demo-button2 :can-play-ogg)
+                 (demo-button2 :can-play-mp3)
+                 (demo-button2 :can-play-m4a)
+                 (demo-button2 :can-play)
+                 (demo-button2 :terminal-type)
+                 (demo-button2 :float->percent)
+                 (demo-button2 :percent->float)
                  ]
                 ;; footer
                 [:hr]

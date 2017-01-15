@@ -8,8 +8,12 @@
 (def ^:dynamic p-key :html-audio-single)
 
 (defn- p [& args]
-  (when entry-table/device-log-verbose?
+  (when true
     (util/logging p-key args)))
+
+
+(defn- ready? [a]
+  (<= 2 (.-readyState a)))
 
 
 ;;; 実装について
@@ -117,7 +121,7 @@
     (go-loop [elapsed-sec 0]
       (<! (async/timeout 1000))
       (when-not @(:loaded? as)
-        (if (= 4 (.-readyState a))
+        (if (ready? a)
           (@h-loaded nil)
           (if (< 30 elapsed-sec)
             (do
@@ -190,7 +194,7 @@
     ;;     これにきちんと対応できなくてはならない。
     ;;     (以下の .-readyState が4以外だった時の処理)
     (let [a (:audio @ch)]
-      (if (= 4 (.-readyState a))
+      (if (ready? a)
         (do
           ;(.pause a)
           (set! (.-loop a) (boolean loop?))
@@ -225,7 +229,7 @@
           (go-loop []
             (<! (async/timeout 1))
             (when-let [play-request @(:play-request @ch)]
-              (if (= 4 (.-readyState a))
+              (if (ready? a)
                 (do
                   (reset! (:play-request @ch) nil)
                   (apply play! ch play-request))

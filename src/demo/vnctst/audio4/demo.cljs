@@ -281,13 +281,14 @@
    :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0.5)"
    :desc (str "同一SE連打防止機能の閾値(秒)を設定する(初期値は0.05)。"
               "0を設定すると無効化できる。"
-              "ゲームでは同じSEが複数同時に発生する事がよくあるが、"
-              "これを何も考えずに行うと音が重なって音量の増幅が起こり、"
+              "ゲームでは同じSEが特定タイミングで複数同時に発生する事が"
+              "よくあるが、"
+              "何も考えずにこれを行うと音が重なって音量の増幅が起こり、"
               "爆音や音割れの原因となってしまう"
               "(艦これの爆撃や雷撃などで顕著)。"
               "vnctst-audio4ではこの問題を防ぐ為に、"
               "この設定秒数以内での同一SEの再生は"
-              "一つだけになるように内部で制限されている。"
+              "一つだけになるように内部で制限している。"
               )})
 
 (defba :set-config-autoext-list-a
@@ -490,32 +491,40 @@
    ;               }
 
 ;;; Misc
+
+(defba :version-js
+  {:fn #(js/alert vnctst.audio4.js/version)
+   :cljs "利用不可"
+   :js "vnctst.audio4.js.version"
+   :desc "vnctst-audio4のライブラリとしてのバージョン文字列。js版のみ提供。"
+   })
+
 (defba :can-play-ogg
   {:fn #(js/alert (vnctst.audio4/can-play-ogg?))
    :cljs "(vnctst.audio4/can-play-ogg?)"
    :js "vnctst.audio4.js.canPlayOgg()"
-   :desc "oggが再生可能なら真値を返す"
+   :desc "oggが再生可能なら真値を返す。"
    })
 
 (defba :can-play-mp3
   {:fn #(js/alert (vnctst.audio4/can-play-mp3?))
    :cljs "(vnctst.audio4/can-play-mp3?)"
    :js "vnctst.audio4.js.canPlayMp3()"
-   :desc "mp3が再生可能なら真値を返す"
+   :desc "mp3が再生可能なら真値を返す。"
    })
 
 (defba :can-play-m4a
   {:fn #(js/alert (vnctst.audio4/can-play-m4a?))
    :cljs "(vnctst.audio4/can-play-m4a?)"
    :js "vnctst.audio4.js.canPlayM4a()"
-   :desc "m4aが再生可能なら真値を返す"
+   :desc "m4aが再生可能なら真値を返す。"
    })
 
 (defba :can-play
   {:fn #(js/alert (vnctst.audio4/can-play? "audio/wav"))
    :cljs "(vnctst.audio4/can-play? \"audio/wav\")"
    :js "vnctst.audio4.js.canPlay(\"audio/wav\")"
-   :desc "引数として渡したmime-typeが再生可能なら真値を返す"
+   :desc "引数として渡したmime-typeが再生可能なら真値を返す。"
    })
 
 (defba :terminal-type
@@ -541,9 +550,9 @@
   {:fn #(js/alert (vnctst.audio4/float->percent 0.25))
    :cljs "(vnctst.audio4/float->percent 0.25)"
    :js "vnctst.audio4.js.floatToPercent(0.25)"
-   :desc (str "ボリューム値は0.0～1.0の小数値で指定するが、"
+   :desc (str "各ボリューム設定は0.0～1.0の小数値で指定するが、"
               "これを0～100のパーセント値へと変換する"
-              "単純なユーティリティ関数")
+              "単純なユーティリティ関数。")
    })
 
 (defba :percent->float
@@ -551,7 +560,7 @@
    :cljs "(vnctst.audio4/percent->float 25)"
    :js "vnctst.audio4.js.percentToFloat(25)"
    :desc (str "float->percent / floatToPercent の"
-              "逆変換を行うユーティリティ")
+              "逆変換を行うユーティリティ。")
    })
 
 
