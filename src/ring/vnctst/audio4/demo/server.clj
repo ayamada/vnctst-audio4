@@ -141,8 +141,8 @@
                  (demo-button2 :stop-bgm-3)
                  (demo-button2 :stop-bgm-0)
                  [:h3 "SEを鳴らす"]
-                 (demo-button2 :se-launch)
-                 (demo-button2 :se-shootout)
+                 (demo-button2 :se-open-wood)
+                 (demo-button2 :se-buy1)
                  ]
                 [:hr]
                 [:div
@@ -164,24 +164,25 @@
                  (demo-button2 :set-config-debug?-true)
                  (demo-button2 :set-config-debug-verbose?-false)
                  (demo-button2 :set-config-debug-verbose?-true)
-                 [:h3 "その他"]
-                 (demo-button2 :set-config-se-chattering-sec-0)
-                 (demo-button2 :set-config-se-chattering-sec-05)
+                 [:h3 "あまり使われない項目"]
+                 [:p "読み飛ばしても問題ありません"]
                  (demo-button2 :set-config-default-bgm-fade-sec-0)
                  (demo-button2 :set-config-default-bgm-fade-sec-05)
                  (demo-button2 :set-config-default-se-fade-sec-0)
                  (demo-button2 :set-config-default-se-fade-sec-05)
-                 ;;
+                 (demo-button2 :set-config-se-chattering-sec-0)
+                 (demo-button2 :set-config-se-chattering-sec-05)
                  (demo-button2 :set-config-autoext-list-a)
                  (demo-button2 :set-config-autoext-list-b)
+                 ;;
                  (demo-button2 :set-config-dont-stop-on-background?-false)
                  (demo-button2 :set-config-dont-stop-on-background?-true)
                  (demo-button2 :set-config-disable-mobile?-false)
                  (demo-button2 :set-config-disable-mobile?-true)
-                 (demo-button2 :set-config-disable-webaudio?-false)
-                 (demo-button2 :set-config-disable-webaudio?-true)
                  (demo-button2 :set-config-disable-htmlaudio?-false)
                  (demo-button2 :set-config-disable-htmlaudio?-true)
+                 (demo-button2 :set-config-disable-webaudio?-false)
+                 (demo-button2 :set-config-disable-webaudio?-true)
                  ]
                 [:hr]
                 ;; SE

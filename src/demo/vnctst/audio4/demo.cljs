@@ -16,8 +16,8 @@
    ])
 
 (def preload-pathes
-  ["se/launch.*"
-   "se/shootout.*"
+  ["se/open-wood.*"
+   "se/buy1.*"
    ])
 
 (def button-assign (atom {}))
@@ -102,21 +102,21 @@
    :desc "現在再生中のBGMを即座に停止させる。"
    })
 
-(defba :se-launch
-  {:fn #(vnctst.audio4/se! "se/launch.*")
-   :cljs "(vnctst.audio4/se! \"se/launch.*\")"
-   :js "vnstst.audio4.js.se(\"se/launch.*\")"
-   :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
+(defba :se-open-wood
+  {:fn #(vnctst.audio4/se! "se/open-wood.*")
+   :cljs "(vnctst.audio4/se! \"se/open-wood.*\")"
+   :js "vnstst.audio4.js.se(\"se/open-wood.*\")"
+   :desc (str "\"se/open-wood.ogg\" もしくは \"se/open-wood.mp3\" を"
               "SEとして再生する。"
               "SEとしての再生では、音源の多重再生が可能となる"
               "(ボタンを連打しても前の音が途切れたりしない)。"
               )})
 
-(defba :se-shootout
-  {:fn #(vnctst.audio4/se! "se/shootout.*")
-   :cljs "(vnctst.audio4/se! \"se/shootout.*\")"
-   :js "vnstst.audio4.js.se(\"se/shootout.*\")"
-   :desc (str "\"se/shootout.ogg\" もしくは \"se/shootout.mp3\" を"
+(defba :se-buy1
+  {:fn #(vnctst.audio4/se! "se/buy1.*")
+   :cljs "(vnctst.audio4/se! \"se/buy1.*\")"
+   :js "vnstst.audio4.js.se(\"se/buy1.*\")"
+   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
               "SEとして再生する。")})
 
 
@@ -225,27 +225,6 @@
               "再生/停止タイミング等をきちんと調べたい時のみtrueにするとよい。"
               )})
 
-(defba :set-config-se-chattering-sec-0
-  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0)
-   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0)"
-   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0)"
-   :desc ""})
-
-(defba :set-config-se-chattering-sec-05
-  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0.5)
-   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0.5)"
-   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0.5)"
-   :desc (str "同一SE連打防止機能の閾値(秒)を設定する(初期値は0.05)。"
-              "0を設定すると無効化できる。"
-              "ゲームでは同じSEが複数同時に発生する事がよくあるが、"
-              "これを何も考えずに行うと音が重なって音量の増幅が起こり、"
-              "爆音や音割れの原因となってしまう"
-              "(艦これの爆撃や雷撃などで顕著)。"
-              "vnctst-audio4ではこの問題を防ぐ為に、"
-              "この設定秒数以内での同一SEの再生は"
-              "一つだけになるように内部で制限されている。"
-              )})
-
 (defba :set-config-default-bgm-fade-sec-0
   {:fn #(vnctst.audio4/set-config! :default-bgm-fade-sec 0)
    :cljs "(vnctst.audio4/set-config! :default-bgm-fade-sec 0)"
@@ -274,7 +253,34 @@
               "0を設定するとフェードなしで即座に停止するようになる。"
               )})
 
-(defba :set-config-autoext-list
+(defba :set-config-se-chattering-sec-0
+  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0)
+   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0)"
+   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0)"
+   :desc ""})
+
+(defba :set-config-se-chattering-sec-05
+  {:fn #(vnctst.audio4/set-config! :se-chattering-sec 0.5)
+   :cljs "(vnctst.audio4/set-config! :se-chattering-sec 0.5)"
+   :js "vnctst.audio4.js.setConfig(\"se-chattering-sec\", 0.5)"
+   :desc (str "同一SE連打防止機能の閾値(秒)を設定する(初期値は0.05)。"
+              "0を設定すると無効化できる。"
+              "ゲームでは同じSEが複数同時に発生する事がよくあるが、"
+              "これを何も考えずに行うと音が重なって音量の増幅が起こり、"
+              "爆音や音割れの原因となってしまう"
+              "(艦これの爆撃や雷撃などで顕著)。"
+              "vnctst-audio4ではこの問題を防ぐ為に、"
+              "この設定秒数以内での同一SEの再生は"
+              "一つだけになるように内部で制限されている。"
+              )})
+
+(defba :set-config-autoext-list-a
+  {:fn #(vnctst.audio4/set-config! :autoext-list ["ogg"])
+   :cljs "(vnctst.audio4/set-config! :autoext-list [\"ogg\"])"
+   :js "vnctst.audio4.js.setConfig(\"autoext-list\", [\"ogg\"])"
+   :desc ""})
+
+(defba :set-config-autoext-list-b
   {:fn #(vnctst.audio4/set-config! :autoext-list ["m4a" "mp3" "ogg" ["wav" "audio/wav"]])
    :cljs "(vnctst.audio4/set-config! :autoext-list [\"m4a\" \"mp3\" \"ogg\" [\"wav\" \"audio/wav\"])"
    :js "vnctst.audio4.js.setConfig(\"autoext-list\", [\"m4a\", \"mp3\", \"ogg\", [\"wav\", \"audio/wav\"])"
@@ -285,11 +291,13 @@
               "なお ogg, mp3, m4a 以外の拡張子を指定する際には、"
               "上記のwavのように、"
               "一緒にmime-typeも指定する必要があるので注意"
-              "(もちろんブラウザが対応していなければ再生はできない)。"
+              "(もちろんブラウザが対応していない場合は再生できない)。"
               "初期値は [\"ogg\" \"mp3\" \"m4a\"] 。"
-              "この値を変更した場合、一旦、全ての再生中音源は停止され、"
-              "また全てのロード済音源もアンロードされる。")
-   })
+              "この値を変更した場合は内部状態をリセットする必要がある為、"
+              "全ての再生中音源は停止され、"
+              "また全てのロード済音源もアンロードされる"
+              "(ロード/アンロードについては後述)。"
+              )})
 
 (defba :set-config-dont-stop-on-background?-true
   {:fn #(vnctst.audio4/set-config! :dont-stop-on-background? true)

@@ -160,8 +160,8 @@
 
 (defn unload-all! []
   (init!)
-  (cache/unload-all!)
-  true)
+  (doseq [path (cache/all-pathes)]
+    (unload! path)))
 
 
 

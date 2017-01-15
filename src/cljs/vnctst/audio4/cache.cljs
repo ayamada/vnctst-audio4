@@ -240,12 +240,9 @@
   true)
 
 
-(defn unload-all! []
-  (doseq [path (keys @loaded-audiosource-table)]
-    (unload! path))
-  (doseq [path (keys @loading-info-table)]
-    (unload! path))
-  true)
+(defn all-pathes []
+  (seq (set (concat (keys @loaded-audiosource-table)
+                    (keys @loading-info-table)))))
 
 
 
