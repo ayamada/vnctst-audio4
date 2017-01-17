@@ -143,6 +143,8 @@
                  [:h3 "SEを鳴らす"]
                  (demo-button2 :se-open-wood)
                  (demo-button2 :se-buy1)
+                 (demo-button2 :stop-se)
+                 (demo-button2 :stop-se-05)
                  ]
                 [:hr]
                 [:div
@@ -187,11 +189,26 @@
                 [:div
                  [:h2 "やや複雑な操作"]
                  [:h3 "プリロード / アンロード"]
-                 ;; TODO
+                 (demo-button2 :load-noise)
+                 (demo-button2 :loaded?)
+                 (demo-button2 :error?)
+                 (demo-button2 :unload-noise)
+                 (demo-button2 :unload-all)
                  [:h3 "BGMの再生オプション"]
-                 ;; TODO
+                 (demo-button2 :bgm-va32-a)
+                 (demo-button2 :bgm-va32-b)
+                 (demo-button2 :bgm-va32-c)
+                 (demo-button2 :bgm-noise-ch)
+                 (demo-button2 :stop-bgm-ch-a)
+                 (demo-button2 :stop-bgm-ch-b)
+                 ;(demo-button2 :bgs-noise)
+                 ;(demo-button2 :me-rnr)
                  [:h3 "SEの再生オプション"]
-                 ;; TODO
+                 (demo-button2 :se-buy1-a)
+                 (demo-button2 :se-buy1-b)
+                 (demo-button2 :se-buy1-c)
+                 (demo-button2 :stop-se-ch)
+                 (demo-button2 :alert-buy1)
                  ]
                 [:hr]
                 [:div

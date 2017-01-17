@@ -245,7 +245,7 @@
                   (do
                     (swap! state assoc :fade-factor new-factor)
                     (sync-state-volume! state)
-                    (when-not (= end-value new-factor)
+                    (when (= end-value new-factor)
                       (swap! fade-targets dissoc sid)
                       (when (zero? end-value)
                         (_stop-immediately! sid state)))))))

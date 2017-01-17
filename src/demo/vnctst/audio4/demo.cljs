@@ -27,7 +27,7 @@
 
 
 
-;;; Main
+;;; main
 
 (defba :bgm-va32
   {:fn #(vnctst.audio4/bgm! "bgm/va32.*")
@@ -119,8 +119,25 @@
    :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
               "SEとして再生する。")})
 
+(defba :stop-se
+  {:fn #(vnctst.audio4/stop-se!)
+   :cljs "(vnctst.audio4/stop-se!)"
+   :js "vnstst.audio4.js.stopSe()"
+   :desc (str "現在再生中のSE全てをデフォルト秒数(0秒)かけて"
+              "フェード終了させる(0秒の時は即座に終了する)。"
+              "再生中でない場合は何も起きない。"
+              "この「デフォルト秒数」は後述の設定項目から変更可能。"
+              )})
 
-;;; Configure
+(defba :stop-se-05
+  {:fn #(vnctst.audio4/stop-se! 0.5)
+   :cljs "(vnctst.audio4/stop-se! 0.5)"
+   :js "vnstst.audio4.js.stopSe(0.5)"
+   :desc (str "現在再生中のSE全てを0.5秒かけてフェード終了させる。"
+              )})
+
+
+;;; configure
 
 
 (defba :config-volume-master
@@ -373,124 +390,103 @@
               "また全てのロード済音源もアンロードされる。"
               )})
 
-;;; TODO: 以下を使うボタンの追加が残っている(追加が完了したら消していく事)
-;bgm/noise.*
-;
-;stop-bgm!
-;bgm!
-;bgm-oneshot!
-;me!
-;bgs!
-;load!
-;unload!
-;loaded?
-;error?
-;unload-all!
-   ;; SE
-   ;:play-se-jump {:fn #(vnctst.audio4/play! :se/jump)
-   ;               :cljs "(vnctst.audio4/play! :se/jump)"
-   ;               :js "vnctst.audio4.js.play({se: \"jump\"})"
-   ;               :desc (str "\"audio/se/jump.{ogg,mp3}\" をSEとして再生する。"
-   ;                          "連打での多重再生が可能")
-   ;               }
-   ;:play-se-yarare {:fn #(vnctst.audio4/play! :se/yarare)
-   ;                 :cljs "(vnctst.audio4/play! :se/yarare)"
-   ;                 :js "vnctst.audio4.js.play({se: \"yarare\"})"
-   ;                 :desc "\"audio/se/yarare.{ogg,mp3}\" をSEとして再生する"
-   ;                 }
-   ;:play-se-yarare-ogg {:fn #(vnctst.audio4/se! "audio/se/yarare.ogg")
-   ;                     :cljs "(vnctst.audio4/se! \"audio/se/yarare.ogg\")"
-   ;                     :js "vnctst.audio4.js.se(\"audio/se/yarare.ogg\")"
-   ;                     :desc "\"audio/se/yarare.ogg\" をSEとして再生する"
-   ;                     }
-   ;; BGM
-   ;:play-bgm-drop {:fn #(vnctst.audio4/play! :bgm/drop)
-   ;                :cljs "(vnctst.audio4/play! :bgm/drop)"
-   ;                :js "vnctst.audio4.js.play({bgm: \"drop\"})"
-   ;                :desc "\"audio/bgm/drop.{ogg,mp3}\" をBGMとして再生する"
-   ;                }
-   ;:play-bgm-drop-2 {:fn #(vnctst.audio4/play! :bgm/drop 1.5 1.2 0.2)
-   ;                  :cljs "(vnctst.audio4/play! :bgm/drop 1.5 1.2 0.2)"
-   ;                  :js "vnctst.audio4.js.play({bgm: \"drop\"}, 1.5, 1.2, 0.2)"
-   ;                  :desc (str "\"audio/bgm/drop.{ogg,mp3}\" を"
-   ;                             "BGMとして再生する。"
-   ;                             "引数は音量(省略時1.0)、"
-   ;                             "ピッチ(再生速度倍率、省略時1.0)、"
-   ;                             "パン(左右に寄せる、省略時0、-1が左最大、"
-   ;                             "1が右最大)。"
-   ;                             "環境によってはピッチ、パンが無効な場合あり")
-   ;                  }
-   ;:play-me-unmei {:fn #(vnctst.audio4/play! :me/unmei)
-   ;                :cljs "(vnctst.audio4/play! :me/unmei)"
-   ;                :js "vnctst.audio4.js.play({me: \"unmei\"})"
-   ;                :desc "\"audio/me/unmei.{ogg,mp3}\" をMEとして再生する"
-   ;                }
-   ;:play-me-unmei-2 {:fn #(vnctst.audio4/play! :me/unmei 1.5 1.2 0.2)
-   ;                  :cljs "(vnctst.audio4/play! :me/unmei 1.5 1.2 0.2)"
-   ;                  :js "vnctst.audio4.js.play({me: \"unmei\"}, 1.5, 1.2, 0.2)"
-   ;                  :desc (str "\"audio/me/unmei.{ogg,mp3}\" を"
-   ;                             "MEとして再生する。"
-   ;                             "引数は音量(省略時1.0)、"
-   ;                             "ピッチ(再生速度倍率、省略時1.0)、"
-   ;                             "パン(左右に寄せる、省略時0、-1が左最大、"
-   ;                             "1が右最大)。"
-   ;                             "環境によってはピッチ、パンが無効な場合あり")
-   ;                  }
-   ;:play-bgm-drop-ogg {:fn #(vnctst.audio4/bgm! "audio/bgm/drop.ogg")
-   ;                    :cljs "(vnctst.audio4/bgm! \"audio/bgm/drop.ogg\")"
-   ;                    :js "vnctst.audio4.js.bgm(\"audio/bgm/drop.ogg\")"
-   ;                    :desc (str "\"audio/bgm/drop.ogg\" を"
-   ;                               "BGMとして再生する。"
-   ;                               "任意のurlを指定可能"
-   ;                               "(外部サーバ指定時は要CORS設定)。"
-   ;                               "この環境でoggが再生可能かどうかは"
-   ;                               "後述の方法で確認可能。"
-   ;                               "再生できない環境の場合は何も再生されない。")
-   ;                    }
-   ;:play-bgm-drop-mp3 {:fn #(vnctst.audio4/bgm! "audio/bgm/drop.mp3")
-   ;                    :cljs "(vnctst.audio4/bgm! \"audio/bgm/drop.mp3\")"
-   ;                    :js "vnctst.audio4.js.bgm(\"audio/bgm/drop.mp3\")"
-   ;                    :desc (str "\"audio/bgm/drop.mp3\" を"
-   ;                               "BGMとして再生する。"
-   ;                               "再生できない環境の場合は何も再生されない。")
-   ;                    }
-   ;:play-me-unmei-ogg {:fn #(vnctst.audio4/me! "audio/me/unmei.ogg")
-   ;                    :cljs "(vnctst.audio4/me! \"audio/me/unmei.ogg\")"
-   ;                    :js "vnctst.audio4.js.me(\"audio/me/unmei.ogg\")"
-   ;                    :desc "\"audio/me/unmei.ogg\" をMEとして再生する"
-   ;                    }
-   ;:play-bgm-nil {:fn #(vnctst.audio4/bgm! nil)
-   ;               :cljs "(vnctst.audio4/bgm! nil)"
-   ;               :js "vnctst.audio4.js.bgm(null)"
-   ;               :desc "BGM / ME をフェード停止させる"
-   ;               }
-   ;:play-me-nil {:fn #(vnctst.audio4/me! nil)
-   ;              :cljs "(vnctst.audio4/me! nil)"
-   ;              :js "vnctst.audio4.js.me(null)"
-   ;              :desc "BGM / ME をフェード停止させる"
-   ;              }
-   ;:stop-bgs {:fn #(vnctst.audio4/stop-bgs!)
-   ;           :cljs "(vnctst.audio4/stop-bgs!)"
-   ;           :js "vnctst.audio4.js.stopBgs()"
-   ;           :desc "BGSをフェード停止させる"
-   ;           }
-   ;:stop-bgs-0 {:fn #(vnctst.audio4/stop-bgs! 0)
-   ;             :cljs "(vnctst.audio4/stop-bgs! 0)"
-   ;             :js "vnctst.audio4.js.stopBgs(0)"
-   ;             :desc "BGSを即座に停止させる(引数はフェード秒数)"
-   ;             }
-   ;:play-bgs-noise {:fn #(vnctst.audio4/play! :bgs/noise)
-   ;                 :cljs "(vnctst.audio4/play! :bgs/noise)"
-   ;                 :js "vnctst.audio4.js.play({bgs: \"noise\"})"
-   ;                 :desc "\"audio/bgs/noise.{ogg,mp3}\" をBGSとして再生する"
-   ;                 }
-   ;:play-bgs-nil {:fn #(vnctst.audio4/bgs! nil)
-   ;               :cljs "(vnctst.audio4/bgs! nil)"
-   ;               :js "vnctst.audio4.js.bgs(null)"
-   ;               :desc "BGSをフェード停止させる"
-   ;               }
 
-;;; Misc
+;;; preload / unload
+
+
+(defba :load-noise
+  {:fn #(vnctst.audio4/load! "bgm/noise.*")
+   :cljs "(vnctst.audio4/load! \"bgm/noise.\")"
+   :js "vnctst.audio4.js.load(\"bgm/noise.\")"
+   :desc (str ""
+              ""
+              ""
+              ""
+              )})
+
+(defba :loaded?
+  {:fn #(vnctst.audio4/loaded? "bgm/noise.*")
+   :cljs "(vnctst.audio4/loaded? \"bgm/noise.\")"
+   :js "vnctst.audio4.js.isLoaded(\"bgm/noise.\")"
+   :desc (str ""
+              ""
+              ""
+              ""
+              )})
+
+(defba :error?
+  {:fn #(vnctst.audio4/error? "bgm/noise.*")
+   :cljs "(vnctst.audio4/error? \"bgm/noise.\")"
+   :js "vnctst.audio4.js.isError(\"bgm/noise.\")"
+   :desc (str ""
+              ""
+              ""
+              ""
+              )})
+
+(defba :unload-noise
+  {:fn #(vnctst.audio4/unload! "bgm/noise.*")
+   :cljs "(vnctst.audio4/unload! \"bgm/noise.\")"
+   :js "vnctst.audio4.js.unload(\"bgm/noise.\")"
+   :desc (str ""
+              ""
+              ""
+              ""
+              )})
+
+(defba :unload-all
+  {:fn #(vnctst.audio4/unload-all!)
+   :cljs "(vnctst.audio4/unload-all!"
+   :js "vnctst.audio4.js.unloadAll()"
+   :desc (str ""
+              ""
+              ""
+              ""
+              )})
+
+
+;;; more BGM
+
+
+(defba :bgm-va32-a
+  {})
+
+(defba :bgm-va32-b
+  {})
+
+(defba :bgm-va32-c
+  {})
+
+(defba :bgm-noise-ch
+  {})
+
+(defba :stop-bgm-ch-a
+  {})
+
+(defba :stop-bgm-ch-b
+  {})
+
+
+;;; more SE
+
+(defba :se-buy1-a
+  {})
+
+(defba :se-buy1-b
+  {})
+
+(defba :se-buy1-c
+  {})
+
+(defba :stop-se-ch
+  {})
+
+(defba :alert-buy1
+  {})
+
+
+;;; misc
+
 
 (defba :version-js
   {:fn #(js/alert vnctst.audio4.js/version)

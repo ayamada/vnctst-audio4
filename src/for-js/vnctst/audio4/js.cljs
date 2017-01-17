@@ -1,4 +1,5 @@
 (ns vnctst.audio4.js
+  (:refer-clojure :exclude [load])
   (:require-macros [project-clj.core :as project-clj])
   (:require [vnctst.audio4 :as audio4]))
 
@@ -55,16 +56,11 @@
   ;; 具体的には、 autoext-list の場合に対応が必要となる
   (audio4/set-config! (keyword k) v))
 
-;(defn ^:export init [& [option]]
-;  (if-let [option (when option
-;                    (js->clj option :keywordize-keys true))]
-;    (audio4/init! option)
-;    (audio4/init!)))
-;
-;
-;;;; jsではclojureのキーワードを簡単に指定できないので、
-;;;; (play! :se/hoge) のようなものを簡潔に表現できない。そこで、
-;;;; vnctst.audio4.js.play({se: "hoge"}) と指定できるようにする
+
+
+
+
+;;; 引数としてjs-objを受ける、古いサンプル
 ;(defn- conv-kp [key-or-path]
 ;  (if-not (= js/Object (type key-or-path))
 ;    key-or-path
@@ -74,69 +70,6 @@
 ;      (assert (not (nil? k)) "k must be not null")
 ;      (assert (not (nil? v)) "v must be not null")
 ;      (keyword (str k) (str v)))))
-;
-;
-;
-;(defn ^:export bgm [key-or-path & [vol pitch pan]]
-;  (audio4/bgm! (conv-kp key-or-path) vol pitch pan))
-;
-;(defn ^:export bgs [key-or-path & [vol pitch pan]]
-;  (audio4/bgs! (conv-kp key-or-path) vol pitch pan))
-;
-;(defn ^:export me [key-or-path & [vol pitch pan]]
-;  (audio4/me! (conv-kp key-or-path) vol pitch pan))
-;
-;(defn ^:export se [key-or-path & [vol pitch pan]]
-;  (audio4/se! (conv-kp key-or-path) vol pitch pan))
-;
-;(def ^:export playBgm bgm)
-;(def ^:export playBgs bgs)
-;(def ^:export playMe me)
-;(def ^:export playSe se)
-;
-;(defn ^:export alarm [key-or-path & [vol pitch pan]]
-;  (audio4/alarm! (conv-kp key-or-path) vol pitch pan))
-;
-;(defn ^:export play [k & [vol pitch pan]]
-;  (let [k (conv-kp k)]
-;    (assert (keyword? k)) ; 文字列指定不可
-;    (audio4/play! k vol pitch pan)))
-;
-;
-;
-;
-;
-;(defn ^:export isPlayingBgm [] (audio4/playing-bgm?))
-;(defn ^:export isPlayingBgs [] (audio4/playing-bgs?))
-;(defn ^:export isPlayingMe [] (audio4/playing-me?))
-;
-;
-;(defn ^:export preloadBgm [key-or-path]
-;  (audio4/preload-bgm! (conv-kp key-or-path)))
-;(def ^:export preloadBgs preloadBgm)
-;(def ^:export preloadMe preloadBgm)
-;
-;(defn ^:export unloadBgm [key-or-path]
-;  (audio4/unload-bgm! (conv-kp key-or-path)))
-;(def ^:export unloadBgs unloadBgm)
-;(def ^:export unloadMe unloadBgm)
-;
-;(defn ^:export isPreloadedBgm [key-or-path]
-;  (audio4/preloaded-bgm? (conv-kp key-or-path)))
-;(defn ^:export isSucceededToPreloadBgm [key-or-path]
-;  (audio4/succeeded-to-preload-bgm? (conv-kp key-or-path)))
-;
-;
-;
-;
-;(defn ^:export isPreloadSe [key-or-path]
-;  (audio4/preload-se! (conv-kp key-or-path)))
-;(defn ^:export isUnloadSe [key-or-path]
-;  (audio4/unload-se! (conv-kp key-or-path)))
-;(defn ^:export isLoadedSe [key-or-path]
-;  (audio4/loaded-se? (conv-kp key-or-path)))
-;(defn ^:export isSucceededToLoadSe [key-or-path]
-;  (audio4/succeeded-to-load-se? (conv-kp key-or-path)))
 
 
 
@@ -146,9 +79,8 @@
 
 (def ^:export version (project-clj/get :version))
 
-;; jsでsetを表現しづらいので、これは一旦非公開とする
 (defn ^:export hasTerminalType [k]
-  (get audio4/terminal-type (keyword k)))
+  (boolean (get audio4/terminal-type (keyword k))))
 
 (defn ^:export canPlay [mime] (audio4/can-play? mime))
 (defn ^:export canPlayOgg [] (audio4/can-play-ogg?))
@@ -163,7 +95,6 @@
 
 
 
-;;; NB: jsではプリセット情報の取得ができないので、プリセット関係は提供しない
 
 
 
