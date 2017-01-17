@@ -180,10 +180,10 @@
                  (demo-button2 :set-config-autoext-list-b)
                  (demo-button2 :set-config-disable-mobile?-false)
                  (demo-button2 :set-config-disable-mobile?-true)
-                 (demo-button2 :set-config-disable-htmlaudio?-false)
-                 (demo-button2 :set-config-disable-htmlaudio?-true)
                  (demo-button2 :set-config-disable-webaudio?-false)
                  (demo-button2 :set-config-disable-webaudio?-true)
+                 (demo-button2 :set-config-disable-htmlaudio?-false)
+                 (demo-button2 :set-config-disable-htmlaudio?-true)
                  ]
                 [:hr]
                 [:div

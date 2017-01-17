@@ -50,11 +50,11 @@
 
 
 
-(defn ^:export getConfig [k] (audio4/config (keyword k)))
+(defn ^:export getConfig [k] 
+  (clj->js (audio4/config (keyword k))))
+
 (defn ^:export setConfig [k v]
-  ;; TODO: 一部のkに応じて、vの値を改変する必要あり！あとで…
-  ;; 具体的には、 autoext-list の場合に対応が必要となる
-  (audio4/set-config! (keyword k) v))
+  (audio4/set-config! (keyword k) (js->clj v)))
 
 
 

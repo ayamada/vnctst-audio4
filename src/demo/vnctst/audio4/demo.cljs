@@ -283,7 +283,7 @@
    :desc (str "vnctst-audio4は、ブラウザのタブをバックグラウンドにした際に"
               "BGMが自動的に一時停止される機能を持っている。"
               "この項目にtrueを設定する事で、その機能を無効化できる"
-              "(初期値はfalse)"
+              "(初期値はfalse)。"
               )})
 
 (defba :set-config-se-chattering-sec-0
@@ -365,7 +365,7 @@
               "どちらも使えなければ再生は無効される、"
               "という優先順位になっている。"
               "通常はこのままでも問題ないが、"
-              "「HtmlAudioでの動作確認を取りたい」等には、"
+              "「HtmlAudioでの動作確認を取りたい」等の時に"
               "この設定項目を有効にするとよい。"
               "この値を変更した場合は内部状態をリセットする必要がある為、"
               "全ての再生中音源は停止され、"
@@ -396,52 +396,64 @@
 
 (defba :load-noise
   {:fn #(vnctst.audio4/load! "bgm/noise.*")
-   :cljs "(vnctst.audio4/load! \"bgm/noise.\")"
-   :js "vnctst.audio4.js.load(\"bgm/noise.\")"
-   :desc (str ""
-              ""
-              ""
-              ""
+   :cljs "(vnctst.audio4/load! \"bgm/noise.*\")"
+   :js "vnctst.audio4.js.load(\"bgm/noise.*\")"
+   :desc (str "bgmやseでの音響ファイルの初回再生時は、実は内部で"
+              "ファイルのロードを行いそれが完了してから再生している。"
+              "なので初回再生時のみ実際に再生されるまでタイムラグがある"
+              "(ファイルサイズが小さかったりブラウザキャッシュがなされていれば"
+              "目立たないが)。"
+              "このタイムラグをなくすには、再生するよりずっと前の段階で"
+              "プリロードを行っておけばよい。"
+              "この関数はそのプリロードをバックグラウンドで行わせる。"
+              "既にロード中だったりロードが完了している場合は何も行われない。"
               )})
 
 (defba :loaded?
-  {:fn #(vnctst.audio4/loaded? "bgm/noise.*")
-   :cljs "(vnctst.audio4/loaded? \"bgm/noise.\")"
-   :js "vnctst.audio4.js.isLoaded(\"bgm/noise.\")"
-   :desc (str ""
-              ""
-              ""
-              ""
+  {:fn #(js/alert (vnctst.audio4/loaded? "bgm/noise.*"))
+   :cljs "(vnctst.audio4/loaded? \"bgm/noise.*\")"
+   :js "vnctst.audio4.js.isLoaded(\"bgm/noise.*\")"
+   :desc (str "プリロードはバックグラウンドで非同期に実行される。"
+              "この関数は、そのプリロードが正常終了/異常終了のどちらにせよ"
+              "完了しているかどうかを真偽値で返す。"
+              "ローディング画面等では、定期的にこの関数を呼んで"
+              "ロードが完了したかを確認するとよい。"
               )})
 
 (defba :error?
-  {:fn #(vnctst.audio4/error? "bgm/noise.*")
-   :cljs "(vnctst.audio4/error? \"bgm/noise.\")"
-   :js "vnctst.audio4.js.isError(\"bgm/noise.\")"
-   :desc (str ""
-              ""
-              ""
-              ""
+  {:fn #(js/alert (vnctst.audio4/error? "bgm/noise.*"))
+   :cljs "(vnctst.audio4/error? \"bgm/noise.*\")"
+   :js "vnctst.audio4.js.isError(\"bgm/noise.*\")"
+   :desc (str "前述の loaded? / isLoaded ではプリロードの完了は分かるものの、"
+              "正常にロードできたかまでは分からない。"
+              "ロード時にエラーが起こったかどうかを調べたい時は、"
+              "真偽値としてそれを返すこの関数が使える。"
               )})
 
 (defba :unload-noise
   {:fn #(vnctst.audio4/unload! "bgm/noise.*")
-   :cljs "(vnctst.audio4/unload! \"bgm/noise.\")"
-   :js "vnctst.audio4.js.unload(\"bgm/noise.\")"
-   :desc (str ""
-              ""
-              ""
-              ""
+   :cljs "(vnctst.audio4/unload! \"bgm/noise.*\")"
+   :js "vnctst.audio4.js.unload(\"bgm/noise.*\")"
+   :desc (str "前述の通り、プリロードしなくてもbgmやseの内部でファイルの"
+              "ロードは行われるので、音響ファイルの数が非常に多い場合や"
+              "サーバで動的に生成した音響ファイルを扱う場合、"
+              "それらがメモリを圧迫してしまう事になる。"
+              "その場合はこの関数でアンロードするとよい。"
+              "もしアンロード時にまだその音響ファイルが再生中だった場合、"
+              "その再生は強制停止される。"
+              "なお、アンロード後にその音響ファイルを再生しようとした場合、"
+              "内部でファイルのロードが実行し直されるので、"
+              "効率は悪いものの再生自体に支障はない。"
+              "アンロード後は、前述の loaded? / isLoaded が"
+              "またfalseを返すようになる。"
               )})
 
 (defba :unload-all
   {:fn #(vnctst.audio4/unload-all!)
    :cljs "(vnctst.audio4/unload-all!"
    :js "vnctst.audio4.js.unloadAll()"
-   :desc (str ""
-              ""
-              ""
-              ""
+   :desc (str "ロード済の全ての音響ファイルをアンロードする。"
+              "ほぼデバッグ時の為の機能で、普段使う事はない。"
               )})
 
 
