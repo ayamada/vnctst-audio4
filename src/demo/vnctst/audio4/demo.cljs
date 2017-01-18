@@ -18,6 +18,7 @@
 (def preload-pathes
   ["se/open-wood.*"
    "se/buy1.*"
+   "se/launch.*"
    ])
 
 (def button-assign (atom {}))
@@ -102,6 +103,20 @@
    :desc "現在再生中のBGMを即座に停止させる。"
    })
 
+(defba :se-launch
+  {:fn #(vnctst.audio4/se! "se/launch.*")
+   :cljs "(vnctst.audio4/se! \"se/launch.*\")"
+   :js "vnstst.audio4.js.se(\"se/launch.*\")"
+   :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
+              "SEとして再生する。")})
+
+(defba :se-buy1
+  {:fn #(vnctst.audio4/se! "se/buy1.*")
+   :cljs "(vnctst.audio4/se! \"se/buy1.*\")"
+   :js "vnstst.audio4.js.se(\"se/buy1.*\")"
+   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+              "SEとして再生する。")})
+
 (defba :se-open-wood
   {:fn #(vnctst.audio4/se! "se/open-wood.*")
    :cljs "(vnctst.audio4/se! \"se/open-wood.*\")"
@@ -111,13 +126,6 @@
               "SEとしての再生では、音源の多重再生が可能となる"
               "(ボタンを連打しても前の音が途切れたりしない)。"
               )})
-
-(defba :se-buy1
-  {:fn #(vnctst.audio4/se! "se/buy1.*")
-   :cljs "(vnctst.audio4/se! \"se/buy1.*\")"
-   :js "vnstst.audio4.js.se(\"se/buy1.*\")"
-   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
-              "SEとして再生する。")})
 
 (defba :stop-se
   {:fn #(vnctst.audio4/stop-se!)
@@ -399,14 +407,14 @@
   {:fn #(vnctst.audio4/load! "bgm/noise.*")
    :cljs "(vnctst.audio4/load! \"bgm/noise.*\")"
    :js "vnctst.audio4.js.load(\"bgm/noise.*\")"
-   :desc (str "bgmやseでの音響ファイルの初回再生時は、実は内部で"
+   :desc (str "BGMやSEの音響ファイルの初回再生時は、実は内部で"
               "ファイルのロードを行いそれが完了してから再生している。"
               "なので初回再生時のみ実際に再生されるまでタイムラグがある"
               "(ファイルサイズが小さかったりブラウザキャッシュがなされていれば"
               "目立たないが)。"
               "このタイムラグをなくすには、再生するよりずっと前の段階で"
-              "プリロードを行っておけばよい。"
-              "この関数はそのプリロードをバックグラウンドで行わせる。"
+              "ロードを行っておけばよい。"
+              "この関数はそのロードをバックグラウンドで行わせる。"
               "既にロード中だったりロードが完了している場合は何も行われない。"
               )})
 
@@ -414,8 +422,8 @@
   {:fn #(js/alert (vnctst.audio4/loaded? "bgm/noise.*"))
    :cljs "(vnctst.audio4/loaded? \"bgm/noise.*\")"
    :js "vnctst.audio4.js.isLoaded(\"bgm/noise.*\")"
-   :desc (str "プリロードはバックグラウンドで非同期に実行される。"
-              "この関数は、そのプリロードが正常終了/異常終了のどちらにせよ"
+   :desc (str "音響ファイルのロードはバックグラウンドで非同期に実行される。"
+              "この関数は、そのロードが正常終了/異常終了のどちらにせよ"
               "完了しているかどうかを真偽値で返す。"
               "ローディング画面等では、定期的にこの関数を呼んで"
               "ロードが完了したかを確認するとよい。"
@@ -425,7 +433,7 @@
   {:fn #(js/alert (vnctst.audio4/error? "bgm/noise.*"))
    :cljs "(vnctst.audio4/error? \"bgm/noise.*\")"
    :js "vnctst.audio4.js.isError(\"bgm/noise.*\")"
-   :desc (str "前述の loaded? / isLoaded ではプリロードの完了は分かるものの、"
+   :desc (str "前述の loaded? / isLoaded ではロードの完了は分かるものの、"
               "正常にロードできたかまでは分からない。"
               "ロード時にエラーが起こったかどうかを調べたい時は、"
               "真偽値としてそれを返すこの関数が使える。"
@@ -435,16 +443,16 @@
   {:fn #(vnctst.audio4/unload! "bgm/noise.*")
    :cljs "(vnctst.audio4/unload! \"bgm/noise.*\")"
    :js "vnctst.audio4.js.unload(\"bgm/noise.*\")"
-   :desc (str "前述の通り、プリロードしなくてもbgmやseの内部でファイルの"
-              "ロードは行われるので、音響ファイルの数が非常に多い場合や"
+   :desc (str "音響ファイルの数が非常に多い場合や"
               "サーバで動的に生成した音響ファイルを扱う場合、"
-              "それらがメモリを圧迫してしまう事になる。"
-              "その場合はこの関数でアンロードするとよい。"
+              "ロード済の音源が多くなりメモリを圧迫してしまう事がある。"
+              "その場合はこの関数を使い、"
+              "再生しない音源をアンロードするとよい。"
               "もしアンロード時にまだその音響ファイルが再生中だった場合、"
               "その再生は強制停止される。"
-              "なお、アンロード後にその音響ファイルを再生しようとした場合、"
+              "アンロード後にその音響ファイルを再生しようとした場合は"
               "内部でファイルのロードが実行し直されるので、"
-              "効率は悪いものの再生自体に支障はない。"
+              "効率は悪いものの再生自体に支障が出る事はない。"
               "アンロード後は、前述の loaded? / isLoaded が"
               "またfalseを返すようになる。"
               )})
@@ -453,21 +461,19 @@
   {:fn #(vnctst.audio4/unload-all!)
    :cljs "(vnctst.audio4/unload-all!"
    :js "vnctst.audio4.js.unloadAll()"
-   :desc (str "ロード済の全ての音響ファイルをアンロードする。"
-              "ほぼデバッグ時の為の機能で、普段使う事はない。"
-              )})
+   :desc (str "ロード済の全ての音響ファイルをアンロードする。")})
 
 
 ;;; more BGM
 
 
-(defba :bgm-va32-a
+(defba :bgm-option-a
   {})
 
-(defba :bgm-va32-b
+(defba :bgm-option-b
   {})
 
-(defba :bgm-va32-c
+(defba :bgm-option-c
   {})
 
 (defba :bgm-noise-ch
@@ -482,20 +488,87 @@
 
 ;;; more SE
 
-(defba :se-buy1-a
-  {})
 
-(defba :se-buy1-b
-  {})
+(defba :se-option-a
+  {:fn #(vnctst.audio4/se! "se/buy1.*" {:volume 0.5 :pitch 2.0 :pan -0.5})
+   :cljs "(vnctst.audio4/se! \"se/buy1.*\" :volume 0.5 :pitch 2.0 :pan -0.5)"
+   :js "vnstst.audio4.js.se(\"se/buy1.*\", {volume: 0.5, pitch: 2.0, pan: -0.5})"
+   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+              "SEとして再生する。"
+              ""
+              "volumeは個別の音量。通常 0.0 ～ 1.0 の数値。"
+              "指定しない場合は 1.0 が指定された事になる。"
+              "volumeに1.0以上の数値を指定する事も可能だが、"
+              "マスターボリュームとSEボリュームの設定によっては効果が出ない"
+              "(「volume * マスターボリューム * SEボリューム」の値を"
+              "1.0以上にする事はできない為)。"
+              ""
+              "pitchは再生速度。 0.1 ～ 10.0 の数値。"
+              "指定しない場合は 1.0 が指定された事になる。"
+              "この数値が1.0より小さいと再生速度が減速され、"
+              "1.0より大きいと再生速度が加速される。"
+              "ブラウザによっては常に1.0固定となる為、"
+              "この数値に依存するような処理は避けた方が無難。"
+              ""
+              "panはステレオでの左右への寄りの値。 -1.0 ～ 1.0 の数値。"
+              "-1.0が最も左寄り、0なら中央、1.0が最も右寄りに再生される。"
+              "指定しない場合は 0 が指定された事になる。"
+              "ブラウザによっては常に中央固定になる為、"
+              "この数値に依存するような処理は避けた方が無難。"
+              )})
 
-(defba :se-buy1-c
-  {})
+(defba :se-option-b
+  {:fn #(vnctst.audio4/se! "se/buy1.*" :volume 1.0 :pitch 1.0 :pan 0.5)
+   :cljs "(vnctst.audio4/se! \"se/buy1.*\" :volume 1.0 :pitch 1.0 :pan 0.5)"
+   :js "vnstst.audio4.js.se(\"se/buy1.*\", {volume: 1.0, pitch: 1.0, pan: 0.5})"
+   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+              "SEとして再生する。"
+              "各オプションの詳細については一つ上の説明を参照。"
+              "cljs版では、追加の引数は一つのmapで指定してもよいし、"
+              "複数のkey-value値として指定してもよい"
+              "(js版ではObjectでの指定のみ可能)。"
+              )})
+
+(defba :se-option-c
+  {:fn #(vnctst.audio4/se! "se/buy1.*" :volume 1.5 :pitch 0.5 :pan 0)
+   :cljs "(vnctst.audio4/se! \"se/buy1.*\" :volume 1.5 :pitch 0.5 :pan 0)"
+   :js "vnstst.audio4.js.se(\"se/buy1.*\", {volume: 1.5, pitch: 0.5, pan: 0})"
+   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+              "SEとして再生する。"
+              "オプションの詳細については一つ上の説明を参照。"
+              ""
+              "SE再生関数は、返り値として「SE再生チャンネルID」を返す。"
+              "これについての詳細は次の項目を参照。"
+              )})
 
 (defba :stop-se-ch
-  {})
+  {:fn #(when-let [se-ch (vnctst.audio4/last-played-se-channel-id)]
+          (vnctst.audio4/stop-se! 0 se-ch))
+   :cljs "(vnctst.audio4/stop-se! 0 se-channel-id)"
+   :js "vnstst.audio4.js.stopSe(0, seChannelId)"
+   :desc (str "第二引数で指定した「SE再生チャンネルID」に対応するSEだけを、"
+              "第一引数で指定したフェード秒数かけて終了する。"
+              "「SE再生チャンネルID」は、SE再生関数の返り値として得られる"
+              "(この「SE再生チャンネルID」は、そのまま捨てても全く問題ない)。"
+              "第二引数で指定した「SE再生チャンネルID」に対応するSEの再生が"
+              "既に完了している場合は何も起きない。"
+              "第一引数に nil / null を指定した場合は、"
+              "設定されたデフォルト値がフェード秒数として適用される"
+              "(詳細については既出の「設定項目」内「音量設定」の項目を参照)。"
+              "第二引数省略時は全てのSEに対して停止処理が行われる。"
+              )})
 
-(defba :alert-buy1
-  {})
+(defba :alarm-buy1
+  {:fn #(vnctst.audio4/alarm! "se/buy1.*")
+   :cljs "(vnctst.audio4/alarm! \"se/buy1.*\")"
+   :js "vnstst.audio4.js.alarm(\"se/buy1.*\")"
+   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+              "SEとして再生する。"
+              "ただしバックグラウンドタブであっても強制的に再生が行われる"
+              "(通常はバックグラウンドタブ時はSEの再生が行われない)。"
+              "通常のSE再生と同様に、追加の引数を取る事もできる"
+              "(詳細は上記参照)。"
+              )})
 
 
 ;;; misc
@@ -503,7 +576,7 @@
 
 (defba :version-js
   {:fn #(js/alert vnctst.audio4.js/version)
-   :cljs "利用不可"
+   :cljs "----"
    :js "vnctst.audio4.js.version"
    :desc "vnctst-audio4のライブラリとしてのバージョン文字列。js版のみ提供。"
    })
