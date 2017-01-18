@@ -281,7 +281,8 @@
    :cljs "(vnctst.audio4/set-config! :dont-stop-on-background? true)"
    :js "vnctst.audio4.js.setConfig(\"dont-stop-on-background?\", true)"
    :desc (str "vnctst-audio4は、ブラウザのタブをバックグラウンドにした際に"
-              "BGMが自動的に一時停止される機能を持っている。"
+              "BGMを自動的に一時停止する機能を持っている"
+              "(非対応ブラウザあり。またSEは停止されない)。"
               "この項目にtrueを設定する事で、その機能を無効化できる"
               "(初期値はfalse)。"
               )})
