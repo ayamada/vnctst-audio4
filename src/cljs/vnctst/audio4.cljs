@@ -12,6 +12,11 @@
 
 
 
+;;; TODO: stat関数の実装
+;;;       (現在のロード数、再生BGMの状態、SEの状態等を一つの文字列として返す)
+
+
+
 
 ;;; 最も最近に鳴らしたSEのチャンネルobjを保持する
 (defonce a-last-played-se-channel-id (atom nil))

@@ -206,7 +206,7 @@
           (not (loading? path))
           (not (and
                  (state/get :disable-mobile?)
-                 (:mobile (util/terminal-type)))))
+                 (:mobile util/terminal-type))))
     (swap! preload-request-queue #(concat % [path]))
     (util/run-preload-process! preload-process
                                preload-request-queue

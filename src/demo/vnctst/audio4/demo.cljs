@@ -107,7 +107,10 @@
    :cljs "(vnctst.audio4/se! \"se/launch.*\")"
    :js "vnstst.audio4.js.se(\"se/launch.*\")"
    :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
-              "SEとして再生する。")})
+              "SEとして再生する。"
+              "SEとしての再生では、音源の多重再生が可能となる"
+              "(ボタンを連打しても前の音が途切れたりしない)。"
+              )})
 
 (defba :se-kick
   {:fn #(vnctst.audio4/se! "se/kick.*")
@@ -115,8 +118,6 @@
    :js "vnstst.audio4.js.se(\"se/kick.*\")"
    :desc (str "\"se/kick.ogg\" もしくは \"se/kick.mp3\" を"
               "SEとして再生する。"
-              "SEとしての再生では、音源の多重再生が可能となる"
-              "(ボタンを連打しても前の音が途切れたりしない)。"
               )})
 
 (defba :stop-se
@@ -218,7 +219,7 @@
               "再生時にエラーは投げられない。単に何も再生されないだけとなる。"
               "しかしこれでは開発時に不便な為、この設定をtrueにする事で、"
               "エラー等が起こった際に、その内容をコンソールへと"
-              "出力するようにした。"
+              "出力するようにできる。"
               )})
 
 (defba :set-config-debug-verbose?-false
@@ -460,22 +461,96 @@
 
 
 (defba :bgm-option-a
-  {})
+  {:fn #(vnctst.audio4/bgm! "bgm/va32.*" {:volume 0.5 :pitch 1.5 :pan -0.5})
+   :cljs "(vnctst.audio4/bgm! \"bgm/va32.*\" {:volume 0.5 :pitch 1.5 :pan -0.5})"
+   :js "vnstst.audio4.js.bgm(\"bgm/va32.*\", {volume: 0.5, pitch: 1.5, pan: -0.5})"
+   :desc (str "\"bgm/va32.ogg\" もしくは \"bgm/va32.mp3\" を"
+              "BGMとして再生する。"
+              ""
+              "volumeは個別の音量。通常 0.0 ～ 1.0 の数値。"
+              "指定しない場合は 1.0 が指定された事になる。"
+              "volumeに1.0以上の数値を指定する事も可能だが、"
+              "マスターボリュームとBGMボリュームの設定によっては効果が出ない"
+              "(「volume * マスターボリューム * BGMボリューム」の値を"
+              "1.0以上にする事はできない為)。"
+              ""
+              "pitchは再生レート。 0.1 ～ 10.0 の数値。"
+              "指定しない場合は 1.0 が指定された事になる。"
+              "この数値が1.0より小さいと再生速度と音程が低下し、"
+              "1.0より大きいと再生速度と音程が上昇する。"
+              "ブラウザによっては常に1.0固定となる為、"
+              "この数値に依存するような処理は避けた方が無難。"
+              ""
+              "panはステレオでの左右への寄りの値。 -1.0 ～ 1.0 の数値。"
+              "-1.0が最も左寄り、0なら中央、1.0が最も右寄りに再生される。"
+              "指定しない場合は 0 が指定された事になる。"
+              "ブラウザによっては常に中央固定になる為、"
+              "この数値に依存するような処理は避けた方が無難。"
+              )})
 
 (defba :bgm-option-b
-  {})
+  {:fn #(vnctst.audio4/bgm! "bgm/va32.*" :volume 1.0 :pitch 1.0 :pan 0.5)
+   :cljs "(vnctst.audio4/bgm! \"bgm/va32.*\" :volume 1.0 :pitch 1.0 :pan 0.5)"
+   :js "vnstst.audio4.js.bgm(\"bgm/va32.*\", {volume: 1.0, pitch: 1.0, pan: 0.5})"
+   :desc (str "\"bgm/va32.ogg\" もしくは \"bgm/va32.mp3\" を"
+              "BGMとして再生する。"
+              "各オプションの詳細については前述の説明を参照。"
+              "cljs版では、追加の引数は一つのmapで指定してもよいし、"
+              "複数のkey-value値として指定してもよい"
+              "(js版ではObjectでの指定のみ可能)。"
+              )})
 
 (defba :bgm-option-c
-  {})
+  {:fn #(vnctst.audio4/bgm! "bgm/va32.*" :volume 1.5 :pitch 0.5 :pan 0)
+   :cljs "(vnctst.audio4/bgm! \"bgm/va32.*\" :volume 1.5 :pitch 0.5 :pan 0)"
+   :js "vnstst.audio4.js.bgm(\"bgm/va32.*\", {volume: 1.5, pitch: 0.5, pan: 0})"
+   :desc (str "\"bgm/va32.ogg\" もしくは \"bgm/va32.mp3\" を"
+              "BGMとして再生する。"
+              "オプションの詳細については前述の説明を参照。"
+              )})
 
 (defba :bgm-noise-ch
-  {})
+  {:fn #(vnctst.audio4/bgm! "bgm/noise.*" :channel "BGS")
+   :cljs "(vnctst.audio4/bgm! \"bgm/noise.*\" :channel \"BGS\")"
+   :js "vnctst.audio4.js.bgm(\"bgm/noise.*\", {channel: \"BGS\"})"
+   :desc (str "\"bgm/noise.ogg\" もしくは \"bgm/noise.mp3\" を"
+              "「\"BGS\"」という名前のBGM再生チャンネルにて、"
+              "ループBGMとして再生する。"
+              ""
+              "BGM再生チャンネルは必要な数だけ作成でき、"
+              "違うBGM再生チャンネルは同時に再生される"
+              "(これは「BGMと同時に風音などの環境音を再生したい」ような"
+              "用途に利用できる)。"
+              "BGM再生チャンネル名には好きな数値、文字列、キーワード等を"
+              "指定できる。"
+              "BGM再生チャンネル名が省略された場合はデフォルト値として"
+              "「0」が指定されたものとして扱われる。"
+              )})
 
 (defba :stop-bgm-ch-a
-  {})
+  {:fn #(vnctst.audio4/stop-bgm! nil "BGS")
+   :cljs "(vnctst.audio4/stop-bgm! nil \"BGS\")"
+   :js "vnstst.audio4.js.stopBgm(null, \"BGS\")"
+   :desc (str "第二引数で指定した「BGM再生チャンネル名」で再生中のBGMだけを、"
+              "第一引数で指定したフェード秒数かけて終了する。"
+              "第一引数に nil / null を指定した場合は、"
+              "設定されたデフォルト値がフェード秒数として適用される"
+              "(詳細については既出の「設定項目」内「音量設定」の項目を参照)。"
+              "第二引数省略時は全てのBGMチャンネルに対して停止処理が行われる。"
+              ""
+              "この例では「\"BGS\"」だけが停止される。"
+              )})
 
 (defba :stop-bgm-ch-b
-  {})
+  {:fn #(vnctst.audio4/stop-bgm! 0.25 0)
+   :cljs "(vnctst.audio4/stop-bgm! 0.25 0)"
+   :js "vnstst.audio4.js.stopBgm(0.25, 0)"
+   :desc (str "第二引数で指定した「BGM再生チャンネルID」で再生中のBGMだけを、"
+              "第一引数で指定したフェード秒数かけて終了する。"
+              ""
+              "この例では「0」、つまりチャンネル無指定でのBGM再生だけが"
+              "停止される。"
+              )})
 
 
 ;;; more SE
@@ -483,7 +558,7 @@
 
 (defba :se-option-a
   {:fn #(vnctst.audio4/se! "se/launch.*" {:volume 0.5 :pitch 2.0 :pan -0.5})
-   :cljs "(vnctst.audio4/se! \"se/launch.*\" :volume 0.5 :pitch 2.0 :pan -0.5)"
+   :cljs "(vnctst.audio4/se! \"se/launch.*\" {:volume 0.5 :pitch 2.0 :pan -0.5})"
    :js "vnstst.audio4.js.se(\"se/launch.*\", {volume: 0.5, pitch: 2.0, pan: -0.5})"
    :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。"
@@ -515,7 +590,7 @@
    :js "vnstst.audio4.js.se(\"se/launch.*\", {volume: 1.0, pitch: 1.0, pan: 0.5})"
    :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。"
-              "各オプションの詳細については一つ上の説明を参照。"
+              "各オプションの詳細については前述の説明を参照。"
               "cljs版では、追加の引数は一つのmapで指定してもよいし、"
               "複数のkey-value値として指定してもよい"
               "(js版ではObjectでの指定のみ可能)。"
@@ -527,7 +602,7 @@
    :js "vnstst.audio4.js.se(\"se/launch.*\", {volume: 1.5, pitch: 0.5, pan: 0})"
    :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。"
-              "オプションの詳細については一つ上の説明を参照。"
+              "オプションの詳細については前述の説明を参照。"
               ""
               "SE再生関数は、返り値として「SE再生チャンネルID」を返す。"
               "これについての詳細は次の項目を参照。"
@@ -617,7 +692,10 @@
               " firefox"
               " が指定可能。"
               "ただしこれは User-Agent による判定の為、"
-              "誤判定する場合もある事に注意。")
+              "誤判定する場合もある事に注意。"
+              ""
+              "これはjs版では関数だが、cljs版ではsetでありset用の各種の"
+              "操作が適用可能。")
    })
 
 (defba :float->percent
