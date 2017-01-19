@@ -42,6 +42,22 @@
      [:dt [:button {:id id} " "]]
      [:dd [:span {:id desc-id} " "]]]))
 
+(def heading-index (atom []))
+
+(defmacro heading [label & [anchor]]
+  (let [anchor (or anchor label)]
+    (when (empty? (filter #(= anchor (second %))
+                          @heading-index))
+      (swap! heading-index conj [label anchor]))
+    `[:div
+      [:div [:a {:name ~anchor} " "]]
+      [:br]
+      [:br]
+      [:h2 ~label]]))
+
+(defn- index-item [label & [anchor]]
+  [:li [:a {:href (str "#" (or anchor label))} label]])
+
 (defn render-app [req]
   (let [github-url "https://github.com/ayamada/vnctst-audio4"
         link-home (fn [label]
@@ -105,7 +121,11 @@
                  ]
                 [:hr]
                 [:div
-                 [:h2 "前書き"]
+                 [:h2 "目次"]
+                 [:ul (map #(apply index-item %)
+                           @heading-index)]]
+                [:div
+                 (heading "前書き")
                  [:ul
                   [:li (str "これは、ゲーム向けの音響ファイル再生ライブラリ"
                             "である「vnctst-audio4」のオンラインデモです。")]
@@ -128,7 +148,7 @@
                   ]]
                 [:hr]
                 [:div
-                 [:h2 "基本操作"]
+                 (heading "基本操作")
                  [:p
                   "このセクションで紹介している機能だけでも"
                   "大体なんとかなります"]
@@ -148,7 +168,7 @@
                  ]
                 [:hr]
                 [:div
-                 [:h2 "設定項目"]
+                 (heading "設定項目")
                  [:p
                   "項目は多いですが、実際にいじる必要があるのは"
                   "音量設定とデバッグ出力ぐらいです"]
@@ -187,7 +207,7 @@
                  ]
                 [:hr]
                 [:div
-                 [:h2 "やや複雑な操作"]
+                 (heading "高度な操作")
                  [:h3 "プリロード / アンロード"]
                  (demo-button2 :load-noise)
                  (demo-button2 :loaded?)
@@ -212,7 +232,7 @@
                  ]
                 [:hr]
                 [:div
-                 [:h2 "その他の補助的な機能"]
+                 (heading "おまけ機能")
                  (demo-button2 :version-js)
                  (demo-button2 :can-play-ogg)
                  (demo-button2 :can-play-mp3)
