@@ -161,23 +161,25 @@
   (let [volume (or (:volume options) 1)
         pitch (or (:pitch options) 1)
         pan (or (:pan options) 0)
-        alarm? (:alarm? options)]
-    (let [sid (auto-number!)
-          r (util/calc-internal-params :se volume pitch pan)
-          [i-volume i-pitch i-pan] r
-          combined-key [path volume pitch pan]
-          doit! (fn [state]
-                  (util/logging-verbose :se/play (:path @state))
-                  (update-played-same-se! combined-key)
-                  (device/call!
-                    :play! (:ac @state) 0 false i-volume i-pitch i-pan alarm?)
-                  (swap! playing-state-pool assoc sid state))]
-      (when (and
-              (or
-                alarm?
-                (not (state/get :in-background?)))
-              (pos? i-volume)
-              (not (played-same-se? combined-key)))
+        alarm? (:alarm? options)
+        sid (auto-number!)
+        r (util/calc-internal-params :se volume pitch pan)
+        [i-volume i-pitch i-pan] r
+        combined-key [path volume pitch pan]
+        doit! (fn [state]
+                (util/logging-verbose :se/play (:path @state))
+                (update-played-same-se! combined-key)
+                (device/call!
+                  :play! (:ac @state) 0 false i-volume i-pitch i-pan alarm?)
+                (swap! playing-state-pool assoc sid state))]
+    (when (and
+            (or
+              alarm?
+              (not (state/get :in-background?)))
+            (pos? i-volume)
+            (not (played-same-se? combined-key)))
+      (if (cache/error? path)
+        (util/logging :error (str "found error in " path))
         (let [as (cache/get-as path)
               ac (when as
                    (device/call! :spawn-audio-channel as))

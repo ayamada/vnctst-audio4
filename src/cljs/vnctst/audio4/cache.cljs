@@ -224,10 +224,11 @@
 ;;;     この停止処理はcacheモジュール内では困難)
 (defn unload! [path]
   (if (loaded? path)
-    ;; ロード済
-    (when-let [as (get @loaded-audiosource-table path)]
-      (device/call! :dispose-audio-source! as)
-      (util/logging-verbose :unloaded path)
+    ;; ロード済(ロードエラー含む)
+    (do
+      (when-let [as (get @loaded-audiosource-table path)]
+        (device/call! :dispose-audio-source! as)
+        (util/logging-verbose :unloaded path))
       (swap! loaded-audiosource-table dissoc path))
     ;; 未ロードもしくはロードキュー待ち
     (do

@@ -276,6 +276,9 @@
     (when @state
       (swap! state assoc :next-param nil))
     (cond
+      ;; ロードエラーならログに出す
+      (cache/error? path)
+      (util/logging :error (str "found error in " path))
       ;; 停止中(もしくはプリロード中)なら、即座に再生を開始するだけでよい
       (not @state)
       (_load+play! channel state path volume pitch pan oneshot? fadein)
