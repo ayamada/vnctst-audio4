@@ -179,32 +179,67 @@
 
 ;;; Settings
 
+(defn- must-be-sec! [k v]
+  (assert (number? v) (str (name k) " must be non-negative number"))
+  (max 0 v))
+
+(defn- must-be-volume! [k v]
+  (assert (number? v) (str (name k) " must be 0.0-1.0 number"))
+  (max 0 (min 1 v)))
+
+(defn- autoext-value-msg [k entry]
+  (str (pr-str entry) " must be "
+       '["ext" "mime/type"]
+       " or"
+       (apply str (map #(str " " (pr-str %)) (keys util/autoext-table)))
+       " in " (name k)))
+
 (def ^:private config-fns
-  {;; これらはstateの変更のみで対応可能
-   :debug? state/set!
+  {:debug? state/set!
    :debug-verbose? state/set!
-   :se-chattering-sec state/set!
-   :default-bgm-fade-sec state/set!
-   :default-se-fade-sec state/set!
+   :se-chattering-sec (fn [k v]
+                        (let [v (must-be-sec! k v)]
+                          (state/set! k v)))
+   :default-bgm-fade-sec (fn [k v]
+                           (let [v (must-be-sec! k v)]
+                             (state/set! k v)))
+   :default-se-fade-sec (fn [k v]
+                          (let [v (must-be-sec! k v)]
+                            (state/set! k v)))
    :volume-master (fn [k v]
-                    (state/set! k v)
-                    (se/sync-volume!)
-                    (bgm/sync-volume!))
+                    (let [v (must-be-volume! k v)]
+                      (state/set! k v)
+                      (se/sync-volume!)
+                      (bgm/sync-volume!)))
    :volume-bgm (fn [k v]
-                 (state/set! k v)
-                 (bgm/sync-volume!))
+                 (let [v (must-be-volume! k v)]
+                   (state/set! k v)
+                   (bgm/sync-volume!)))
    :volume-se (fn [k v]
-                (state/set! k v)
-                (se/sync-volume!)
-                )
-   ;; NB: 既存プリロードの全破棄が必要
+                (let [v (must-be-volume! k v)]
+                  (state/set! k v)
+                  (se/sync-volume!)))
    :autoext-list (fn [k v]
+                   (assert (vector? v)
+                           (str k " must be vector"))
+                   (doseq [entry v]
+                     (assert (or
+                               (vector? entry)
+                               (string? entry))
+                             (autoext-value-msg k entry))
+                     (when (vector? entry)
+                       (assert (and
+                                 (string? (first entry))
+                                 (string? (second entry)))
+                               (autoext-value-msg k entry)))
+                     (when (string? entry)
+                       (assert (util/autoext-table entry)
+                               (autoext-value-msg k entry))))
                    (stop-bgm! nil 0)
                    (stop-se! nil 0)
                    (unload-all!)
                    (state/set! :resolved-autoext-list nil)
                    (state/set! k v))
-   ;; NB: 既にバックグラウンドの時のみ、強制的に再生開始させる必要がある
    :dont-stop-on-background? (fn [k v]
                                (when (and
                                        (not
@@ -213,21 +248,18 @@
                                        (state/get :in-background?))
                                  (bgm/sync-background! false true))
                                (state/set! k v))
-   ;; NB: モバイル環境の場合、既に再生中のものを全て止める必要がある
    :disable-mobile? (fn [k v]
                       (state/set! k v)
                       (when (:mobile util/terminal-type)
                         (stop-bgm! nil 0)
                         (stop-se! nil 0)
                         (unload-all!)))
-   ;; NB: 現在がwebaudioモードの場合、全てのやり直しが必要
    :disable-webaudio? (fn [k v]
                         (stop-bgm! nil 0)
                         (stop-se! nil 0)
                         (unload-all!)
                         (state/set! k v)
                         (init-force!))
-   ;; NB: 現在がhtmlaudioモードの場合、全てのやり直しが必要
    :disable-htmlaudio? (fn [k v]
                          (stop-bgm! nil 0)
                          (stop-se! nil 0)
