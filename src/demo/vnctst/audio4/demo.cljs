@@ -16,8 +16,7 @@
    ])
 
 (def preload-pathes
-  ["se/open-wood.*"
-   "se/buy1.*"
+  ["se/kick.*"
    "se/launch.*"
    ])
 
@@ -56,11 +55,11 @@
               "が有効ならコンソールにメッセージが出力される)。"
               )})
 
-(defba :bgm-rnr
-  {:fn #(vnctst.audio4/bgm! "bgm/rnr.*")
-   :cljs "(vnctst.audio4/bgm! \"bgm/rnr.*\")"
-   :js "vnctst.audio4.js.bgm(\"bgm/rnr.*\")"
-   :desc (str "\"bgm/rnr.ogg\" もしくは \"bgm/rnr.mp3\" を"
+(defba :bgm-cntr
+  {:fn #(vnctst.audio4/bgm! "bgm/cntr.*")
+   :cljs "(vnctst.audio4/bgm! \"bgm/cntr.*\")"
+   :js "vnctst.audio4.js.bgm(\"bgm/cntr.*\")"
+   :desc (str "\"bgm/cntr.ogg\" もしくは \"bgm/cntr.mp3\" を"
               "ループBGMとして再生する。"
               "もし既に別のBGMが再生中の場合は、そのBGMの"
               "フェードアウトを開始し、フェードアウトが"
@@ -110,18 +109,11 @@
    :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。")})
 
-(defba :se-buy1
-  {:fn #(vnctst.audio4/se! "se/buy1.*")
-   :cljs "(vnctst.audio4/se! \"se/buy1.*\")"
-   :js "vnstst.audio4.js.se(\"se/buy1.*\")"
-   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
-              "SEとして再生する。")})
-
-(defba :se-open-wood
-  {:fn #(vnctst.audio4/se! "se/open-wood.*")
-   :cljs "(vnctst.audio4/se! \"se/open-wood.*\")"
-   :js "vnstst.audio4.js.se(\"se/open-wood.*\")"
-   :desc (str "\"se/open-wood.ogg\" もしくは \"se/open-wood.mp3\" を"
+(defba :se-kick
+  {:fn #(vnctst.audio4/se! "se/kick.*")
+   :cljs "(vnctst.audio4/se! \"se/kick.*\")"
+   :js "vnstst.audio4.js.se(\"se/kick.*\")"
+   :desc (str "\"se/kick.ogg\" もしくは \"se/kick.mp3\" を"
               "SEとして再生する。"
               "SEとしての再生では、音源の多重再生が可能となる"
               "(ボタンを連打しても前の音が途切れたりしない)。"
@@ -490,10 +482,10 @@
 
 
 (defba :se-option-a
-  {:fn #(vnctst.audio4/se! "se/buy1.*" {:volume 0.5 :pitch 2.0 :pan -0.5})
-   :cljs "(vnctst.audio4/se! \"se/buy1.*\" :volume 0.5 :pitch 2.0 :pan -0.5)"
-   :js "vnstst.audio4.js.se(\"se/buy1.*\", {volume: 0.5, pitch: 2.0, pan: -0.5})"
-   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+  {:fn #(vnctst.audio4/se! "se/launch.*" {:volume 0.5 :pitch 2.0 :pan -0.5})
+   :cljs "(vnctst.audio4/se! \"se/launch.*\" :volume 0.5 :pitch 2.0 :pan -0.5)"
+   :js "vnstst.audio4.js.se(\"se/launch.*\", {volume: 0.5, pitch: 2.0, pan: -0.5})"
+   :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。"
               ""
               "volumeは個別の音量。通常 0.0 ～ 1.0 の数値。"
@@ -518,10 +510,10 @@
               )})
 
 (defba :se-option-b
-  {:fn #(vnctst.audio4/se! "se/buy1.*" :volume 1.0 :pitch 1.0 :pan 0.5)
-   :cljs "(vnctst.audio4/se! \"se/buy1.*\" :volume 1.0 :pitch 1.0 :pan 0.5)"
-   :js "vnstst.audio4.js.se(\"se/buy1.*\", {volume: 1.0, pitch: 1.0, pan: 0.5})"
-   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+  {:fn #(vnctst.audio4/se! "se/launch.*" :volume 1.0 :pitch 1.0 :pan 0.5)
+   :cljs "(vnctst.audio4/se! \"se/launch.*\" :volume 1.0 :pitch 1.0 :pan 0.5)"
+   :js "vnstst.audio4.js.se(\"se/launch.*\", {volume: 1.0, pitch: 1.0, pan: 0.5})"
+   :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。"
               "各オプションの詳細については一つ上の説明を参照。"
               "cljs版では、追加の引数は一つのmapで指定してもよいし、"
@@ -530,10 +522,10 @@
               )})
 
 (defba :se-option-c
-  {:fn #(vnctst.audio4/se! "se/buy1.*" :volume 1.5 :pitch 0.5 :pan 0)
-   :cljs "(vnctst.audio4/se! \"se/buy1.*\" :volume 1.5 :pitch 0.5 :pan 0)"
-   :js "vnstst.audio4.js.se(\"se/buy1.*\", {volume: 1.5, pitch: 0.5, pan: 0})"
-   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+  {:fn #(vnctst.audio4/se! "se/launch.*" :volume 1.5 :pitch 0.5 :pan 0)
+   :cljs "(vnctst.audio4/se! \"se/launch.*\" :volume 1.5 :pitch 0.5 :pan 0)"
+   :js "vnstst.audio4.js.se(\"se/launch.*\", {volume: 1.5, pitch: 0.5, pan: 0})"
+   :desc (str "\"se/launch.ogg\" もしくは \"se/launch.mp3\" を"
               "SEとして再生する。"
               "オプションの詳細については一つ上の説明を参照。"
               ""
@@ -558,11 +550,11 @@
               "第二引数省略時は全てのSEに対して停止処理が行われる。"
               )})
 
-(defba :alarm-buy1
-  {:fn #(vnctst.audio4/alarm! "se/buy1.*")
-   :cljs "(vnctst.audio4/alarm! \"se/buy1.*\")"
-   :js "vnstst.audio4.js.alarm(\"se/buy1.*\")"
-   :desc (str "\"se/buy1.ogg\" もしくは \"se/buy1.mp3\" を"
+(defba :alarm-kick
+  {:fn #(vnctst.audio4/alarm! "se/kick.*")
+   :cljs "(vnctst.audio4/alarm! \"se/kick.*\")"
+   :js "vnstst.audio4.js.alarm(\"se/kick.*\")"
+   :desc (str "\"se/kick.ogg\" もしくは \"se/kick.mp3\" を"
               "SEとして再生する。"
               "ただしバックグラウンドタブであっても強制的に再生が行われる"
               "(通常はバックグラウンドタブ時はSEの再生が行われない)。"

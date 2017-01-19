@@ -134,7 +134,7 @@
                   "大体なんとかなります"]
                  [:h3 "BGMを鳴らす"]
                  (demo-button2 :bgm-va32)
-                 (demo-button2 :bgm-rnr)
+                 (demo-button2 :bgm-cntr)
                  (demo-button2 :bgm-oneshot-ny2017)
                  [:h3 "BGMを止める"]
                  (demo-button2 :stop-bgm)
@@ -142,8 +142,7 @@
                  (demo-button2 :stop-bgm-0)
                  [:h3 "SEを鳴らす"]
                  (demo-button2 :se-launch)
-                 (demo-button2 :se-buy1)
-                 (demo-button2 :se-open-wood)
+                 (demo-button2 :se-kick)
                  (demo-button2 :stop-se)
                  (demo-button2 :stop-se-05)
                  ]
@@ -203,13 +202,13 @@
                  (demo-button2 :stop-bgm-ch-a)
                  (demo-button2 :stop-bgm-ch-b)
                  ;(demo-button2 :bgs-noise)
-                 ;(demo-button2 :me-rnr)
+                 ;(demo-button2 :me-cntr)
                  [:h3 "SEの再生オプション"]
                  (demo-button2 :se-option-a)
                  (demo-button2 :se-option-b)
                  (demo-button2 :se-option-c)
                  (demo-button2 :stop-se-ch)
-                 (demo-button2 :alarm-buy1)
+                 (demo-button2 :alarm-kick)
                  ]
                 [:hr]
                 [:div
