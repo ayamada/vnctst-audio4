@@ -21,6 +21,9 @@
 (defn ^:export bgmOneshot [path & [opt]]
   (audio4/bgm-oneshot! path (js->clj opt :keywordize-keys true)))
 
+(defn ^:export bgmFadein [path & [opt]]
+  (audio4/bgm-fadein! path (js->clj opt :keywordize-keys true)))
+
 (defn ^:export me [path & [opt]]
   (audio4/me! path (js->clj opt :keywordize-keys true)))
 

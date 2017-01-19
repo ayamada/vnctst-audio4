@@ -156,6 +156,7 @@
                  (demo-button2 :bgm-va32)
                  (demo-button2 :bgm-cntr)
                  (demo-button2 :bgm-oneshot-ny2017)
+                 (demo-button2 :bgm-fadein-cntr)
                  [:h3 "BGMを止める"]
                  (demo-button2 :stop-bgm)
                  (demo-button2 :stop-bgm-3)

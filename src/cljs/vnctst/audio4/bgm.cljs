@@ -19,7 +19,8 @@
 ;;; - :fade-factor ; 通常は 1.0、フェード中のみ変化する
 ;;; - :fade-delta ; 通常は0。基本となるフェード量が設定される
 ;;; - :fade-process ; フェードを進めるgoスレッド、通常はnil
-;;; - :current-param ; :path :volume :pan :pitch :oneshot? :as :ac を持つ map
+;;; - :current-param ; :path :volume :pan :pitch :oneshot? :fadein :as :ac
+;;;   を持つ map
 ;;; - :next-param ; 「次の曲」。内容は :current-param と同様。「ロード中」を
 ;;;   示すのもこれで表現される
 (defonce channel-state-table (atom {}))
@@ -92,6 +93,7 @@
 
 
 
+(declare run-fader!)
 
 (defn- _play-immediately! [bgm-ch state as param]
   (let [ac (device/call! :spawn-audio-channel as)
@@ -99,13 +101,20 @@
         pitch (:pitch param)
         pan (:pan param)
         oneshot? (:oneshot? param)
+        fadein (:fadein param)
         [i-volume i-pitch i-pan] (util/calc-internal-params
                                    :bgm volume pitch pan)
+        i-volume (if fadein 0.0001 i-volume)
+        fade-factor (if fadein 0.0001 1)
+        fade-delta (if fadein
+                     (/ fade-granularity-msec
+                        (max 1 (int (* 1000 fadein))))
+                     0)
         new-param (assoc param
                          :as as
                          :ac ac)]
-    (swap! state merge {:fade-factor 1
-                        :fade-delta 0
+    (swap! state merge {:fade-factor fade-factor
+                        :fade-delta fade-delta
                         :fade-process nil
                         :current-param new-param
                         :next-param nil})
@@ -115,12 +124,14 @@
     ;; (非バックグラウンド時はイベントリスナで設定されるので不要)
     (if (state/get :in-background?)
       (swap! resume-pos-table assoc bgm-ch 0)
-      (device/call! :play! ac 0 (not oneshot?) i-volume i-pitch i-pan false))))
+      (device/call! :play! ac 0 (not oneshot?) i-volume i-pitch i-pan false))
+    (when fadein
+      (run-fader! bgm-ch state))))
 
 
 
 ;;; NB: ロード中にキャンセルされたり、別の音源の再生要求が入る可能性がある
-(defn- _load+play! [bgm-ch state path volume pitch pan oneshot?]
+(defn- _load+play! [bgm-ch state path volume pitch pan oneshot? fadein]
   (let [previous-loading-key (:path (:next-param @state))
         h-done (fn [as]
                  (when-let [next-param (:next-param @state)]
@@ -129,7 +140,8 @@
                :volume volume
                :pan pan
                :pitch pitch
-               :oneshot? oneshot?}]
+               :oneshot? oneshot?
+               :fadein fadein}]
     ;; とりあえず再生対象を :next-param として積んでおく
     (swap! state assoc :next-param param)
     (if (cache/loaded? path)
@@ -198,7 +210,8 @@
                                        (:volume next-param)
                                        (:pitch next-param)
                                        (:pan next-param)
-                                       (:oneshot? next-param))))))))))))
+                                       (:oneshot? next-param)
+                                       (:fadein next-param))))))))))))
       (swap! state assoc :fade-process c))))
 
 
@@ -255,8 +268,8 @@
         pitch (or (:pitch options) 1)
         pan (or (:pan options) 0)
         oneshot? (:oneshot? options)
-        state (resolve-state! channel)
-        ]
+        fadein (:fadein options)
+        state (resolve-state! channel)]
     (sync-playing-state! state)
     ;; NB: これが呼ばれたタイミングで、どのパターンであっても、
     ;;     とりあえず以前の :next-param は無用になるので消しておく
@@ -265,14 +278,14 @@
     (cond
       ;; 停止中(もしくはプリロード中)なら、即座に再生を開始するだけでよい
       (not @state)
-      (_load+play! channel state path volume pitch pan oneshot?)
+      (_load+play! channel state path volume pitch pan oneshot? fadein)
       ;; ロード中(再生準備中)なら、ロード対象を差し替える
       (and
         (not (fading? state))
         (:next-param @state))
       (do
         (cache/cancel-load-by-stop-bgm! channel)
-        (_load+play! channel state path volume pitch pan oneshot?))
+        (_load+play! channel state path volume pitch pan oneshot? fadein))
       ;; 同一BGMの場合、パラメータの変更だけで済ませる
       ;; (ただしフェード中のみ特殊処理が必要)
       (same-bgm? state path volume pitch pan)
@@ -292,7 +305,8 @@
                               :volume volume
                               :pan pan
                               :pitch pitch
-                              :oneshot? oneshot?}]
+                              :oneshot? oneshot?
+                              :fadein fadein}]
               ;; NB: 既にフェード中の場合の為に、 :fade-factor はいじらない
               (swap! state merge {:fade-delta fade-delta
                                   :next-param next-param})
@@ -355,6 +369,7 @@
               pitch (:pitch param)
               pan (:pan param)
               oneshot? (:oneshot? param)
+              fadein (:fadein param)
               [i-volume i-pitch i-pan] (util/calc-internal-params
                                          :bgm volume pitch pan)
               i-volume (* i-volume (:fade-factor @state))]

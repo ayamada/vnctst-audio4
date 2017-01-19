@@ -79,6 +79,11 @@
     (bgm! path options)))
 
 
+(defn bgm-fadein! [path & optional-args]
+  (let [options (merge {:fadein (state/get :default-bgm-fade-sec)}
+                       (optional-args->map optional-args))]
+    (bgm! path options)))
+
 
 
 

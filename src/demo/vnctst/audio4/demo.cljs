@@ -79,6 +79,16 @@
               "ループしない点以外は前述のBGM再生と同じ。"
               )})
 
+(defba :bgm-fadein-cntr
+  {:fn #(vnctst.audio4/bgm-fadein! "bgm/cntr.*")
+   :cljs "(vnctst.audio4/bgm-fadein! \"bgm/cntr.*\")"
+   :js "vnctst.audio4.js.bgmFadein(\"bgm/cntr.*\")"
+   :desc (str "\"bgm/cntr.ogg\" もしくは \"bgm/cntr.mp3\" を"
+              "ループBGMとして再生するが、再生開始時に"
+              "フェードインがかかるようにする。"
+              "フェードイン開始する事以外は前述のBGM再生と同じ。"
+              )})
+
 (defba :stop-bgm
   {:fn #(vnctst.audio4/stop-bgm!)
    :cljs "(vnctst.audio4/stop-bgm!)"
