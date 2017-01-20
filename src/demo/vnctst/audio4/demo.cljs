@@ -3,7 +3,9 @@
   (:require [cljs.core.async :as async :refer [>! <!]]
             [clojure.string :as string]
             [vnctst.audio4 :as audio4]
-            [vnctst.audio4.js :as audio4-js]))
+            [vnctst.audio4.js :as audio4-js]
+            [vnctst.audio4.prefetch :as audio4-prefetch :include-macros true]
+            ))
 
 
 
@@ -16,9 +18,7 @@
    ])
 
 (def preload-pathes
-  ["se/kick.*"
-   "se/launch.*"
-   ])
+  (audio4-prefetch/pathlist-from-directory "resources/public/se/" "se/"))
 
 (def button-assign (atom {}))
 (defn- defba [k m]
