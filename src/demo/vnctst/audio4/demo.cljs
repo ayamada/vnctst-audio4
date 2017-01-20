@@ -318,21 +318,21 @@
    })
 
 (defba :bgm-noise-ch
-  {:fn #(vnctst.audio4/bgm! "bgm/noise.*" :channel "BGS")
-   :cljs "(vnctst.audio4/bgm! \"bgm/noise.*\" :channel \"BGS\")"
-   :js "vnctst.audio4.js.bgm(\"bgm/noise.*\", {channel: \"BGS\"})"
+  {:fn #(vnctst.audio4/bgm! "bgm/noise.*" :channel :background-sound)
+   :cljs "(vnctst.audio4/bgm! \"bgm/noise.*\" :channel :background-sound)"
+   :js "vnctst.audio4.js.bgm(\"bgm/noise.*\", {channel: \"background-sound\"})"
    })
 
 (defba :stop-bgm-ch-a
-  {:fn #(vnctst.audio4/stop-bgm! nil "BGS")
-   :cljs "(vnctst.audio4/stop-bgm! nil \"BGS\")"
-   :js "vnstst.audio4.js.stopBgm(null, \"BGS\")"
+  {:fn #(vnctst.audio4/stop-bgm! nil :background-sound)
+   :cljs "(vnctst.audio4/stop-bgm! nil :background-sound)"
+   :js "vnstst.audio4.js.stopBgm(null, \"background-sound\")"
    })
 
 (defba :stop-bgm-ch-b
-  {:fn #(vnctst.audio4/stop-bgm! 0.25 0)
-   :cljs "(vnctst.audio4/stop-bgm! 0.25 0)"
-   :js "vnstst.audio4.js.stopBgm(0.25, 0)"
+  {:fn #(vnctst.audio4/stop-bgm! 0.25 :BGM)
+   :cljs "(vnctst.audio4/stop-bgm! 0.25 :BGM)"
+   :js "vnstst.audio4.js.stopBgm(0.25, \"BGM\")"
    })
 
 

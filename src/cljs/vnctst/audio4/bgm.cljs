@@ -263,7 +263,10 @@
 ;;; - フェードアウト中 → フェードアウト完了後に指定音源を再生開始
 
 (defn play! [path options]
-  (let [channel (or (:channel options) 0)
+  (let [channel (or (:channel options) :BGM)
+        channel (if (keyword? channel)
+                  channel
+                  (keyword (str channel)))
         volume (or (:volume options) 1)
         pitch (or (:pitch options) 1)
         pan (or (:pan options) 0)

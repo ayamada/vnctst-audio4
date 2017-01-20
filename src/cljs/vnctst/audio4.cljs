@@ -127,7 +127,7 @@
 
 
 (defn bgs! [path & optional-args]
-  (let [options (merge {:channel "BGS"}
+  (let [options (merge {:channel :BGS}
                        (optional-args->map optional-args))]
     (bgm! path options)))
 
