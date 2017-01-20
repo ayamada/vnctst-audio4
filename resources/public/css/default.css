@@ -28,7 +28,10 @@ a:active {
   color: #9f9fff;
 }
 
-
+code {
+  background-color: #f7f7f7;
+  color: #000000;
+}
 
 
 
