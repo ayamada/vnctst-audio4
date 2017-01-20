@@ -334,7 +334,12 @@
      "このタイムラグをなくすには、再生するよりずっと前の段階で"
      "ロードを行っておけばよい。")
   (p "この関数はそのロードをバックグラウンドで行わせる。")
-  (p "既にロード中だったりロードが完了している場合は何も行われない。")
+  (p "一度に大量のファイルのロード要求が来た場合でも、"
+     "同時にロードを実行せずに一つずつ順番にロードを実行していく為、"
+     "大量のhttpコネクションを消費してしまう事はない。"
+     "雑にロード要求を投げてよい。")
+  (p "指定したファイルが既にロード中だったりロードが完了している場合は"
+     "何も行われない。")
   )
 
 (defdesc :loaded?
@@ -775,6 +780,84 @@
                  (demo-button2 :float->percent)
                  (demo-button2 :percent->float)
                  ]
+                ;; prefetch
+                [:hr]
+                [:div
+                 (heading "ファイル一覧の取得")
+                 [:p "これはcljs版専用の機能です。js版では利用できません"]
+                 [:dl
+                  [:dt
+                   [:code
+                    "(require [vnctst.audio4.prefetch"
+                    " :include-macros true])"]]
+                  [:dd
+                   "この機能は別名前空間に分かれている為、最初に"
+                   [:code "vnctst.audio4.prefetch"]
+                   "をrequireしておく必要がある。"
+                   [:br]
+                   "ここには書いてないが"
+                   [:code ":as"]
+                   "を指定して短い別名を付けてもよい。"
+                   [:br]
+                   "この機能はマクロで実装されている為"
+                   [:code ":include-macros true"]
+                   "を必ず付ける事。"]
+                  [:dt
+                   [:code
+                    "(vnctst.audio4.prefetch/pathlist-from-directory "
+                    (pr-str "resources/public/se/")
+                    " "
+                    (pr-str "se/")
+                    ")"
+                    ]]
+                  [:dd
+                   "第一引数は、ファイル一覧を取得するローカルディレクトリ。"
+                   "これは即値の文字列でなくてはならない。"
+                   "変数や式を指定した場合はコンパイルエラーが投げられる。"
+                   "末尾のスラッシュはあってもなくてもよい。"
+                   [:br]
+                   "第二引数は、httpサーバ上でのディレクトリ。"
+                   "第一引数に対応するものを指定する事。"
+                   "末尾のスラッシュはあってもなくてもよい。"
+                   [:br]
+                   "これはコンパイルフェーズに評価され、"
+                   [:code (pr-str ["se/launch.*" "se/kick.*"])]
+                   "のようなvecとしてソースに埋め込まれる。"
+                   "このvecを適当な変数にdefしておき、"
+                   "早いタイミングでdoseq等を使って"
+                   [:code "load!"]
+                   "にかけておくとよい。"
+                   [:br]
+                   "なお、第一引数で指定したローカルディレクトリ内には"
+                   "音響ファイルだけを入れておく事"
+                   "(そうしないと音響ファイル以外も"
+                   "このリストに追加されてしまう為)。"
+                   ]
+                  [:dt
+                   [:code
+                    "(vnctst.audio4.prefetch/pathlist-from-directory "
+                    (pr-str "resources/public/se/")
+                    " "
+                    (pr-str "se/")
+                    " true"
+                    ")"
+                    ]]
+                  [:dd
+                   "第三引数に即値の真値を指定すると、"
+                   "autoext変換が行われなくなる。"
+                   [:br]
+                   "具体的には、上ではマクロの展開結果が"
+                   [:code (pr-str ["se/launch.*" "se/kick.*"])]
+                   "のようになるが、こちらでは"
+                   [:code (pr-str ["se/launch.ogg"
+                                   "se/launch.mp3"
+                                   "se/kick.ogg"
+                                   "se/kick.mp3"])]
+                   "のようになる。"
+                   "autoext指定をしない運用をする場合は"
+                   "こちらを使う必要がある。"
+                   ]
+                  ]]
                 ;; footer
                 [:hr]
                 address
