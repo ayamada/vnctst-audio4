@@ -29,7 +29,8 @@ a:active {
 }
 
 code {
-  background-color: #f7f7f7;
+  background-clip: content-box;
+  background-color: #efefef;
   color: #000000;
 }
 

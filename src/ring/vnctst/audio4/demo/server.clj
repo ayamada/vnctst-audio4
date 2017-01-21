@@ -719,7 +719,6 @@
                      "から取ってきて配置し、"
                      "html内に"
                      [:code
-                      ;"<script src=\"vnctst-audio4.js\" type=\"text/javascript\"></script>"
                       (hiccup/h "<script src=\"vnctst-audio4.js\" type=\"text/javascript\"></script>")
                       ] "タグを入れて読み込む"]
                     [:li
@@ -737,7 +736,7 @@
                   "上記で前準備は完了となる。"
                   [:br]
                   "必要であれば、後述する「音源ファイルの先行ロード」を予め行っておいてもよい"
-                  "(行わなくても問題ない)"
+                  "(行わなくても問題はない)"
                   ]
                  ]
                 [:hr]
