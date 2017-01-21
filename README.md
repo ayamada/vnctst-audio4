@@ -117,5 +117,5 @@ zlib風ライセンスとします。
 -->
 
 - 0.1.0-SNAPSHOT (XXXX-XX-XX 現在作成中)
-    - [vnctst-audio3](https://github.com/ayamada/vnctst-audio3)をベースに開発
+    - [vnctst-audio3](https://github.com/ayamada/vnctst-audio3)をベースに開発を開始
 
