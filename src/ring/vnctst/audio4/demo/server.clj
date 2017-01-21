@@ -6,6 +6,7 @@
             [hiccup.page :as page]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
+            [project-clj.core :as project-clj]
             ))
 
 (defn- prevent-cache [path]
@@ -407,7 +408,7 @@
   (p "各オプションの詳細については前述の説明を参照。")
   (p "cljs版では、追加の引数は一つのmapで指定してもよいし、"
      "複数のkey-value値として指定してもよい"
-     "(js版ではObjectでの指定のみ可能)。")
+     "(js版ではObject形式での指定のみ可能)。")
   )
 
 (defdesc :bgm-option-c
@@ -476,7 +477,7 @@
   (p "各オプションの詳細については前述の説明を参照。")
   (p "cljs版では、追加の引数は一つのmapで指定してもよいし、"
      "複数のkey-value値として指定してもよい"
-     "(js版ではObjectでの指定のみ可能)。")
+     "(js版ではObject形式での指定のみ可能)。")
   )
 
 (defdesc :se-option-c
@@ -498,6 +499,8 @@
      "設定されたデフォルト値がフェード秒数として適用される"
      "(詳細については既出の「設定項目」内「音量設定」の項目を参照)。")
   (p "第二引数省略時は全てのSEに対して停止処理が行われる。")
+  (p "この機能は、登場キャラクタがボイスを発生するような内容のゲームでの"
+     "利用を想定している。")
   )
 
 (defdesc :alarm-kick
@@ -685,6 +688,60 @@
                   ]]
                 [:hr]
                 [:div
+                 (heading "前準備")
+                 [:p "cljs版とjs版とで内容が違います"]
+                 [:dl
+                  [:dt "cljs版"]
+                  [:dd
+                   [:ol
+                    [:li
+                     [:code "project.clj"]
+                     "の"
+                     [:code ":dependencies"]
+                     "に"
+                     [:code (pr-str ['jp.ne.tir/vnctst-audio4
+                                     (project-clj/get :version)])]
+                     "を追加"]
+                    [:li
+                     "利用したい"
+                     [:code "ns"]
+                     "内にて"
+                     [:code (pr-str '(:require [vnctst.audio4 :as va4]))]
+                     "のような感じでrequireする"]]]
+                  [:dt "js版"]
+                  [:dd
+                   [:p "以下のどちらか好きな方を選ぶ"]
+                   [:ul
+                    [:li
+                     [:code "vnctst-audio4.js"]
+                     "ファイルを"
+                     (a "https://github.com/ayamada/vnctst-audio4/releases")
+                     "から取ってきて配置し、"
+                     "html内に"
+                     [:code
+                      ;"<script src=\"vnctst-audio4.js\" type=\"text/javascript\"></script>"
+                      (hiccup/h "<script src=\"vnctst-audio4.js\" type=\"text/javascript\"></script>")
+                      ] "タグを入れて読み込む"]
+                    [:li
+                     (a "https://www.npmjs.com/" "npm")
+                     "に"
+                     [:code (a "https://www.npmjs.com/package/vnctst-audio4" "vnctst-audio4")]
+                     "の名前で登録しているので、"
+                     "自分の使っているパッケージマネージャの流儀で"
+                     "適切に取り込む"
+                     ]]
+                   ;[:p ""]
+                   ]
+                  ]
+                 [:p
+                  "上記で前準備は完了となる。"
+                  [:br]
+                  "必要であれば、後述する「音源ファイルの先行ロード」を予め行っておいてもよい"
+                  "(行わなくても問題ない)"
+                  ]
+                 ]
+                [:hr]
+                [:div
                  (heading "基本操作")
                  [:p
                   "このセクションで紹介している機能だけでも"
@@ -858,6 +915,12 @@
                    "こちらを使う必要がある。"
                    ]
                   ]]
+                [:hr]
+                [:div
+                 (heading "注意事項")
+                 [:p "実運用時によく引っかかるポイントなど"]
+                 [:p "あとで"]
+                 ]
                 ;; footer
                 [:hr]
                 address
