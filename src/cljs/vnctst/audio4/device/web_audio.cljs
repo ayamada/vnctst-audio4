@@ -33,6 +33,7 @@
               (aget js/window "webkitAudioContext"))
           ctx (when c
                 (try
+                  (.close (new c))
                   (new c)
                   (catch :default e
                     nil)))]
