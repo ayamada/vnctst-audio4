@@ -47,10 +47,15 @@
                (aget js/window "Audio")
                (aget js/window "webkitAudio"))
           audio (when ac
-                  (try
-                    (new ac)
-                    (catch :default e
-                      nil)))]
+                  (or
+                    (try
+                      (new ac)
+                      (catch :default e
+                        nil))
+                    (try
+                      (new ac "")
+                      (catch :default e
+                        nil))))]
       (when audio
         (reset! audio-class ac)
         (util/register-touch-unlock-fn!
