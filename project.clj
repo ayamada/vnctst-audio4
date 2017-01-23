@@ -79,7 +79,7 @@
   ;;     - lein clean && lein with-profile demo-prod cljsbuild once demo-prod
   :profiles {:ring {:source-paths ["src/ring"]
                     :dependencies [[org.clojure/clojure "1.8.0"]
-                                   [ring/ring-core "1.5.0"]
+                                   [ring/ring-core "1.5.1"]
                                    [jp.ne.tir/project-clj "0.1.6"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["resources"]
