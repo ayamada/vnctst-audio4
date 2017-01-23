@@ -18,6 +18,12 @@
 
 
 
+(defn- empty-path? [path]
+  (try
+    (empty? path)
+    (catch :default e false)))
+
+
 ;;; 最も最近に鳴らしたSEのチャンネルobjを保持する
 (defonce a-last-played-se-channel-id (atom nil))
 (defn last-played-se-channel-id [] @a-last-played-se-channel-id)
@@ -67,7 +73,7 @@
     (when-not (and
                 (state/get :disable-mobile?)
                 (:mobile util/terminal-type))
-      (if (empty? path) ; pathがnilの時はstop-bgm!を呼ぶ
+      (if (empty-path? path) ; pathがnilの時はstop-bgm!を呼ぶ
         (stop-bgm! (:channel options))
         (bgm/play! (util/path-key->path path) options))))
   true)
@@ -101,7 +107,7 @@
   (when-not (and
               (state/get :disable-mobile?)
               (:mobile util/terminal-type))
-    (when-not (empty? path) ; pathがnilの時は何もしない
+    (when-not (empty-path? path) ; pathがnilの時は何もしない
       (let [options (optional-args->map optional-args)
             se-channel-id (se/play! (util/path-key->path path) options)]
         (reset! a-last-played-se-channel-id se-channel-id)
@@ -138,7 +144,7 @@
 
 (defn load! [path]
   (init!)
-  (when-not (empty? path)
+  (when-not (empty-path? path)
     (when-not (and
                 (state/get :disable-mobile?)
                 (:mobile util/terminal-type))
@@ -148,7 +154,7 @@
 
 (defn unload! [path]
   (init!)
-  (when-not (empty? path)
+  (when-not (empty-path? path)
     (let [path (util/path-key->path path)]
       ;; NB: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
       ;;     これを鳴らしているチャンネルがないかどうか調べ、
