@@ -25,6 +25,13 @@
 
 
 
+;;; イベントが発火しない環境がある為、ロードがこの秒数待っても終わらない場合は
+;;; 強制的にロード失敗扱いにする
+(def ^:private error-timeout-sec 65)
+
+
+
+
 
 ;;; 頻出するaudio-classをここに保持しておく
 (defonce audio-class (atom nil))
@@ -128,7 +135,7 @@
       (when-not @(:loaded? as)
         (if (ready? a)
           (@h-loaded nil)
-          (if (< 30 elapsed-sec)
+          (if (< error-timeout-sec elapsed-sec)
             (do
               (reset! (:loaded? as) true)
               (reset! (:error? as) true)
@@ -145,7 +152,13 @@
 
 (defn dispose-audio-source! [audio-source]
   (p 'dispose-audio-source! (:url audio-source))
-  nil)
+  (when-let [a (:audio audio-source)]
+    (try
+      (set! (.-src a) "")
+      (catch :default e nil))
+    (try
+      (.load a)
+      (catch :default e nil))))
 
 
 
@@ -199,23 +212,34 @@
     ;;     これにきちんと対応できなくてはならない。
     ;;     (以下の .-readyState が4以外だった時の処理)
     (let [a (:audio @ch)]
+      ;; 即座に再生するか、再生予約を入れるだけか
       (if (ready? a)
         (do
           ;(.pause a)
           (set! (.-loop a) (boolean loop?))
           (set! (.-volume a) volume)
-          ;; NB: これが上手く機能しない(=常に0扱いになる)環境があるようだ。
+          (_set-pitch! a pitch)
+          ;; NB: seekよりも先にplayの実行が必要となる環境があるらしい
+          (try
+            (.play a)
+            (catch :default e 0))
+          ;; NB: seekが上手く機能しない(=常に0扱いになる)環境があるようだ。
           ;;     しかしこれが必要になるのはbackgroundからの復帰時のみで、
           ;;     その場合は曲の最初から再生し直しても大きな問題はないので、
           ;;     上手く動かない環境でも、現状ではこれでよいという事にする。
           ;;     (将来に「途中ポイントからの再生」を外部に提供しようと
           ;;     考えた場合には問題になるので注意)
-          (set! (.-currentTime a) start-pos)
-          (_set-pitch! a pitch)
-          (reset! (:playing-info @ch) {:start-pos start-pos
-                                       :begin-msec (js/Date.now)
-                                       :end-msec nil
-                                       })
+          (let [start-pos (cond
+                            (not start-pos) 0
+                            (not (pos? start-pos)) 0
+                            :else (try
+                                    (set! (.-currentTime a) start-pos)
+                                    start-pos
+                                    (catch :default e 0)))]
+            (reset! (:playing-info @ch) {:start-pos start-pos
+                                         :begin-msec (js/Date.now)
+                                         :end-msec nil
+                                         }))
           ;; 非ループ時は、再生終了時に状態を変更するgoスレッドを起動する
           (when-not loop?
             (go-loop []
@@ -227,7 +251,11 @@
                   (if (.-ended (:audio @ch))
                     (swap! (:playing-info @ch) assoc :end-msec (js/Date.now))
                     (recur))))))
-          (.play a))
+          ;; NB: 先にseekしているので、これは不要？？？
+          ;(try
+          ;  (.play a)
+          ;  (catch :default e 0))
+          )
         (do
           (reset! (:play-request @ch)
                   [start-pos loop? volume pitch pan alarm?])
