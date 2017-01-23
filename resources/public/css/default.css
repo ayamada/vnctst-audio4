@@ -103,3 +103,13 @@ div#preloading {
   padding: 3em 0.5em;
 }
 
+.folding-label {
+}
+
+.folding-label:after {
+  content: "[+]";
+}
+
+
+
+

@@ -371,7 +371,7 @@
    })
 
 
-;;; misc
+;;; misc 1
 
 
 (defba :version-js
@@ -424,6 +424,39 @@
    })
 
 
+;;; misc 2
+
+
+(defba :bgm-option-d
+  {:fn #(vnctst.audio4/bgm! "bgm/ny2017.*" :oneshot? true :fadein 1.5)
+   :cljs "(vnctst.audio4/bgm! \"bgm/ny2017.*\" :oneshot? true :fadein 1.5)"
+   :js "vnstst.audio4.js.bgm(\"bgm/ny2017.*\", {\"oneshot?\": true, fadein 1.5})"
+   })
+
+(defba :me-launch
+  {:fn #(vnctst.audio4/me! "se/launch.*")
+   :cljs "(vnctst.audio4/me! \"se/launch.*\")"
+   :js "vnctst.audio4.js.me(\"se/launch.*\")"
+   })
+
+(defba :bgs-noise
+  {:fn #(vnctst.audio4/bgs! "bgm/noise.*")
+   :cljs "(vnctst.audio4/bgs! \"bgm/noise.*\")"
+   :js "vnctst.audio4.js.bgs(\"bgm/noise.*\")"
+   })
+
+(defba :se-kick-keyword
+  {:fn #(vnctst.audio4/se! :se/kick)
+   :cljs "(vnctst.audio4/se! :se/kick)"
+   :js "----"
+   })
+
+
+
+
+
+
+
 
 
 
@@ -474,12 +507,41 @@
     (set! (.. dom -style -display) "block")))
 
 
+
+(def ^:private folding-defines
+  [[:h-introduction :introduction]
+   [:h-preparation :preparation]])
+
+(defn- add-folding! [label-key content-key]
+  (let [visible? (atom false)
+        label-dom (js/document.getElementById (name label-key))
+        content-dom (js/document.getElementById (name content-key))
+        apply-visible! #(when content-dom
+                          (set! (.. content-dom -style -display)
+                                (if @visible?
+                                  "block"
+                                  "none")))
+        listener (fn [e]
+                   (.preventDefault e)
+                   (.stopPropagation e)
+                   (swap! visible? not)
+                   (apply-visible!))]
+    (apply-visible!)
+    (when label-dom
+      (.addEventListener label-dom "click" listener)
+      (.addEventListener label-dom "touchend" listener))
+    nil))
+
+
+
 (defn ^:export jsmode [bool]
   (reset! display-js-mode? bool)
   (sync-button-labels!))
 
 (defn ^:export bootstrap []
   (sync-button-labels!)
+  (doseq [[k1 k2] folding-defines]
+    (add-folding! k1 k2))
   (apply audio4/set-config! config-options)
   ;; プリセットのプリロードとロード待ちを行う
   (let [target-num (count preload-pathes)

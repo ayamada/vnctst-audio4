@@ -17,7 +17,6 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
 - [特徴](#特徴)
 - [使い方](#使い方)
 - [オンラインデモ](#オンラインデモ)
-- [FAQ](#faq)
 - [TODO](#todo)
 - [Development](#development)
 - [License](#license)
@@ -75,25 +74,8 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
 - http://vnctst.tir.jp/vnctst-audio4-demo/
 
 
-# FAQ
-
-- 音が出ない
-    - `debug?` フラグを有効にして、コンソールにエラー内容が出ていないか確認してみよう
-    - 多くのブラウザでは、ローカルファイル(`file:///...`形式のurl)からの再生はできません。httpサーバを用意し、その中で動作確認しよう
-
-- 音が小さい
-    - デフォルトの音量は25%相当です。オンラインデモのサンプルコードを確認して、マスターボリューム、BGMボリューム、SEボリュームを設定してみよう
-
-- いちいち `vnctst.audio4.js.bgm("hoge.ogg")` って書くのは長くて面倒
-    - `var va4 = vnctst.audio4.js;` を実行しておけば、 `va4.bgm("hoge.ogg")` ですみます
-
-- オンラインデモのサンプルBGM/SEについて
-    - ayamadaが作成したものです。ライセンスはCC0とします
-
-
 # TODO
 
-- https://outcloud.blogspot.jp/2015/11/htmlaudio.html を見て、モバイル対応をより補強する
 - ロゴ画像をもっと良いものに作り直す
 - オンラインデモに英文切り替えボタンを追加
 - このドキュメントの英語版を作成
@@ -104,6 +86,20 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
 `vnctst-audio4` 自体の開発手順については [DEVEL.md](DEVEL.md) を参照。
 
 cljs開発の知識がある事が前提。
+
+
+# Link
+
+関連する外部ページへのリンク集
+
+- https://github.com/ayamada/vnctst-audio3
+    - 当ライブラリの旧版。4には置いてない内部構造の解説などがある
+
+- https://outcloud.blogspot.jp/2015/11/htmlaudio.html
+    - モバイルブラウザ回りについてのまとめ記事。とても参考になる。「ぺったんR」というソフト内のライブラリらしい
+
+- https://github.com/CyberAgent/boombox.js
+    - vnctst-audio2以前で内部デバイスとして利用していたライブラリ。当時に筆者が試した同類ライブラリ中では最も品質が良かった。ただしフェードおよび同一音源の多重再生機能は付いていない
 
 
 # License

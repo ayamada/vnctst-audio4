@@ -102,6 +102,10 @@
         pan (:pan param)
         oneshot? (:oneshot? param)
         fadein (:fadein param)
+        fadein (when fadein
+                 (if (number? fadein)
+                   fadein
+                   (state/get :default-bgm-fade-sec)))
         [i-volume i-pitch i-pan] (util/calc-internal-params
                                    :bgm volume pitch pan)
         i-volume (if fadein 0.0001 i-volume)

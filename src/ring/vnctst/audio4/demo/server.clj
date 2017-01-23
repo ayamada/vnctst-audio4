@@ -357,6 +357,17 @@
      "正常にロードできたかまでは分からない。")
   (p "ロード時にエラーが起こったかどうかを調べたい時は、"
      "真偽値としてそれを返すこの関数が使える。")
+  (p "なお、エラーの起こったファイルを再生しようとしても何も起こらないので、"
+     "雑に扱っても問題ない"
+     "(もちろん、"
+     [:code "debug?"]
+     "フラグを有効にしていればコンソールへのエラー通知は行われる)。")
+  (p "ただし上記について例外があり、別のBGMの再生中のみ、"
+     "再生中BGMのフェード停止が発生する仕様としている。"
+     "これはBGM変更の状況では、"
+     "エラーの起こったファイルの再生が無視されて"
+     "元のBGMが鳴り続けるよりも、BGMが無音になった方がまだマシ"
+     "であると考え、この仕様とした。")
   )
 
 (defdesc :unload-noise
@@ -415,6 +426,20 @@
   (p (expand-autoext-html "bgm/va32.*")
      "をBGMとして再生する。")
   (p "オプションの詳細については前述の説明を参照。")
+  )
+
+(defdesc :bgm-option-d
+  (p (expand-autoext-html "bgm/ny2017.*")
+     "をBGMとして再生する。")
+  (p [:code "oneshot?"]
+     "に真値を指定する事により、非ループ再生となる。"
+     "前述の" [:code "bgm-oneshot!"] "/" [:code "bgmOneshot"] "は、"
+     "内部でこのパラメータを設定している。")
+  (p [:code "fadein"]
+     "にフェードイン秒数を指定する事により、"
+     "再生開始時にフェードインが適用されるようになる。"
+     "前述の" [:code "bgm-fadein!"] "/" [:code "bgmFadein"] "は、"
+     "内部でこのパラメータを設定している。")
   )
 
 (defdesc :bgm-noise-ch
@@ -558,6 +583,35 @@
   (p "上記 float->percent / floatToPercent の"
      "逆変換を行うユーティリティ。"))
 
+(defdesc :me-launch
+  (p (expand-autoext-html "se/launch.*")
+     "を非ループBGMとして再生する。")
+  (p "前述の" [:code "bgm-oneshot!"] "/" [:code "bgmOneshot"]
+     "と全く同じ。")
+  (p "分かりづらいのでobsoletedとする。")
+  )
+
+(defdesc :bgs-noise
+  (p (expand-autoext-html "bgm/noise.*")
+     "を「" [:code "BGS"] "」という名前のBGM再生チャンネルで再生する。")
+  (p "分かりづらいのでobsoletedとする。")
+  )
+
+(defdesc :se-kick-keyword
+  (p "キーワードでpathを指定する機能はcljs版のみ対応しており、"
+     "js版では対応していない。")
+  (p "引数にキーワードを指定した場合、"
+     [:code ":foo"] "なら" [:code (pr-str "foo.*")] "へと、"
+     [:code ":bar/baz"] "なら" [:code (pr-str "bar/baz.*")] "へと、"
+     "自動的に展開されて扱われる。")
+  (p "キーワード構文の仕様上、二段以上深いディレクトリ内にあるファイルを"
+     "キーワード構文で指定する事はできない。"
+     "この制約により、利用できる場面はかなり限定される。")
+  )
+
+
+
+
 
 
 
@@ -576,8 +630,13 @@
 
 (def heading-index (atom []))
 
-(defmacro heading [label & [anchor]]
-  (let [anchor (or anchor label)]
+(defmacro heading [label & [anchor folding-id]]
+  (let [anchor (or anchor label)
+        label-html (if-not folding-id
+                     [:span label]
+                     [:a.folding-label {:id (name folding-id)
+                                        :href "#"}
+                      label])]
     (when (empty? (filter #(= anchor (second %))
                           @heading-index))
       (swap! heading-index conj [label anchor]))
@@ -585,7 +644,7 @@
       [:div [:a {:name ~anchor} " "]]
       [:br]
       [:br]
-      [:h2 ~label]]))
+      [:h2 ~label-html]]))
 
 (defn- index-item [label & [anchor]]
   [:li [:a {:href (str "#" (or anchor label))} label]])
@@ -663,10 +722,11 @@
                  [:ul (map #(apply index-item %)
                            @heading-index)]]
                 [:div
-                 (heading "前書き")
-                 [:ul
-                  [:li (str "これは、ゲーム向けの音響ファイル再生ライブラリ"
-                            "である「vnctst-audio4」のオンラインデモです。")]
+                 (heading "前書き" nil :h-introduction)
+                 [:ul#introduction
+                  [:li
+                   "これは、ゲーム向けの音響ファイル再生ライブラリ"
+                   "である「vnctst-audio4」のオンラインデモです。"]
                   [:li
                    "vnctst-audio4についての概要は"
                    (link-home "vnctst-audio4のgithubリポジトリ")
@@ -688,55 +748,53 @@
                   ]]
                 [:hr]
                 [:div
-                 (heading "前準備")
-                 [:p "cljs版とjs版とで内容が違います"]
-                 [:dl
-                  [:dt "cljs版"]
-                  [:dd
-                   [:ol
-                    [:li
-                     [:code "project.clj"]
-                     "の"
-                     [:code ":dependencies"]
-                     "に"
-                     [:code (pr-str ['jp.ne.tir/vnctst-audio4
-                                     (project-clj/get :version)])]
-                     "を追加"]
-                    [:li
-                     "利用したい"
-                     [:code "ns"]
-                     "内にて"
-                     [:code (pr-str '(:require [vnctst.audio4 :as va4]))]
-                     "のような感じでrequireする"]]]
-                  [:dt "js版"]
-                  [:dd
-                   [:p "以下のどちらか好きな方を選ぶ"]
-                   [:ul
-                    [:li
-                     [:code "vnctst-audio4.js"]
-                     "ファイルを"
-                     (a "https://github.com/ayamada/vnctst-audio4/releases")
-                     "から取ってきて配置し、"
-                     "html内に"
-                     [:code
-                      (hiccup/h "<script src=\"vnctst-audio4.js\" type=\"text/javascript\"></script>")
-                      ] "タグを入れて読み込む"]
-                    [:li
-                     (a "https://www.npmjs.com/" "npm")
-                     "に"
-                     [:code (a "https://www.npmjs.com/package/vnctst-audio4" "vnctst-audio4")]
-                     "の名前で登録しているので、"
-                     "自分の使っているパッケージマネージャの流儀で"
-                     "適切に取り込む"
-                     ]]
-                   ;[:p ""]
+                 (heading "前準備" nil :h-preparation)
+                 [:div#preparation
+                  [:p
+                   "実運用時に当ライブラリを利用する前準備です。"
+                   "cljs版とjs版とで内容が違います"]
+                  [:dl
+                   [:dt "cljs版"]
+                   [:dd
+                    [:ol
+                     [:li
+                      [:code "project.clj"]
+                      "の"
+                      [:code ":dependencies"]
+                      "に"
+                      [:code (pr-str ['jp.ne.tir/vnctst-audio4
+                                      (project-clj/get :version)])]
+                      "を追加"]
+                     [:li
+                      "利用したい"
+                      [:code "ns"]
+                      "内にて"
+                      [:code (pr-str '(:require [vnctst.audio4 :as va4]))]
+                      "のような感じでrequireする"]]]
+                   [:dt "js版"]
+                   [:dd
+                    [:p "以下のどちらか好きな方を選ぶ"]
+                    [:ul
+                     [:li
+                      [:code "vnctst-audio4.js"]
+                      "ファイルを"
+                      (a "https://github.com/ayamada/vnctst-audio4/releases")
+                      "から取ってきて配置し、"
+                      "html内に"
+                      [:code
+                       (hiccup/h "<script src=\"vnctst-audio4.js\" type=\"text/javascript\"></script>")
+                       ] "タグを入れて読み込む"]
+                     [:li
+                      (a "https://www.npmjs.com/" "npm")
+                      "に"
+                      [:code (a "https://www.npmjs.com/package/vnctst-audio4" "vnctst-audio4")]
+                      "の名前で登録しているので、"
+                      "自分の使っているパッケージマネージャの流儀で"
+                      "適切に取り込む"
+                      ]]
+                    ;[:p ""]
+                    ]
                    ]
-                  ]
-                 [:p
-                  "上記で前準備は完了となる。"
-                  [:br]
-                  "必要であれば、後述する「音源ファイルの先行ロード」を予め行っておいてもよい"
-                  "(行わなくても問題はない)"
                   ]
                  ]
                 [:hr]
@@ -812,6 +870,7 @@
                  (demo-button2 :bgm-option-a)
                  (demo-button2 :bgm-option-b)
                  (demo-button2 :bgm-option-c)
+                 (demo-button2 :bgm-option-d)
                  (demo-button2 :bgm-noise-ch)
                  (demo-button2 :stop-bgm-ch-a)
                  (demo-button2 :stop-bgm-ch-b)
@@ -823,10 +882,18 @@
                  (demo-button2 :se-option-c)
                  (demo-button2 :stop-se-ch)
                  (demo-button2 :alarm-kick)
+                 [:h3 "その他"]
+                 [:p
+                  "旧版であるvnctst-audio3"
+                  "由来のインターフェースです"]
+                 (demo-button2 :me-launch)
+                 (demo-button2 :bgs-noise)
+                 (demo-button2 :se-kick-keyword)
                  ]
                 [:hr]
                 [:div
-                 (heading "おまけ機能")
+                 (heading "補助機能")
+                 [:p "便利関数類です"]
                  (demo-button2 :version-js)
                  (demo-button2 :can-play-ogg)
                  (demo-button2 :can-play-mp3)
@@ -916,16 +983,98 @@
                   ]]
                 [:hr]
                 [:div
-                 (heading "必要知識")
-                 [:p "実運用時によく引っかかるポイントなど"]
+                 (heading "FAQ")
                  [:p "あとで"]
-                 [:p "html5上の音響システム固有の必要知識"]
-                 [:p "あとで"]
+                 ;; TODO
+;- 音が出ない
+;    - `debug?` フラグを有効にして、コンソールにエラー内容が出ていないか確認して>みよう
+;    - 多くのブラウザでは、ローカルファイル(`file:///...`形式のurl)からの再生はで
+;きません。httpサーバを用意し、その中で動作確認しよう
+;
+;- 音が小さい
+;    - デフォルトの音量は25%相当です。オンラインデモのサンプルコードを確認して、>マスターボリューム、BGMボリューム、SEボリュームを設定してみよう
+;
+;- いちいち `vnctst.audio4.js.bgm("hoge.ogg")` って書くのは長くて面倒
+;    - `var va4 = vnctst.audio4.js;` を実行しておけば、 `va4.bgm("hoge.ogg")` で>すみます
+;
+;- オンラインデモのサンプルBGM/SEについて
+;    - ayamadaが作成したものです。ライセンスはCC0とします
                  ]
                 [:hr]
                 [:div
-                 (heading "隠し機能")
-                 [:p "あとで"]
+                 (heading "必要知識")
+                 [:p "html5上の音響システム固有の前提知識。"
+                  "ライブラリレベルでは吸収できないバッドノウハウ類です"]
+                 [:dl
+                  [:dt
+                   "「この拡張子なら全ブラウザで再生できる」という"
+                   "万能ファイル形式は存在しない"]
+                  [:dd
+                   "なので、なるべく多くのブラウザでの再生をサポートしたい場合"
+                   "複数種類の拡張子のファイルを用意する必要があります。"]
+                  [:dd
+                   "再生回りでのトラブルの少なさは「ogg、mp3、m4a、他」の順"
+                   "なので、この優先順位で二つほど選ぶと良いでしょう"
+                   "(「oggとmp3をセットで配置」もしくは"
+                   "「oggとm4aをセットで配置」あたりが安定)。"]
+                  [:dd
+                   "どうしても一つに絞る場合は、"
+                   "「oggを採用し、ieとsafariでの再生を切り捨てる」"
+                   "「mp3を採用し、一部os向けfirefoxを切り捨て、"
+                   "一部モバイル環境で出る不具合には目をつぶる」"
+                   "「m4aを採用し、一部os向けfirefoxを切り捨て、"
+                   "一部モバイル環境で出る不具合には目をつぶる」"
+                   "あたりから選択する事になります。"]
+                  [:dd
+                   "なお、"
+                   "「oggは内部コーデックが通常のvorbisのもののみ対応」"
+                   "「m4aは内部コーデックがaacのもののみ対応」"
+                   "「mp3でcbr(可変ビットレート)を有効にしていると"
+                   "一部モバイル環境で不安定になる」"
+                   "という制約もあるので、音源ファイルのエンコード時には"
+                   "この辺りにも気を付けておくとよいでしょう"
+                   "(特にmp3は、エンコーダのデフォルト設定でcbrが有効に"
+                   "なっている事が多いので注意)。"]
+                  [:dt
+                   "可能であれば、無音であっても支障の出ない内容にする"
+                   ]
+                  [:dd
+                   "前述の拡張子対応をどんなにがんばっても、"
+                   "古いモバイル端末では、音源の一部/全部が再生されないような"
+                   "ケースもあります。"
+                   "またそもそもモバイル環境では音量を0にして使う事も多いです。"
+                   "なので、「音が出なくても利用できる」ようになっているのが"
+                   "ベターでしょう。"
+                   ]
+                  [:dt
+                   "違うドメインにあるファイルを再生する場合は"
+                   (a "https://www.google.com/search?nfpr=1&q=CORS" "CORS設定")
+                   "が必要"]
+                  [:dd
+                   "詳細はリンクから確認してください"
+                   ]
+                  [:dt
+                   ""
+                 ;; TODO
+;    - 多くのブラウザでは、ローカルファイル(`file:///...`形式のurl)からの再生はで
+;きません。httpサーバを用意し、その中で動作確認しよう
+                   ]
+                  [:dd
+                   ""
+                   ]
+                  [:dt
+                   ""
+                   ]
+                  [:dd
+                   ""
+                   ]
+                  [:dt
+                   ""
+                   ]
+                  [:dd
+                   ""
+                   ]
+                  ]
                  ]
                 ;; footer
                 [:hr]
