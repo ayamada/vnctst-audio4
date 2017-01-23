@@ -668,7 +668,7 @@
                   [:li (str "これは、ゲーム向けの音響ファイル再生ライブラリ"
                             "である「vnctst-audio4」のオンラインデモです。")]
                   [:li
-                   "vnctst-audio4についての詳細は、"
+                   "vnctst-audio4についての概要は"
                    (link-home "vnctst-audio4のgithubリポジトリ")
                    "を参照してください。"]
                   [:li (str "vnctst-audio4には「cljs版」と「js版」があります。"
@@ -916,8 +916,15 @@
                   ]]
                 [:hr]
                 [:div
-                 (heading "注意事項")
+                 (heading "必要知識")
                  [:p "実運用時によく引っかかるポイントなど"]
+                 [:p "あとで"]
+                 [:p "html5上の音響システム固有の必要知識"]
+                 [:p "あとで"]
+                 ]
+                [:hr]
+                [:div
+                 (heading "隠し機能")
                  [:p "あとで"]
                  ]
                 ;; footer
