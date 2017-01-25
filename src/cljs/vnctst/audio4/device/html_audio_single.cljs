@@ -222,20 +222,18 @@
           ;; NB: seekよりも先にplayの実行が必要となる環境があるらしい
           (try
             (.play a)
-            (catch :default e 0))
+            (catch :default e nil))
           ;; NB: seekが上手く機能しない(=常に0扱いになる)環境があるようだ。
           ;;     しかしこれが必要になるのはbackgroundからの復帰時のみで、
           ;;     その場合は曲の最初から再生し直しても大きな問題はないので、
           ;;     上手く動かない環境でも、現状ではこれでよいという事にする。
           ;;     (将来に「途中ポイントからの再生」を外部に提供しようと
           ;;     考えた場合には問題になるので注意)
-          (let [start-pos (cond
-                            (not start-pos) 0
-                            (not (pos? start-pos)) 0
-                            :else (try
-                                    (set! (.-currentTime a) start-pos)
-                                    start-pos
-                                    (catch :default e 0)))]
+          (let [start-pos (if (and start-pos (pos? start-pos)) start-pos 0)
+                start-pos (try
+                            (set! (.-currentTime a) start-pos)
+                            start-pos
+                            (catch :default e 0))]
             (reset! (:playing-info @ch) {:start-pos start-pos
                                          :begin-msec (js/Date.now)
                                          :end-msec nil
@@ -250,12 +248,7 @@
                 (when-not (:end-msec playing-info)
                   (if (.-ended (:audio @ch))
                     (swap! (:playing-info @ch) assoc :end-msec (js/Date.now))
-                    (recur))))))
-          ;; NB: 先にseekしているので、これは不要？？？
-          ;(try
-          ;  (.play a)
-          ;  (catch :default e 0))
-          )
+                    (recur)))))))
         (do
           (reset! (:play-request @ch)
                   [start-pos loop? volume pitch pan alarm?])
