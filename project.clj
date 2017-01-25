@@ -11,7 +11,7 @@
   (merge compiler-option-common
          {:main 'vnctst.audio4.js
           :output-dir "target/out-js" ; unused
-          :output-to "vnctst-audio4.js"}))
+          :output-to "for-npm/vnctst-audio4.js"}))
 
 (def compiler-option-prod
   (merge compiler-option-common

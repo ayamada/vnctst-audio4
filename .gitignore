@@ -9,3 +9,6 @@ pom.xml.asc
 /.nrepl-port
 /figwheel_server.log
 /resources/public/cljs
+.DS_Store
+npm-debug.log
+node_modules

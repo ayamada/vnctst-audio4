@@ -45,12 +45,17 @@ ayamada 以外の人がコードを書く場合は、こちらの記事を参照
 4. このタイミングで一度コミットしておく。
     - コミットメッセージは `'Releasing 0.1.2'` とかで。
 
-5. js向け配布物である `vnctst-audio4.js` をリビルドする
-    - `rm vnctst-audio4.js`
-        - まず先に古いファイルを消す。これを行わないと更新されない時がある
-          (cljsbuildの不具合っぽい？)
-    - `lein clean && lein with-profile for-js cljsbuild once for-js`
-    - ビルドしたら忘れずにコミットしておく事。
+5. js向け配布物である `vnctst-audio4.js` をリビルドし、npmにデプロイする
+    1. `rm -f for-npm/vnctst-audio4.js`
+        - まず先に古いファイルを消す。これを行わないと更新されない時がある(cljsbuildの不具合っぽい？)
+    2. `lein clean && lein with-profile for-js cljsbuild once for-js`
+        - `vnctst-audio4.js` をリビルドする
+    3. `cd for-npm`
+    4. `vim package.json`
+        - バージョンを上げる
+    5. `npm publish`
+        - 事前に `npm adduser` を行っておく必要あり
+    6. コミットしておく
         - コミットメッセージは上記同様 `'Releasing 0.1.2'` とかでよい
           (バージョン番号をコミットログに含めておいた方が後で分かりやすい)
 
