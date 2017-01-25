@@ -232,6 +232,9 @@
     ;; :play-start-time があり、:play-end-timeがない場合、再生中
     (not (:play-end-time @ch))))
 
+(defn preparing? [ch]
+  false)
+
 (defn stop! [ch]
   (p 'stop! (:url @ch))
   ;; NB: race conditionがありえるので、tryで囲む
@@ -298,6 +301,7 @@
    :pos pos
    :play! play!
    :playing? playing?
+   :preparing? preparing?
    :stop! stop!
    :set-volume! set-volume!
    :set-pitch! set-pitch!

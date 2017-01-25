@@ -182,6 +182,17 @@
 
 
 
+(defn preparing? [ch]
+  (when (playing? ch)
+    (when-let [a (:audio @ch)]
+      (try
+        ;; 再生ポジションが0なら準備中扱い
+        (zero? (.-currentTime a))
+        ;; currentTimeの取得に失敗する場合は準備中扱い
+        (catch :default e true)))))
+
+
+
 (defn pos [ch]
   (p 'pos (:url @ch))
   (or
@@ -217,13 +228,16 @@
         (do
           ;(.pause a)
           (set! (.-loop a) (boolean loop?))
-          (set! (.-volume a) volume)
           (_set-pitch! a pitch)
           ;; NB: seekよりも先にplayの実行が必要となる環境があるらしい。
           ;;     しかしそうでない環境ではseekを優先したい
           ;;     (seek前の音が一瞬鳴ってしまう為)。
           ;;     そこで (try (seek)) → (play) → (try (seek)) という
-          ;;     順番で実行を行う事にする
+          ;;     順番で実行を行う事にする。
+          ;;     ただしこの場合、環境によってはseek直前の音が
+          ;;     一瞬聴こえてしまう問題がある。ので、初回はvolume=0にしておき、
+          ;;     seekが上手くいってから改めてボリュームを再設定する
+          (set! (.-volume a) 0)
           ;; NB: seekが上手く機能しない(=常に0扱いになる)環境があるようだ
           ;;     (前述のseek不可環境か？)。
           ;;     しかし途中からの再生が必要になるのは、現状では
@@ -233,26 +247,30 @@
           ;;     (将来に「途中ポイントからの再生」を外部に提供しようと
           ;;     考えた場合には問題になるので注意)
           (let [start-pos (if (and start-pos (pos? start-pos)) start-pos 0)
-                done-seek?  (try
-                              (set! (.-currentTime a) start-pos)
-                              true
-                              (catch :default e false))
-                _ (try
-                    (.play a)
-                    (catch :default e nil))
-                ;; NB: seekに失敗している場合は再度挑戦する。
-                ;;     また二度目のseekにも失敗した場合は、前述の通り、
-                ;;     start-posが0だったものとして続行する。
-                start-pos (if done-seek?
-                            start-pos
-                            (try
-                              (set! (.-currentTime a) start-pos)
+                done-pre-seek? (try
+                                 (set! (.-currentTime a) start-pos)
+                                 true
+                                 (catch :default e false))]
+            (when done-pre-seek?
+              (set! (.-volume a) volume))
+            (try
+              (.play a)
+              (catch :default e nil))
+            ;; NB: seekに失敗している場合は再度挑戦する。
+            ;;     また二度目のseekにも失敗した場合は、前述の通り、
+            ;;     start-posが0だったものとして続行する。
+            (let [start-pos (if done-pre-seek?
                               start-pos
-                              (catch :default e 0)))]
-            (reset! (:playing-info @ch) {:start-pos start-pos
-                                         :begin-msec (js/Date.now)
-                                         :end-msec nil
-                                         }))
+                              (try
+                                (set! (.-currentTime a) start-pos)
+                                start-pos
+                                (catch :default e 0)))]
+              (when-not done-pre-seek?
+                (set! (.-volume a) volume))
+              (reset! (:playing-info @ch) {:start-pos start-pos
+                                           :begin-msec (js/Date.now)
+                                           :end-msec nil
+                                           })))
           ;; 非ループ時は、再生終了時に状態を変更するgoスレッドを起動する
           (when-not loop?
             (go-loop []
@@ -261,6 +279,7 @@
               (when-let [playing-info @(:playing-info @ch)]
                 ;; stop!されたら終了
                 (when-not (:end-msec playing-info)
+                  ;; endedが真値になってたら終了
                   (if (.-ended (:audio @ch))
                     (swap! (:playing-info @ch) assoc :end-msec (js/Date.now))
                     (recur)))))))
@@ -280,18 +299,23 @@
 
 (defn stop! [ch]
   (p 'stop! (:url @ch))
-  (.pause (:audio @ch))
+  (when-let [a (:audio @ch)]
+    (try
+      (.pause a)
+      (catch :default e nil)))
   ;; NB: :play-request のキャンセルが必須
   (reset! (:play-request @ch) nil)
   (swap! (:playing-info @ch) assoc :end-msec (js/Date.now)))
 
 (defn set-volume! [ch volume]
   (p 'set-volume! (:url @ch) volume)
-  (set! (.-volume (:audio @ch)) volume))
+  (when-let [a (:audio @ch)]
+    (set! (.-volume a) volume)))
 
 (defn set-pitch! [ch pitch]
   (p 'set-pitch! (:url @ch) pitch)
-  (_set-pitch! (:audio @ch) pitch)
+  (when-let [a (:audio @ch)]
+    (_set-pitch! a pitch))
   nil)
 
 (defn set-pan! [ch pan]
@@ -318,6 +342,7 @@
    :pos pos
    :play! play!
    :playing? playing?
+   :preparing? preparing?
    :stop! stop!
    :set-volume! set-volume!
    :set-pitch! set-pitch!

@@ -91,6 +91,9 @@
 (defn playing? [ch]
   (apply-single-fn html-audio-single/playing? ch))
 
+(defn preparing? [ch]
+  (apply-single-fn html-audio-single/preparing? ch))
+
 (defn stop! [ch]
   (apply-single-fn html-audio-single/stop! ch))
 
@@ -120,6 +123,7 @@
    :pos pos
    :play! play!
    :playing? playing?
+   :preparing? preparing?
    :stop! stop!
    :set-volume! set-volume!
    :set-pitch! set-pitch!

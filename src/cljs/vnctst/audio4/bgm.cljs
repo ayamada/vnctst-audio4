@@ -177,45 +177,44 @@
           c (async/chan)]
       (go-loop []
         (<! (async/timeout interval-msec))
-        (if (state/get :in-background?)
-          (recur) ; バックグラウンド時はフェード処理を進めないようにする
-          (when @state
-            (let [delta (:fade-delta @state)
-                  new-factor (max 0 (min 1 (+ delta (:fade-factor @state))))
-                  end-value (if (pos? delta) 1 0)]
-              (when-not (zero? delta)
-                (swap! state assoc :fade-factor new-factor)
-                (sync-state-volume! state)
-                (if (and
-                      (not= end-value new-factor)
-                      ;; NB: 以下の判定を行うかどうかは迷う。
-                      ;;     この判定は「MEのフェード中にMEの再生が完了した」
-                      ;;     場合の為のものなのだが、
-                      ;;     このチェックがなくても「フェードの残り秒数分だけ
-                      ;;     無駄に待たされる」程度の問題しかない。
-                      ;;     なので、この判定がそこそこ重いようであれば、
-                      ;;     この判定は行わない方がよい。
-                      ;;     現在は行わない事にした。
-                      ;(when-let [ac (:ac (:current-param @state))]
-                      ;  (device/call! :playing? ac))
-                      )
-                  (recur)
+        (let [ac (:ac (:current-param @state))
+              delta (:fade-delta @state)]
+          (if (or
+                ;; バックグラウンド中は再生状態に関わらず、進めてはいけない
+                (state/get :in-background?)
+                ;; フェードの向きがinかつ再生準備中なら再生が開始されるまで待つ
+                (and
+                  ac
+                  (pos? delta)
+                  (device/call! :preparing? ac)))
+            (recur)
+            ;; stateなし(BGM停止)ならfaderを終了できる
+            (when @state
+              (let [new-factor (max 0 (min 1 (+ delta (:fade-factor @state))))
+                    end-value (if (pos? delta) 1 0)]
+                (if (zero? delta)
+                  (swap! state assoc :fade-process nil)
                   (do
-                    (swap! state assoc :fade-process nil)
-                    ;; フェードアウト完了時のみ、
-                    ;; 次の曲が指定されているなら対応する必要がある
-                    (when (zero? end-value)
-                      (let [next-param (:next-param @state)]
-                        (_stop-immediately! state)
-                        (when next-param
-                          (_load+play! bgm-ch
-                                       state
-                                       (:path next-param)
-                                       (:volume next-param)
-                                       (:pitch next-param)
-                                       (:pan next-param)
-                                       (:oneshot? next-param)
-                                       (:fadein next-param))))))))))))
+                    (swap! state assoc :fade-factor new-factor)
+                    (sync-state-volume! state)
+                    (if (not= end-value new-factor)
+                      (recur)
+                      (do
+                        (swap! state assoc :fade-process nil)
+                        ;; フェードアウト完了時のみ、
+                        ;; 次の曲が指定されているなら対応する必要がある
+                        (when (zero? end-value)
+                          (let [next-param (:next-param @state)]
+                            (_stop-immediately! state)
+                            (when next-param
+                              (_load+play! bgm-ch
+                                           state
+                                           (:path next-param)
+                                           (:volume next-param)
+                                           (:pitch next-param)
+                                           (:pan next-param)
+                                           (:oneshot? next-param)
+                                           (:fadein next-param))))))))))))))
       (swap! state assoc :fade-process c))))
 
 
@@ -286,10 +285,10 @@
       ;; ロードエラーならログに出す
       (cache/error? path)
       (util/logging :error (str "found error in " path))
-      ;; 停止中(もしくはプリロード中)なら、即座に再生を開始するだけでよい
+      ;; BGM停止中(もしくはプリロード中)なら、即座に再生を開始するだけでよい
       (not @state)
       (_load+play! channel state path volume pitch pan oneshot? fadein)
-      ;; ロード中(再生準備中)なら、ロード対象を差し替える
+      ;; BGMロード中(再生準備中)なら、ロード対象を差し替える
       (and
         (not (fading? state))
         (:next-param @state))
@@ -317,6 +316,8 @@
                               :pitch pitch
                               :oneshot? oneshot?
                               :fadein fadein}]
+              ;; フェード中に先行ロードを開始しておく
+              (cache/load! path)
               ;; NB: 既にフェード中の場合の為に、 :fade-factor はいじらない
               (swap! state merge {:fade-delta fade-delta
                                   :next-param next-param})

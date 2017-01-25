@@ -64,6 +64,9 @@
 (defn playing? [ch]
   false)
 
+(defn preparing? [ch]
+  false)
+
 (defn stop! [ch]
   (p 'stop! ch)
   (swap! ch assoc :play-stop-msec (js/Date.now))
@@ -98,6 +101,7 @@
    :pos pos
    :play! play!
    :playing? playing?
+   :preparing? preparing?
    :stop! stop!
    :set-volume! set-volume!
    :set-pitch! set-pitch!
