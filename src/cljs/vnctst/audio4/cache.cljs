@@ -93,7 +93,7 @@
         (and
           (state/get :disable-mobile?)
           (:mobile util/terminal-type)))
-    ;; 既にロード済。done-fnを実行して終了
+    ;; 既にロード済。done-fnがあるなら、それを実行して終了
     (when done-fn
       (when-let [as (get @loaded-audiosource-table path)]
         (done-fn as)))
@@ -211,7 +211,10 @@
     (util/run-preload-process! preload-process
                                preload-request-queue
                                (fn [k]
-                                 (load-internal! k)
+                                 (when (and
+                                         (not (loaded? k))
+                                         (not (loading? k)))
+                                   (load-internal! k))
                                  (go-loop []
                                    (when-not (loaded? k)
                                      (<! (async/timeout 333))

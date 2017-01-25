@@ -183,38 +183,34 @@
                 ;; バックグラウンド中は再生状態に関わらず、進めてはいけない
                 (state/get :in-background?)
                 ;; フェードの向きがinかつ再生準備中なら再生が開始されるまで待つ
-                (and
-                  ac
-                  (pos? delta)
-                  (device/call! :preparing? ac)))
+                (and ac (pos? delta) (device/call! :preparing? ac)))
             (recur)
-            ;; stateなし(BGM停止)ならfaderを終了できる
             (when @state
               (let [new-factor (max 0 (min 1 (+ delta (:fade-factor @state))))
                     end-value (if (pos? delta) 1 0)]
-                (if (zero? delta)
-                  (swap! state assoc :fade-process nil)
+                (when-not (zero? delta)
+                  (swap! state assoc :fade-factor new-factor)
+                  (sync-state-volume! state))
+                (if (and
+                      (not (zero? delta))
+                      (not= end-value new-factor))
+                  (recur)
                   (do
-                    (swap! state assoc :fade-factor new-factor)
-                    (sync-state-volume! state)
-                    (if (not= end-value new-factor)
-                      (recur)
-                      (do
-                        (swap! state assoc :fade-process nil)
-                        ;; フェードアウト完了時のみ、
-                        ;; 次の曲が指定されているなら対応する必要がある
-                        (when (zero? end-value)
-                          (let [next-param (:next-param @state)]
-                            (_stop-immediately! state)
-                            (when next-param
-                              (_load+play! bgm-ch
-                                           state
-                                           (:path next-param)
-                                           (:volume next-param)
-                                           (:pitch next-param)
-                                           (:pan next-param)
-                                           (:oneshot? next-param)
-                                           (:fadein next-param))))))))))))))
+                    (swap! state assoc :fade-process nil)
+                    ;; フェードアウト完了時のみ、
+                    ;; 次の曲が指定されているなら対応する必要がある
+                    (when (zero? end-value)
+                      (let [next-param (:next-param @state)]
+                        (_stop-immediately! state)
+                        (when next-param
+                          (_load+play! bgm-ch
+                                       state
+                                       (:path next-param)
+                                       (:volume next-param)
+                                       (:pitch next-param)
+                                       (:pan next-param)
+                                       (:oneshot? next-param)
+                                       (:fadein next-param))))))))))))
       (swap! state assoc :fade-process c))))
 
 
