@@ -291,7 +291,7 @@
 
 (defba :unload-all
   {:fn #(vnctst.audio4/unload-all!)
-   :cljs "(vnctst.audio4/unload-all!"
+   :cljs "(vnctst.audio4/unload-all!)"
    :js "vnctst.audio4.js.unloadAll()"
    })
 
