@@ -12,6 +12,13 @@
 (defonce display-js-mode? (atom true))
 
 
+(defn- sync-device-name! []
+  (when-let [dom (js/document.getElementById "device-name")]
+    (let [msg (pr-str (audio4/current-device-name))]
+      (set! (.. dom -textContent) msg))))
+
+
+
 (def config-options
   [:debug? true
    :debug-verbose? true
@@ -423,6 +430,12 @@
    :js "vnctst.audio4.js.percentToFloat(25)"
    })
 
+(defba :current-device-name
+  {:fn #(js/alert (vnctst.audio4/current-device-name))
+   :cljs "(vnctst.audio4/current-device-name)"
+   :js "vnctst.audio4.js.currentDeviceName()"
+   })
+
 
 ;;; misc 2
 
@@ -459,23 +472,32 @@
 
 
 
-
 (defn- sync-button-labels! []
-  (when-let [dom (js/document.getElementById "config-info")]
+  (when-let [dom (js/document.getElementById "terminal-flags")]
     (let [msg (if @display-js-mode?
-                (str "vnctst.audio4.js.setConfig("
-                     (string/join ", "
-                                  (map #(if (keyword? %)
-                                          (pr-str (name %))
-                                          (pr-str %))
-                                       config-options))
-                     ")")
-                (str "(vnctst.audio4/set-config! "
-                     (string/join " " (map pr-str config-options))
-                     ")"))]
+                (string/join ", " (map (comp pr-str name)
+                                       audio4/terminal-type))
+                (string/join " " (map pr-str audio4/terminal-type)))]
+      (set! (.. dom -textContent) msg)))
+  (sync-device-name!)
+  (when-let [dom (js/document.getElementById "config-info")]
+    (let [config-map (apply hash-map config-options)
+          msg (if @display-js-mode?
+                (string/join "; "
+                             (map (fn [[k v]]
+                                    (str "setConfig(" (pr-str (name k))
+                                         ", " (pr-str v) ")"))
+                                  config-map))
+                (string/join " "
+                             (map (fn [[k v]]
+                                    (str "(set-config! " k
+                                         " " (pr-str v) ")"))
+                                  config-map)))]
       (set! (.. dom -textContent) msg)))
   (when-let [dom (js/document.getElementById "preload-info")]
-    (let [msg (string/join ", " (map pr-str preload-pathes))]
+    (let [msg (if @display-js-mode?
+                (str "[" (string/join ", " (map pr-str preload-pathes)) "]")
+                (str "[" (string/join " " (map pr-str preload-pathes)) "]"))]
       (set! (.. dom -textContent) msg)))
   (doseq [[k m] (seq @button-assign)]
     (when-let [dom (js/document.getElementById (name k))]

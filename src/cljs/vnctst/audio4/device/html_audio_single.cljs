@@ -68,52 +68,82 @@
     a))
 
 
+;;; HtmlAudio対応が壊滅的なモバイル環境かどうか
+(def ^:private unavailable-mobile?
+  ;; androidもしくはiosである
+  (when (or
+          (:android util/terminal-type)
+          (:ios util/terminal-type))
+    ;; firefoxでもchromeでもない
+    (and
+      (not (:firefox util/terminal-type))
+      (not (:chrome util/terminal-type)))))
+
+;;; タッチでのアンロックが必要なモバイル環境かどうか
+(def ^:private need-unlock?
+  (and
+    (not unavailable-mobile?)
+    (or
+      (:mobile util/terminal-type)
+      (:android util/terminal-type)
+      (:ios util/terminal-type))))
+
 
 (defn init!? []
   (p 'init!?)
-  (if @audio-class
-    true
-    (let [ac (or
-               (aget js/window "Audio")
-               (aget js/window "webkitAudio"))
-          audio (when ac
-                  (or
-                    (try
-                      (new ac)
-                      (catch :default e
-                        nil))
-                    (try
-                      (new ac "")
-                      (catch :default e
-                        nil))))]
-      (when audio
-        (reset! audio-class ac)
-        (util/register-touch-unlock-fn!
-          (fn []
-            (doseq [as @locked-stack]
-              (try
-                (let [a (:audio as)
-                      playing-info @(:playing-info as)]
-                  ;; NB: アンロックする為には .load .play のどちらかを実行する。
-                  ;;     ただし、 .load するとAudioインスタンスの状態が
-                  ;;     初期化されてしまうし、 .play すると再生が開始する。
-                  ;;     そこで、以下の基準で処理を行う。
-                  ;;     - 現在既に再生中なら .play する。
-                  ;;       これは現在の再生状態に影響を与えない筈…
-                  ;;     - 現在再生中でないなら .load した上で必要な
-                  ;;       パラメータを再設定する。
-                  ; (:start-pos playing-info)
-                  ; (:begin-msec playing-info)
-                  ; (js/Date.now)
-                  (if (and playing-info (not (:end-msec playing-info)))
-                    (.play a)
-                    (reset-audio-instance! a)))
-                (catch :default e nil)))
-            (reset! locked-stack nil)
-            ;; NB: :html-audioでのアンロックはAudioインスタンス毎に
-            ;;     行う必要がある為、常に実行し続ける必要がある
-            false))
-        true))))
+  ;; NB: 古いandroidのデフォルトブラウザおよび、古いiosのsafariでの、
+  ;;     HtmlAudio対応は壊滅的(複数同時再生不可、音量変更不可、ループ不可、等々)
+  ;;     なので、完全に無効化する事にした。
+  ;;     最近の端末はWebAudioが実装され、そっちは問題ないようなので、
+  ;;     HtmlAudio利用＝古い端末という事で切り捨てる。
+  ;;     なお、古い端末であってもfirefoxやchromeの場合、HtmlAudio対応は
+  ;;     そこそこいけるようなので、これのみ特別扱いする事となった
+  (when-not unavailable-mobile?
+    (if @audio-class
+      true
+      (let [ac (or
+                 (aget js/window "Audio")
+                 (aget js/window "webkitAudio"))
+            audio (when ac
+                    (or
+                      (try
+                        (new ac)
+                        (catch :default e
+                          nil))
+                      (try
+                        (new ac "")
+                        (catch :default e
+                          nil))))]
+        (when audio
+          (reset! audio-class ac)
+          ;; モバイル環境でのみ、タッチによるアンロックを行う
+          (when need-unlock?
+            (util/register-touch-unlock-fn!
+              (fn []
+                (doseq [as @locked-stack]
+                  (try
+                    (let [a (:audio as)
+                          playing-info @(:playing-info as)]
+                      ;; NB: アンロックは .load .play のどちらかを実行。
+                      ;;     ただし、 .load するとAudioインスタンスの状態が
+                      ;;     初期化されてしまうし、 .play すると再生が開始する。
+                      ;;     そこで、以下の基準で処理を行う。
+                      ;;     - 現在既に再生中なら .play する。
+                      ;;       これは現在の再生状態に影響を与えない筈…
+                      ;;     - 現在再生中でないなら .load した上で必要な
+                      ;;       パラメータを再設定する。
+                      ; (:start-pos playing-info)
+                      ; (:begin-msec playing-info)
+                      ; (js/Date.now)
+                      (if (and playing-info (not (:end-msec playing-info)))
+                        (.play a)
+                        (reset-audio-instance! a)))
+                    (catch :default e nil)))
+                (reset! locked-stack nil)
+                ;; NB: :html-audioでのアンロックはAudioインスタンス毎に
+                ;;     行う必要がある為、常に実行し続ける必要がある
+                false)))
+          true)))))
 
 
 
@@ -146,7 +176,8 @@
     (reset! h-loaded (fn [e]
                        (when-not @(:loaded? as)
                          (reset! (:loaded? as) true)
-                         (swap! locked-stack conj as)
+                         (when need-unlock?
+                           (swap! locked-stack conj as))
                          (doseq [k handle-keys]
                            (.removeEventListener a k @h-loaded))
                          (loaded-handle as))))
@@ -386,6 +417,7 @@
    :set-pitch! set-pitch!
    :set-pan! set-pan!
    :dispose-audio-channel! dispose-audio-channel!
+   :name (constantly "html-audio-single")
    })
 
 

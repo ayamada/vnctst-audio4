@@ -107,6 +107,7 @@
    :set-pitch! set-pitch!
    :set-pan! set-pan!
    :dispose-audio-channel! dispose-audio-channel!
+   :name (constantly "dumb")
    })
 
 

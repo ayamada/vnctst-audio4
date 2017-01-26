@@ -53,7 +53,7 @@
 
 
 
-(defn ^:export getConfig [k] 
+(defn ^:export getConfig [k]
   (clj->js (audio4/config (keyword k))))
 
 (defn ^:export setConfig [k v]
@@ -63,25 +63,13 @@
 
 
 
-;;; 引数としてjs-objを受ける、古いサンプル
-;(defn- conv-kp [key-or-path]
-;  (if-not (= js/Object (type key-or-path))
-;    key-or-path
-;    (let [m (js->clj key-or-path)
-;          [k v] (first m)]
-;      ;(assert (= 1 (count m)))
-;      (assert (not (nil? k)) "k must be not null")
-;      (assert (not (nil? v)) "v must be not null")
-;      (keyword (str k) (str v)))))
-
-
-
 
 
 
 
 (def ^:export version (project-clj/get :version))
 
+;;; NB: jsではsetを扱えないので関数化しておく
 (defn ^:export hasTerminalType [k]
   (boolean (get audio4/terminal-type (keyword k))))
 
@@ -89,10 +77,9 @@
 (defn ^:export canPlayOgg [] (audio4/can-play-ogg?))
 (defn ^:export canPlayMp3 [] (audio4/can-play-mp3?))
 (defn ^:export canPlayM4a [] (audio4/can-play-m4a?))
-;
-;;;; 0.0～1.0 の値と 0～100 のパーセント値を相互変換する。ボリューム値用。
 (def ^:export floatToPercent audio4/float->percent)
 (def ^:export percentToFloat audio4/percent->float)
+(def ^:export currentDeviceName audio4/current-device-name)
 
 
 

@@ -610,6 +610,16 @@
      "この制約により、利用できる場面はかなり限定される。")
   )
 
+(defdesc :current-device-name
+  (p "当ライブラリ内部での再生デバイス名を文字列として返す。")
+  (p "具体的に返される値は以下のいずれか。")
+  [:ul
+   [:li [:code "web-audio"] " : WebAudio"]
+   [:li [:code "html-audio-multi"] " : HtmlAudio。SE多重再生サポートあり"]
+   [:li [:code "html-audio-single"] " : HtmlAudio。SE多重再生サポートなし"]
+   [:li [:code "dumb"] " : 無音"]
+   ])
+
 
 
 
@@ -708,13 +718,16 @@
                 [:hr]
                 ;; init実行時の情報表示
                 [:div
-                 [:span "以下の設定を実行しました："]
+                 [:span "この環境の端末フラグ："]
+                 [:code#terminal-flags "(terminal-flags)"]
                  [:br]
+                 [:span "使用デバイス名："]
+                 [:code#device-name "(device-name)"]
+                 [:br]
+                 [:span "事前設定された設定項目："]
                  [:code#config-info "(config-info)"]
                  [:br]
-                 [:br]
-                 [:span "以下の音源ファイルの事前ロードを実行しました："]
-                 [:br]
+                 [:span "事前ロードされた音源ファイル："]
                  [:code#preload-info "(preload-info)"]
                  ]
                 [:hr]
@@ -903,6 +916,7 @@
                  (demo-button2 :terminal-type)
                  (demo-button2 :float->percent)
                  (demo-button2 :percent->float)
+                 (demo-button2 :current-device-name)
                  ]
                 ;; prefetch
                 [:hr]

@@ -315,7 +315,10 @@
 (def float->percent util/float->percent)
 (def percent->float util/percent->float)
 
-
+;;; 現在利用しているデバイス名を文字列で返す
+(defn current-device-name []
+  (init!)
+  (device/call! :name))
 
 
 
