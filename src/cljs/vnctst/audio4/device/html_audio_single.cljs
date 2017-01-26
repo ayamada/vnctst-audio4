@@ -76,7 +76,11 @@
           (:ios util/terminal-type))
     ;; firefoxでもchromeでもない
     (and
-      (not (:firefox util/terminal-type))
+      ;; TODO: firefoxには(set! (.-loop a) true)が効いてない問題があり、
+      ;;       上手く対処できないので一時的に除外を無効化する。
+      ;;       問題があるのはこれのみなので、これさえ解決できれば
+      ;;       また除外対象に含めてもよい。
+      ;(not (:firefox util/terminal-type))
       (not (:chrome util/terminal-type)))))
 
 ;;; タッチでのアンロックが必要なモバイル環境かどうか
