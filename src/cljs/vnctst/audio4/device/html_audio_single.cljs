@@ -40,9 +40,32 @@
     (new ac url)))
 
 
-(defonce first-audio-url-for-touch-unlock (atom nil))
+(defonce locked-stack (atom nil))
 
 
+
+
+(defn- reset-audio-instance! [a]
+  (let [current-time (try
+                       (.-currentTime a)
+                       (catch :default e nil))
+        loop? (.-loop a)
+        volume (.-volume a)]
+    ;; NB: 各種プロパティ値およびハンドラは .load してもリセットされないようだ。
+    ;;     具体的には以下。
+    ;;     - .-currentTime
+    ;;     - .-loop
+    ;;     - .-volume
+    ;;     - .-playbackRate (現在未使用)
+    ;;     - その他、再生に関わるreadonlyなプロパティ値
+    (.load a)
+    (set! (.-loop a) loop?)
+    (set! (.-volume a) volume)
+    (when current-time
+      (try
+        (set! (.-currentTime a) current-time)
+        (catch :default e nil)))
+    a))
 
 
 
@@ -67,14 +90,29 @@
         (reset! audio-class ac)
         (util/register-touch-unlock-fn!
           (fn []
-            ;; NB: :html-audioでのアンロックには音源ファイルが必須なので、
-            ;;     何かしらプリロードされるまではアンロックできない
-            (when-let [url @first-audio-url-for-touch-unlock]
-              (let [a (new-audio url)]
-                (set! (.-volume a) 0)
-                (set! (.-loop a) false)
-                (.play a)
-                true))))
+            (doseq [as @locked-stack]
+              (try
+                (let [a (:audio as)
+                      playing-info @(:playing-info as)]
+                  ;; NB: アンロックする為には .load .play のどちらかを実行する。
+                  ;;     ただし、 .load するとAudioインスタンスの状態が
+                  ;;     初期化されてしまうし、 .play すると再生が開始する。
+                  ;;     そこで、以下の基準で処理を行う。
+                  ;;     - 現在既に再生中なら .play する。
+                  ;;       これは現在の再生状態に影響を与えない筈…
+                  ;;     - 現在再生中でないなら .load した上で必要な
+                  ;;       パラメータを再設定する。
+                  ; (:start-pos playing-info)
+                  ; (:begin-msec playing-info)
+                  ; (js/Date.now)
+                  (if (and playing-info (not (:end-msec playing-info)))
+                    (.play a)
+                    (reset-audio-instance! a)))
+                (catch :default e nil)))
+            (reset! locked-stack nil)
+            ;; NB: :html-audioでのアンロックはAudioインスタンス毎に
+            ;;     行う必要がある為、常に実行し続ける必要がある
+            false))
         true))))
 
 
@@ -108,10 +146,9 @@
     (reset! h-loaded (fn [e]
                        (when-not @(:loaded? as)
                          (reset! (:loaded? as) true)
+                         (swap! locked-stack conj as)
                          (doseq [k handle-keys]
                            (.removeEventListener a k @h-loaded))
-                         (when-not @first-audio-url-for-touch-unlock
-                           (reset! first-audio-url-for-touch-unlock url))
                          (loaded-handle as))))
     (doseq [k handle-keys]
       (.addEventListener a k @h-loaded))
@@ -135,12 +172,13 @@
       (when-not @(:loaded? as)
         (if (ready? a)
           (@h-loaded nil)
-          (if (< error-timeout-sec elapsed-sec)
-            (do
-              (reset! (:loaded? as) true)
-              (reset! (:error? as) true)
-              (error-handle (str "timeout to load url " url)))
-            (recur (inc elapsed-sec))))))
+          (do
+            (if (< error-timeout-sec elapsed-sec)
+              (do
+                (reset! (:loaded? as) true)
+                (reset! (:error? as) true)
+                (error-handle (str "timeout to load url " url)))
+              (recur (inc elapsed-sec)))))))
     as))
 
 (defn load-audio-source! [url loaded-handle error-handle]
