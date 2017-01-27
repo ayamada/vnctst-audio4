@@ -17,8 +17,10 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
 - [特徴](#特徴)
 - [使い方](#使い方)
 - [オンラインデモ](#オンラインデモ)
-- [TODO](#todo)
+- [対応環境マトリックス](#対応環境マトリックス)
 - [Development](#development)
+- [TODO](#todo)
+- [Link](#link)
 - [License](#license)
 - [ChangeLog](#changelog)
 
@@ -74,11 +76,37 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
 - http://vnctst.tir.jp/vnctst-audio4-demo/
 
 
-# TODO
+# 対応環境マトリックス
 
-- ロゴ画像をもっと良いものに作り直す
-- オンラインデモに英文切り替えボタンを追加
-- このドキュメントの英語版を作成
+- ◎ : 問題なし
+- ○ : おそらく問題なし、ただしハードスペックの低さによる問題があるかも
+- △ : 再生開始に遅延あり、BGMループ時に無音になる部分あり
+- × : あまりにも対応状況が悪い為、意図的に無効化(常に再生されない)
+
+分類はかなり適当です、すいません
+
+| OS種別           | ブラウザ     | 対応状況           |
+| ----------------:|:------------:| ------------------ |
+| windows          | chrome       | ◎ (WebAudio)      |
+| windows          | firefox      | ◎ (WebAudio)      |
+| windows          | ie9以降      | △ (HtmlAudio)     |
+| windows          | edge         | 未確認(おそらく◎) |
+| windows          | opera        | 未確認(おそらく◎) |
+| windows          | safari       | 未確認(おそらく△) |
+| ----------------:|:------------:| ------------------ |
+| mac              | chrome       | ◎ (WebAudio)      |
+| mac              | firefox      | ◎ (WebAudio)      |
+| mac              | safari       | ◎ (WebAudio)      |
+| ----------------:|:------------:| ------------------ |
+| android          | firefox      | ○ (WebAudio)      |
+| android5.0以降   | chrome       | ○ (WebAudio)      |
+| android4.4.4以前 | chrome       | △ (HtmlAudio)     |
+| android4.4.2以前 | 標準ブラウザ | ×                 |
+| ----------------:|:------------:| ------------------ |
+| ios(7以降？)     | chrome       | ○ (WebAudio)      |
+| ios(7以降？)     | safari       | ○ (WebAudio)      |
+| 古いios(6以前？) | chrome       | △ (HtmlAudio)     |
+| 古いios(6以前？) | safari       | ×                 |
 
 
 # Development
@@ -86,6 +114,13 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
 `vnctst-audio4` 自体の開発手順については [DEVEL.md](DEVEL.md) を参照。
 
 cljs開発の知識がある事が前提。
+
+
+# TODO
+
+- ロゴ画像をもっと良いものに作り直す
+- オンラインデモに英文切り替えボタンを追加
+- このドキュメントの英語版を作成
 
 
 # Link
@@ -113,11 +148,15 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
-<!--
-- 0.1.1-SNAPSHOT (XXXX-XX-XX 次リリース予定)
-    - ？？？
--->
-
-- 0.1.0-SNAPSHOT (XXXX-XX-XX 現在作成中)
-    - [vnctst-audio3](https://github.com/ayamada/vnctst-audio3)をベースに開発を開始
+- 0.1.0 (2017-01-27)
+    - 初回リリース。以下は [vnctst-audio3](https://github.com/ayamada/vnctst-audio3) からの変更点
+    - モバイル環境での再生対応の大幅な強化
+    - RPGアツマール環境での再生への対応
+    - BGSを廃止し、`channel`オプション指定により好きな数だけBGMの多重再生を可能とした
+    - MEを廃止し、`oneshot?`オプション指定により任意のBGMの非ループ再生を可能とした
+    - 再生関数のオプション引数の指定方法をキーワード指定へと変更
+    - 再生対象pathのキーワード指定は非標準とし、文字列指定を標準とする
+    - 前述の変更に伴い、再生対象音源種別の自動判定機能は`.*`拡張子による指定で行う
+    - コンパイルフェーズでのファイル一覧取得のインターフェース変更
+    - 使い方に関するドキュメントを、オンラインデモ内へと統合
 
