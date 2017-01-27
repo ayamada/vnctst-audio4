@@ -321,7 +321,7 @@
 (defdesc :set-config-disable-htmlaudio?-true
   (p "trueを設定する事で、HtmlAudioによる音源再生を禁止する"
      "(初期値はfalse)。")
-  (p "概要については上の" [:code "disable-htmlaudio?"] "の項目を参照。")
+  (p "概要については上の" [:code "disable-webaudio?"] "の項目を参照。")
   (p "この値を変更した場合は内部状態をリセットする必要がある為、"
      "全ての再生中音源は停止され、"
      "また全てのロード済音源もアンロードされる。")
