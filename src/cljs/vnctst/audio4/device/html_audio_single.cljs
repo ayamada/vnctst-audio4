@@ -16,6 +16,21 @@
   (<= 2 (.-readyState a)))
 
 
+
+(defn- set-loop-listener [e]
+  (let [a (.-currentTarget e)]
+    (set! (.-currentTime a) 0)
+    (.play a)))
+
+(defn- set-loop! [a loop?]
+  (if (boolean (.-loop a))
+    (set! (.-loop a) (boolean loop?))
+    (if loop?
+      (.addEventListener a "ended" set-loop-listener false)
+      (.removeEventListener a "ended" set-loop-listener false))))
+
+
+
 ;;; 実装について
 ;;; - html-audio-single は「単一再生のみでよい」ので、
 ;;;   audio-source = audio-channel という構造とし、
@@ -45,23 +60,23 @@
 
 
 
-(defn- reset-audio-instance! [a]
+(defn- reset-audio-instance! [a loop?]
   (let [current-time (try
                        (.-currentTime a)
-                       (catch :default e nil))
-        loop? (.-loop a)
+                       (catch :default e 0))
         volume (.-volume a)]
     ;; NB: 各種プロパティ値およびハンドラは .load してもリセットされないようだ。
-    ;;     具体的には以下。
+    ;;     .load するとリセットされる可能性のある状態は、具体的には以下。
     ;;     - .-currentTime
     ;;     - .-loop
     ;;     - .-volume
     ;;     - .-playbackRate (現在未使用)
     ;;     - その他、再生に関わるreadonlyなプロパティ値
     (.load a)
-    (set! (.-loop a) loop?)
-    (set! (.-volume a) volume)
-    (when current-time
+    (set-loop! a loop?)
+    (when volume
+      (set! (.-volume a) volume))
+    (when-not (zero? (or current-time 0))
       (try
         (set! (.-currentTime a) current-time)
         (catch :default e nil)))
@@ -76,10 +91,12 @@
           (:ios util/terminal-type))
     ;; firefoxでもchromeでもない
     (and
-      ;; TODO: firefoxには(set! (.-loop a) true)が効いてない問題があり、
-      ;;       上手く対処できないので一時的に除外を無効化する。
+      ;; TODO: モバイル版firefoxのHtmlAudioには、ループ再生時に
+      ;;       一度でもループ部まで再生した音源を、一度停止させた後に、
+      ;;       次から再生ができなくなるという問題がある。
+      ;;       上手く対処できないので一時的にサポート対象外とする。
       ;;       問題があるのはこれのみなので、これさえ解決できれば
-      ;;       また除外対象に含めてもよい。
+      ;;       またサポート対象に含めてもよい。
       ;(not (:firefox util/terminal-type))
       (not (:chrome util/terminal-type)))))
 
@@ -141,7 +158,7 @@
                       ; (js/Date.now)
                       (if (and playing-info (not (:end-msec playing-info)))
                         (.play a)
-                        (reset-audio-instance! a)))
+                        (reset-audio-instance! a (:loop? playing-info))))
                     (catch :default e nil)))
                 (reset! locked-stack nil)
                 ;; NB: :html-audioでのアンロックはAudioインスタンス毎に
@@ -300,7 +317,7 @@
       (if (ready? a)
         (do
           ;(.pause a)
-          (set! (.-loop a) (boolean loop?))
+          (set-loop! a loop?)
           (_set-pitch! a pitch)
           ;; NB: seekよりも先にplayの実行が必要となる環境があるらしい。
           ;;     しかしそうでない環境ではseekを優先したい
@@ -343,6 +360,7 @@
               (reset! (:playing-info @ch) {:start-pos start-pos
                                            :begin-msec (js/Date.now)
                                            :end-msec nil
+                                           :loop? loop?
                                            })))
           ;; 非ループ時は、再生終了時に状態を変更するgoスレッドを起動する
           (when-not loop?
