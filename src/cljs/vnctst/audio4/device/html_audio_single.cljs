@@ -5,29 +5,6 @@
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
-(def ^:dynamic p-key :html-audio-single)
-
-(defn- p [& args]
-  (when entry-table/device-log-verbose?
-    (util/logging p-key args)))
-
-
-(defn- ready? [a]
-  (<= 2 (.-readyState a)))
-
-
-
-(defn- set-loop-listener [e]
-  (let [a (.-currentTarget e)]
-    (set! (.-currentTime a) 0)
-    (.play a)))
-
-(defn- set-loop! [a loop?]
-  (if (boolean (.-loop a))
-    (set! (.-loop a) (boolean loop?))
-    (if loop?
-      (.addEventListener a "ended" set-loop-listener false)
-      (.removeEventListener a "ended" set-loop-listener false))))
 
 
 
@@ -40,10 +17,65 @@
 
 
 
-;;; イベントが発火しない環境がある為、ロードがこの秒数待っても終わらない場合は
-;;; 強制的にロード失敗扱いにする
+;;; errorイベントが発火しない環境がある為、
+;;; ロードがこの秒数待っても終わらない場合は強制的にロード失敗扱いにする
 (def ^:private error-timeout-sec 65)
 
+
+
+
+(def ^:dynamic p-key :html-audio-single)
+
+(defn- p [& args]
+  (when entry-table/device-log-verbose?
+    (util/logging p-key args)))
+
+
+
+
+(def ^:private loaded-handle-keys
+  ["loadeddata"
+   "canplay"
+   ;; 環境によっては、以下での判定になるものがあるらしい、
+   ;; しかしこれらを設定すると他の環境で誤判定になるので、
+   ;; これらについては諦めてタイマーでの検知とする
+   ;"suspend"
+   ;"stalled"
+   ])
+
+
+(defn- ready? [a]
+  (<= 2 (.-readyState a)))
+
+
+
+
+
+
+;;; seek動作が不完全な端末の為の対応。
+;;; どうしてもseekできないパターンもあり、その場合は0からのスタートとなる。
+;;; (途中からの再生が必要になるのは、現状では
+;;; backgroundからの復帰時のみで、
+;;; その場合は曲の最初から再生し直しても大きな問題はない)
+;;; seekが失敗した場合にstart-posが変更された事を示す為に、
+;;; この関数は返り値として、実際に設定したstart-posを返す。
+(defn- play-with-seek! [a start-pos]
+  (let [done-pre-seek? (try
+                         (set! (.-currentTime a) start-pos)
+                         true
+                         (catch :default e false))]
+    (try
+      (.play a)
+      (catch :default e nil))
+    ;; NB: seekに失敗している場合は再度挑戦する。
+    ;;     また二度目のseekにも失敗した場合は、前述の通り、
+    ;;     start-posが0だったものとして続行する。
+    (if done-pre-seek?
+      start-pos
+      (try
+        (set! (.-currentTime a) start-pos)
+        start-pos
+        (catch :default e 0)))))
 
 
 
@@ -60,11 +92,16 @@
 
 
 
-(defn- reset-audio-instance! [a loop?]
+;;; NB: この処理はfirefoxのended内で実行すると、内部で謎のundefined例外を
+;;;     投げるようだ(stacktraceなし)。よく分からないので、ended内では
+;;;     実行しないようにする事
+(defn- reset-audio-instance! [a]
   (let [current-time (try
                        (.-currentTime a)
                        (catch :default e 0))
-        volume (.-volume a)]
+        volume (try
+                 (.-volume a)
+                 (catch :default e nil))]
     ;; NB: 各種プロパティ値およびハンドラは .load してもリセットされないようだ。
     ;;     .load するとリセットされる可能性のある状態は、具体的には以下。
     ;;     - .-currentTime
@@ -73,7 +110,6 @@
     ;;     - .-playbackRate (現在未使用)
     ;;     - その他、再生に関わるreadonlyなプロパティ値
     (.load a)
-    (set-loop! a loop?)
     (when volume
       (set! (.-volume a) volume))
     (when-not (zero? (or current-time 0))
@@ -97,6 +133,7 @@
       ;;       上手く対処できないので一時的にサポート対象外とする。
       ;;       問題があるのはこれのみなので、これさえ解決できれば
       ;;       またサポート対象に含めてもよい。
+      ;;       (terminal-typeの判定で特別扱いしてもよいのだが…)
       ;(not (:firefox util/terminal-type))
       (not (:chrome util/terminal-type)))))
 
@@ -158,7 +195,7 @@
                       ; (js/Date.now)
                       (if (and playing-info (not (:end-msec playing-info)))
                         (.play a)
-                        (reset-audio-instance! a (:loop? playing-info))))
+                        (reset-audio-instance! a)))
                     (catch :default e nil)))
                 (reset! locked-stack nil)
                 ;; NB: :html-audioでのアンロックはAudioインスタンス毎に
@@ -185,24 +222,19 @@
             :loaded? (atom false)
             :playing-info (atom nil)
             :play-request (atom nil)
-            }
-        handle-keys ["loadeddata"
-                     "canplay"
-                     ;; 環境によっては、以下での判定になるものがあるらしい、
-                     ;; しかしこれらを設定すると他の環境で誤判定になるので、
-                     ;; これらについては諦めてタイマーでの検知とする
-                     ;"suspend"
-                     ;"stalled"
-                     ]]
+            :h-loaded h-loaded
+            :h-error h-error
+            :h-ended h-ended
+            }]
     (reset! h-loaded (fn [e]
                        (when-not @(:loaded? as)
                          (reset! (:loaded? as) true)
                          (when need-unlock?
                            (swap! locked-stack conj as))
-                         (doseq [k handle-keys]
+                         (doseq [k loaded-handle-keys]
                            (.removeEventListener a k @h-loaded))
                          (loaded-handle as))))
-    (doseq [k handle-keys]
+    (doseq [k loaded-handle-keys]
       (.addEventListener a k @h-loaded))
     (reset! h-error (fn [e]
                       (when-not @(:loaded? as)
@@ -212,7 +244,16 @@
                         (error-handle (str "cannot load url " url)))))
     (.addEventListener a "error" @h-error)
     (reset! h-ended (fn [e]
-                      (reset! (:playing-info as) nil)))
+                      (when-let [pi @(:playing-info as)]
+                        (if-not (:loop? pi)
+                          (swap! (:playing-info as) assoc
+                                 :end-msec (js/Date.now))
+                          (when-not (:end-msec pi)
+                            (when-not (or
+                                        (:firefox util/terminal-type)
+                                        (:chrome util/terminal-type))
+                              (reset-audio-instance! a))
+                            (play-with-seek! a 0))))))
     (.addEventListener a "ended" @h-ended)
     (set! (.-preload a) "auto")
     (set! (.-autoplay a) false)
@@ -243,12 +284,24 @@
 (defn dispose-audio-source! [audio-source]
   (p 'dispose-audio-source! (:url audio-source))
   (when-let [a (:audio audio-source)]
-    (try
-      (set! (.-src a) "")
-      (catch :default e nil))
-    (try
-      (.load a)
-      (catch :default e nil))))
+    ;; NB: _load-audio-source! で設定しているハンドルが環状参照になっている為、
+    ;;     それを壊す必要がある
+    (let [h-loaded @(:h-loaded audio-source)
+          h-error @(:h-error audio-source)
+          h-ended @(:h-ended audio-source)]
+      (doseq [k loaded-handle-keys]
+        (.removeEventListener a k h-loaded))
+      (.removeEventListener a "error" h-error)
+      (.removeEventListener a "ended" h-ended))
+    ;; モバイル環境では、明示的な解放を行う
+    ;; (PC向けだとコンソールにエラーが出るので避ける)
+    (when need-unlock?
+      (try
+        (set! (.-src a) "")
+        (catch :default e nil))
+      (try
+        (.load a)
+        (catch :default e nil)))))
 
 
 
@@ -305,6 +358,9 @@
   ;  (catch :default e nil))
   nil)
 
+
+
+
 (defn play! [ch start-pos loop? volume pitch pan alarm?]
   (p 'play! (:url @ch) start-pos loop? volume pitch pan alarm?)
   (when-not @(:error? @ch)
@@ -317,7 +373,6 @@
       (if (ready? a)
         (do
           ;(.pause a)
-          (set-loop! a loop?)
           (_set-pitch! a pitch)
           ;; NB: seekよりも先にplayの実行が必要となる環境があるらしい。
           ;;     しかしそうでない環境ではseekを優先したい
@@ -328,41 +383,16 @@
           ;;     一瞬聴こえてしまう問題がある。ので、初回はvolume=0にしておき、
           ;;     seekが上手くいってから改めてボリュームを再設定する
           (set! (.-volume a) 0)
-          ;; NB: seekが上手く機能しない(=常に0扱いになる)環境があるようだ
-          ;;     (前述のseek不可環境か？)。
-          ;;     しかし途中からの再生が必要になるのは、現状では
-          ;;     backgroundからの復帰時のみで、
-          ;;     その場合は曲の最初から再生し直しても大きな問題はないので、
-          ;;     上手く動かない環境でも、現状ではこれでよいという事にする。
-          ;;     (将来に「途中ポイントからの再生」を外部に提供しようと
-          ;;     考えた場合には問題になるので注意)
           (let [start-pos (if (and start-pos (pos? start-pos)) start-pos 0)
-                done-pre-seek? (try
-                                 (set! (.-currentTime a) start-pos)
-                                 true
-                                 (catch :default e false))]
-            (when done-pre-seek?
-              (set! (.-volume a) volume))
-            (try
-              (.play a)
-              (catch :default e nil))
-            ;; NB: seekに失敗している場合は再度挑戦する。
-            ;;     また二度目のseekにも失敗した場合は、前述の通り、
-            ;;     start-posが0だったものとして続行する。
-            (let [start-pos (if done-pre-seek?
-                              start-pos
-                              (try
-                                (set! (.-currentTime a) start-pos)
-                                start-pos
-                                (catch :default e 0)))]
-              (when-not done-pre-seek?
-                (set! (.-volume a) volume))
-              (reset! (:playing-info @ch) {:start-pos start-pos
-                                           :begin-msec (js/Date.now)
-                                           :end-msec nil
-                                           :loop? loop?
-                                           })))
+                start-pos (play-with-seek! a start-pos)]
+            (set! (.-volume a) volume)
+            (reset! (:playing-info @ch) {:start-pos start-pos
+                                         :begin-msec (js/Date.now)
+                                         :end-msec nil
+                                         :loop? loop?
+                                         }))
           ;; 非ループ時は、再生終了時に状態を変更するgoスレッドを起動する
+          ;; (endedイベント非対応の環境がある為)
           (when-not loop?
             (go-loop []
               (<! (async/timeout 888))
