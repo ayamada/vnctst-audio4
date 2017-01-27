@@ -64,6 +64,9 @@ ayamada 以外の人がコードを書く場合は、こちらの記事を参照
 
 7. clojarsにデプロイする
     - `lein deploy clojars`
+    - gnupg2からは、macでエラーが出る場合がある
+        - 詳細は http://d.hatena.ne.jp/tullio/20140418/1398001183 に解説があった
+        - 記事にある通り、`tty`にパーミッションを付け、`gpg-agent`を起動すれば通る。実行後はパーミッションを元に戻しておく事。また`gpg-agent`のプロセスもkillしておくとよい
 
 8. タグをふる
     - `git tag -a 0.1.2 -m 'Tag description'`
