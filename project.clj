@@ -48,11 +48,11 @@
                [['figwheel figwheel-version]])))
 
 
-(defproject jp.ne.tir/vnctst-audio4 "0.1.0-SNAPSHOT"
+(defproject jp.ne.tir/vnctst-audio4 "0.1.0"
   :min-lein-version "2.5.0"
-  :description "audio playback library for html5 game"
+  :description "Audio playback library for html5 game"
   :url "https://github.com/ayamada/vnctst-audio4"
-  :license {:name "zlib License"
+  :license {:name "Zlib License"
             :url "https://opensource.org/licenses/Zlib"}
   :dependencies [[org.clojure/core.async "0.2.395"]]
   :source-paths ["src/cljs"]
