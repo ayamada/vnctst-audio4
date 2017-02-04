@@ -784,6 +784,7 @@
                       [:code (pr-str ['jp.ne.tir/vnctst-audio4
                                       (project-clj/get :version)])]
                       "を追加"
+                      [:br]
                       "("
                       (a "https://clojars.org/jp.ne.tir/vnctst-audio4"
                          "stable releaseの最新版はclojars")
