@@ -4,9 +4,9 @@
 ;;; 共有すべき内部状態を保持する
 
 (def ^:private initial-state
-  {:volume-master 0.5
-   :volume-bgm 0.5
-   :volume-se 0.5
+  {:volume-master 0.6
+   :volume-bgm 0.6
+   :volume-se 0.6
    :autoext-list ["ogg" "mp3" "m4a"]
    :debug? false
    :debug-verbose? false

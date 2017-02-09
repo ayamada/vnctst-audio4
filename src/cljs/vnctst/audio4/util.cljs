@@ -132,8 +132,8 @@
                      :se :volume-se} mode)
         _ (assert volume-key (str "Invalid mode " mode))
         i-volume (max 0 (min 1 (* (or volume 1)
-                                  (state/get :volume-master 0.5)
-                                  (state/get volume-key 0.5))))
+                                  (state/get :volume-master 0.6)
+                                  (state/get volume-key 0.6))))
         i-pitch (max 0.1 (min 10 (or pitch 1)))
         i-pan (max -1 (min 1 (or pan 0)))]
     [i-volume i-pitch i-pan]))
