@@ -152,17 +152,37 @@
       true)))
 
 
+(defonce ^:dynamic dont-process-next-bgm? false)
+
 (defn unload! [path]
   (init!)
   (when-not (empty-path? path)
-    (let [path (util/path-key->path path)]
-      ;; NB: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
-      ;;     これを鳴らしているチャンネルがないかどうか調べ、
-      ;;     もしあれば即座に停止させる必要がある。
-      ;;     この処理はcache側には入れられない(モジュール参照の都合で)
+    ;; NB: まだ鳴っている最中に呼ばないように、このタイミングでBGM/SEで
+    ;;     これを鳴らしているチャンネルがないかどうか調べ、
+    ;;     もしあれば即座に停止させる必要がある。
+    ;;     この処理はcache側には入れられない(モジュール参照の都合で)。
+    ;;     またrace conditionwだが、「対象が現在再生中のBGM」かつ
+    ;;     「フェードアウト中」かつ「次のBGMが予約済」かつ
+    ;;     「unload-all!からの呼び出しでない」全てを満たすのであれば、
+    ;;     BGMの停止後に「次のBGM」を再生する。
+    (let [path (util/path-key->path path)
+          next-bgm-options (when-not dont-process-next-bgm?
+                             (doall
+                               (filter identity
+                                       (map (fn [[ch m]]
+                                              (and
+                                                @m
+                                                (= path (:path (:current-param @m)))
+                                                (neg? (:fade-delta @m))
+                                                (when-let [np (:next-param @m)]
+                                                  (assoc np :channel ch))))
+                                            @bgm/channel-state-table))))]
       (bgm/stop-for-unload! path)
       (se/unload! path)
       (cache/unload! path)
+      (doseq [o next-bgm-options]
+        ;; TODO: 一瞬再生された後ですぐ止まってしまった。どうすればよい？
+        (bgm/play! (:path o) o))
       true)))
 
 
@@ -176,8 +196,9 @@
 
 (defn unload-all! []
   (init!)
-  (doseq [path (cache/all-pathes)]
-    (unload! path)))
+  (binding [dont-process-next-bgm? true]
+    (doseq [path (cache/all-pathes)]
+      (unload! path))))
 
 
 

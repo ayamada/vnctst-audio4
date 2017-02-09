@@ -18,7 +18,7 @@
 ;;; channel-state-table の値は「nilもしくは以下のkeyを持つmap」のatomが入る
 ;;; - :fade-factor ; 通常は 1.0、フェード中のみ変化する
 ;;; - :fade-delta ; 通常は0。基本となるフェード量が設定される
-;;; - :fade-process ; フェードを進めるgoスレッド、通常はnil
+;;; - :fade-process ; フェードを進めるgoスレッドを止めるch、通常はnil
 ;;; - :current-param ; :path :volume :pan :pitch :oneshot? :fadein :as :ac
 ;;;   を持つ map
 ;;; - :next-param ; 「次の曲」。内容は :current-param と同様。「ロード中」を
@@ -167,6 +167,9 @@
         (when-not (state/get :in-background?)
           (device/call! :stop! ac))
         (device/call! :dispose-audio-channel! ac))
+      ;; フェードプロセスが生きているなら、それも止める
+      (when-let [fp (:fade-process @state)]
+        (async/put! fp true))
       (reset! state nil))))
 
 
@@ -176,41 +179,45 @@
     (let [interval-msec fade-granularity-msec
           c (async/chan)]
       (go-loop []
-        (<! (async/timeout interval-msec))
-        (let [ac (:ac (:current-param @state))
+        (let [shutdown? (alt!
+                          (async/timeout interval-msec) false
+                          c true)
+              ac (:ac (:current-param @state))
               delta (:fade-delta @state)]
-          (if (or
-                ;; バックグラウンド中は再生状態に関わらず、進めてはいけない
-                (state/get :in-background?)
-                ;; フェードの向きがinかつ再生準備中なら再生が開始されるまで待つ
-                (and ac (pos? delta) (device/call! :preparing? ac)))
-            (recur)
-            (when @state
-              (let [new-factor (max 0 (min 1 (+ delta (:fade-factor @state))))
-                    end-value (if (pos? delta) 1 0)]
-                (when-not (zero? delta)
-                  (swap! state assoc :fade-factor new-factor)
-                  (sync-state-volume! state))
-                (if (and
-                      (not (zero? delta))
-                      (not= end-value new-factor))
-                  (recur)
-                  (do
-                    (swap! state assoc :fade-process nil)
-                    ;; フェードアウト完了時のみ、
-                    ;; 次の曲が指定されているなら対応する必要がある
-                    (when (zero? end-value)
-                      (let [next-param (:next-param @state)]
-                        (_stop-immediately! state)
-                        (when next-param
-                          (_load+play! bgm-ch
-                                       state
-                                       (:path next-param)
-                                       (:volume next-param)
-                                       (:pitch next-param)
-                                       (:pan next-param)
-                                       (:oneshot? next-param)
-                                       (:fadein next-param))))))))))))
+          (if shutdown?
+            nil
+            (if (or
+                  ;; バックグラウンド中は再生状態に関わらず、進めてはいけない
+                  (state/get :in-background?)
+                  ;; フェードの向きがinかつ再生準備中なら再生開始まで待つ
+                  (and ac (pos? delta) (device/call! :preparing? ac)))
+              (recur)
+              (when @state
+                (let [new-factor (max 0 (min 1 (+ delta (:fade-factor @state))))
+                      end-value (if (pos? delta) 1 0)]
+                  (when-not (zero? delta)
+                    (swap! state assoc :fade-factor new-factor)
+                    (sync-state-volume! state))
+                  (if (and
+                        (not (zero? delta))
+                        (not= end-value new-factor))
+                    (recur)
+                    (do
+                      (swap! state assoc :fade-process nil)
+                      ;; フェードアウト完了時のみ、
+                      ;; 次の曲が指定されているなら対応する必要がある
+                      (when (zero? end-value)
+                        (let [next-param (:next-param @state)]
+                          (_stop-immediately! state)
+                          (when next-param
+                            (_load+play! bgm-ch
+                                         state
+                                         (:path next-param)
+                                         (:volume next-param)
+                                         (:pitch next-param)
+                                         (:pan next-param)
+                                         (:oneshot? next-param)
+                                         (:fadein next-param)))))))))))))
       (swap! state assoc :fade-process c))))
 
 
