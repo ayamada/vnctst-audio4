@@ -31,7 +31,7 @@
           :pretty-print true
           }))
 
-(def figwheel-version "0.5.8")
+(def figwheel-version "0.5.9")
 
 (def plugins-cljs-prod '[[lein-cljsbuild "1.1.5"]])
 
@@ -40,7 +40,7 @@
 
 (def dependencies-cljs-prod
   '[[org.clojure/clojure "1.8.0"]
-    [org.clojure/clojurescript "1.9.293"]
+    [org.clojure/clojurescript "1.9.456"]
     [jp.ne.tir/project-clj "0.1.6"]])
 
 (def dependencies-cljs-dev
@@ -83,7 +83,7 @@
                                    [jp.ne.tir/project-clj "0.1.6"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["resources"]
-                    :plugins [[lein-ring "0.10.0"]]
+                    :plugins [[lein-ring "0.11.0"]]
                     :ring {:port 8004
                            :handler vnctst.audio4.demo.server/handler}}
              :for-js {:dependencies ~dependencies-cljs-prod
