@@ -84,6 +84,7 @@ ayamada 以外の人がコードを書く場合は、こちらの記事を参照
     - `git checkout master`
     - `git merge dev`
     - `git push`
+    - `git checkout dev`
 
 13. github側にて、リリース版の `vnctst-audio4.js` をダウンロード可能にする。
     - https://github.com/ayamada/vnctst-audio4/releases にて
