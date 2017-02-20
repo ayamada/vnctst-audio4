@@ -51,6 +51,7 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
     - 具体的には http://ch.nicovideo.jp/indies-game/blomaga/ar1156958 と同等の対応を行うようにしてある。
     - ただし2017年1月現在、「ツクールMV以外で作成したゲームをRPGアツマール上で実行する」事自体がまだexperimentalな扱いである事に注意。
         - この件についての詳細は http://qiita.com/hajimehoshi/items/2a28b16a2e587c82ac5d の記事が詳しい(2017年1月現在)。
+        - http://ch.nicovideo.jp/indies-game/blomaga/ar1163608 に「ツクールMV以外のhtml5ベースのシステムからアツマールの機能を利用する為のAPI」が公開されている。
 
 - ライセンスとして[zlib](https://ja.wikipedia.org/wiki/Zlib_License)風ライセンスを採用
     - 当ライブラリの利用時にcopyright文等を表示させる義務はない。
