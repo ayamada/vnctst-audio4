@@ -40,7 +40,7 @@
 
 (def dependencies-cljs-prod
   '[[org.clojure/clojure "1.8.0"]
-    [org.clojure/clojurescript "1.9.456"]
+    [org.clojure/clojurescript "1.9.495"]
     [jp.ne.tir/project-clj "0.1.6"]])
 
 (def dependencies-cljs-dev
@@ -54,7 +54,7 @@
   :url "https://github.com/ayamada/vnctst-audio4"
   :license {:name "Zlib License"
             :url "https://opensource.org/licenses/Zlib"}
-  :dependencies [[org.clojure/core.async "0.2.395"]]
+  :dependencies [[org.clojure/core.async "0.3.441"]]
   :source-paths ["src/cljs"]
   :clean-targets ^{:protect false} [:target-path
                                     :compile-path
