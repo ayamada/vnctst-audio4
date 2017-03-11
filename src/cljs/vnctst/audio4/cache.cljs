@@ -56,7 +56,7 @@
 (defn error? [path]
   (and
     (loaded? path)
-    (not (boolean (get @loaded-audiosource-table path)))))
+    (not (get @loaded-audiosource-table path))))
 
 ;;; ロードされたasを取得する
 (defn get-as [path]
@@ -217,7 +217,7 @@
                                    (load-internal! k))
                                  (go-loop []
                                    (when-not (loaded? k)
-                                     (<! (async/timeout 333))
+                                     (<! (async/timeout 33))
                                      (recur)))))
     true))
 
