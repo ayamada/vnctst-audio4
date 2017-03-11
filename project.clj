@@ -40,7 +40,7 @@
 
 (def dependencies-cljs-prod
   '[[org.clojure/clojure "1.8.0"]
-    [org.clojure/clojurescript "1.9.495"]
+    [org.clojure/clojurescript "1.9.456"]
     [jp.ne.tir/project-clj "0.1.6"]])
 
 (def dependencies-cljs-dev
