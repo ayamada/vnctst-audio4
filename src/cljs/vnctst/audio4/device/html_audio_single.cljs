@@ -16,6 +16,17 @@
 
 
 
+(def ^:private can-use-loop-property?
+  ;; ieなら .-loop プロパティを使う必要がある
+  ;; (onendイベントは負荷が高いと発動しない時があるようだ)
+  ;; HtmlAudioになるのは、ie, 古androidのchrome, 古iosのchrome。
+  ;; とりあえずこれらの環境で確認したところ問題なかったので、
+  ;; すべての環境で .-loop を使うようにしたが、
+  ;; もしこれだと問題のある(そしてonendなら問題のない)環境があれば、
+  ;; その通りの判定になるように実装する必要がある。
+  true
+  )
+
 
 ;;; errorイベントが発火しない環境がある為、
 ;;; ロードがこの秒数待っても終わらない場合は強制的にロード失敗扱いにする
@@ -101,7 +112,12 @@
                        (catch :default e 0))
         volume (try
                  (.-volume a)
-                 (catch :default e nil))]
+                 (catch :default e nil))
+        loop-value (when can-use-loop-property?
+                     (try
+                       (.-volume a)
+                       (catch :default e nil)))
+        ]
     ;; NB: 各種プロパティ値およびハンドラは .load してもリセットされないようだ。
     ;;     .load するとリセットされる可能性のある状態は、具体的には以下。
     ;;     - .-currentTime
@@ -112,6 +128,8 @@
     (.load a)
     (when volume
       (set! (.-volume a) volume))
+    (when can-use-loop-property?
+      (set! (.-loop a) loop-value))
     (when-not (zero? (or current-time 0))
       (try
         (set! (.-currentTime a) current-time)
@@ -254,7 +272,9 @@
                                         (:chrome util/terminal-type))
                               (reset-audio-instance! a))
                             (play-with-seek! a 0))))))
-    (.addEventListener a "ended" @h-ended)
+    (if can-use-loop-property?
+      (set! (.-loop a) (boolean (:loop? @(:playing-info as))))
+      (.addEventListener a "ended" @h-ended))
     (set! (.-preload a) "auto")
     (set! (.-autoplay a) false)
     (set! (.-muted a) false)
@@ -386,6 +406,8 @@
           (let [start-pos (if (and start-pos (pos? start-pos)) start-pos 0)
                 start-pos (play-with-seek! a start-pos)]
             (set! (.-volume a) volume)
+            (when can-use-loop-property?
+              (set! (.-loop a) (boolean loop?)))
             (reset! (:playing-info @ch) {:start-pos start-pos
                                          :begin-msec (js/Date.now)
                                          :end-msec nil
