@@ -17,6 +17,7 @@
    :se-chattering-sec 0.05
    :default-bgm-fade-sec 1
    :default-se-fade-sec 0
+   :additional-query-string nil
    })
 
 (defonce ^:private the-state (atom initial-state))

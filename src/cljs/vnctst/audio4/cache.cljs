@@ -34,6 +34,18 @@
 
 
 
+;;; :additional-query-string への対応。
+;;; deviceにurlを渡す直前でのみ、この処理を行う事。
+;;; (device以外では、urlがkeyとして使われる為)
+(defn- disturb-cache-url [url]
+  (if-let [aqs (state/get :additional-query-string)]
+    (let [[_ before-fragment fragment] (re-find #"^([^#]*)(#.*)$" url)
+          url (or before-fragment url)
+          has-query-string? (re-find #"\?" url)
+          combinator (if has-query-string? "&" "?")]
+      (str url combinator aqs fragment))
+    url))
+
 
 
 
@@ -150,7 +162,7 @@
                             (swap! left-real-pathes rest)
                             (if-let [next-real-path (first @left-real-pathes)]
                               (device/call! :load-audio-source!
-                                            next-real-path
+                                            (disturb-cache-url next-real-path)
                                             h-ok
                                             @h-err)
                               (do
@@ -164,7 +176,7 @@
                                 (swap! loading-info-table dissoc path))))))
                 (swap! loading-info-table assoc path info)
                 (device/call! :load-audio-source!
-                              start-real-path
+                              (disturb-cache-url start-real-path)
                               h-ok
                               @h-err)))))))))
 

@@ -293,6 +293,7 @@
                          (unload-all!)
                          (state/set! k v)
                          (init-force!))
+   :additional-query-string state/set!
    })
 
 

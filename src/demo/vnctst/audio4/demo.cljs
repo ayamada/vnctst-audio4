@@ -268,6 +268,12 @@
    :js "vnctst.audio4.js.setConfig(\"disable-htmlaudio?\", true)"
    })
 
+(defba :set-config-additional-query-string
+  {:fn #(vnctst.audio4/set-config! :additional-query-string "01234567")
+   :cljs "(vnctst.audio4/set-config! :additional-query-string \"01234567\")"
+   :js "vnctst.audio4.js.setConfig(\"additional-query-string\", \"01234567\")"
+   })
+
 
 ;;; preload / unload
 

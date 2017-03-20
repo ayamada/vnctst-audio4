@@ -327,6 +327,13 @@
      "また全てのロード済音源もアンロードされる。")
   )
 
+(defdesc :set-config-additional-query-string
+  (p "ここにキャッシュ防止用の文字列を設定する事で、音源ロード時のurlの末尾に"
+     [:code "QUERY_STRING"]
+     "として、その文字列が設定される"
+     "(初期値はnil)。")
+  )
+
 (defdesc :load-noise
   (p "BGMやSEの音響ファイルの初回再生時は、実は内部で"
      "ファイルのロードを行いそれが完了してから再生している。"
@@ -881,6 +888,7 @@
                  (demo-button2 :set-config-disable-webaudio?-true)
                  (demo-button2 :set-config-disable-htmlaudio?-false)
                  (demo-button2 :set-config-disable-htmlaudio?-true)
+                 (demo-button2 :set-config-additional-query-string)
                  ]
                 [:hr]
                 [:div

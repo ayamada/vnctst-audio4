@@ -8,21 +8,7 @@
 
 
 
-;;; NB: デバッグの為に、ブラウザのキャッシュを阻害する
-;;;     (ロードするurlの末尾にこっそり "?12345678" をつける)
-(def disturb-browser-cache? false)
 
-(def disturb-browser-cache-suffix (atom nil))
-
-(defn- dbc [path]
-  (if-not disturb-browser-cache?
-    path
-    (let [suffix (or
-                   @disturb-browser-cache-suffix
-                   (let [s (str "?" (js/Date.now))]
-                     (reset! disturb-browser-cache-suffix s)
-                     s))]
-      (str path suffix))))
 
 
 
@@ -95,7 +81,7 @@
                 (.decodeAudioData @audio-context (.-response xhr) h2 eh2))))
         eh (fn [e]
              (error-handle (str "cannot load url " url)))]
-    (.open xhr "GET" (dbc url))
+    (.open xhr "GET" url)
     (set! (.-responseType xhr) "arraybuffer")
     (set! (.-onload xhr) h)
     (set! (.-onerror xhr) eh)
