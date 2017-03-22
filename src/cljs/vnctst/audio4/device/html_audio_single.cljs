@@ -17,15 +17,18 @@
 
 
 (def ^:private can-use-loop-property?
-  ;; ieなら .-loop プロパティを使う必要がある
+  ;; ieなら .-loop プロパティを使う必要がある。
   ;; (onendイベントは負荷が高いと発動しない時があるようだ)
   ;; HtmlAudioになるのは、ie, 古androidのchrome, 古iosのchrome。
-  ;; とりあえずこれらの環境で確認したところ問題なかったので、
-  ;; すべての環境で .-loop を使うようにしたが、
-  ;; もしこれだと問題のある(そしてonendなら問題のない)環境があれば、
-  ;; その通りの判定になるように実装する必要がある。
-  true
-  )
+  ;; 非常に古いandroidおよびiosでの .-loop プロパティでのリピート再生には
+  ;; 問題があるので、これらでは無効にする。
+  ;; (ただ、そこまで古くないandroidおよびiosであれば問題ないようなので、
+  ;; もうちょっときちんと対応したいなら、osのバージョン判定も必要になる)
+  (cond
+    (:android util/terminal-type) false
+    (:ios util/terminal-type) false
+    :else true))
+
 
 
 ;;; errorイベントが発火しない環境がある為、
