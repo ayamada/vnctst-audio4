@@ -49,7 +49,8 @@
   (apply vector :div args))
 
 (defn- a [url & [label]]
-  [:a {:href url :target "_blank"} (or label url)])
+  [:a {:href url :target "_blank" :ref "noopener noreferrer"}
+   (or label url)])
 
 (defn- file [filename]
   [:code "\"" filename "\""])
@@ -1203,8 +1204,8 @@
                    [:br]
                    "もちろんキーワード的な管理をした方がよいケースは"
                    "普通に存在しますが、その場合は"
-                   "自分で変数やhash-mapに入れて管理した方が"
-                   "ずっと扱いやすいでしょう"]]
+                   "自分で変数やhash-mapを使って管理した方が"
+                   "扱いやすいでしょう"]]
                  [:h4 "このオンラインデモのサンプルBGM/SEについて"]
                  [:ul
                   [:li
@@ -1214,6 +1215,21 @@
                    "これらのライセンスは"
                    (a "http://sciencecommons.jp/cc0/about" "CC0")
                    "とします"]]
+                 [:h4 "vnctstってなんて読むの"]
+                 [:ul
+                  [:li
+                   "作者は頭の中で「ぶいえぬしーてぃーえすてぃー」と"
+                   "読んでいます。"
+                   [:br]
+                   "これは「"
+                   (a "http://vnctst.tir.jp/" "vnctst games")
+                   "」というインディーズゲーム作成ブランドの"
+                   "名前から来ています。"
+                   "しかしあまりに人間には発音しづらいので、このブランド名は"
+                   "もっと読みやすい名前に変更したいと考えています。"
+                   [:br]
+                   "ただし、将来にゲーム作成ブランド名を変更しても、"
+                   "この vnctst-audio4 の名前はこのままにする予定です。"]]
                  [:h4 "なんかおかしい / バグ報告したい"]
                  [:ul
                   [:li
