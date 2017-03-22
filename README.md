@@ -149,7 +149,7 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
-- 0.1.5 (2017-03-XX)
+- 0.1.5 (2017-03-22)
     - `set-config!` に `:additional-query-string` を追加
 
 - 0.1.4 (2017-03-20)
