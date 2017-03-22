@@ -78,6 +78,12 @@
 
 
 
+(defn- failed-load! [path]
+  (swap! loading-info-table dissoc path)
+  ;; NB: エラー時は「エントリはあるが値はnil」
+  ;;     という形式で示す。
+  ;;     うっかりここをdissocに書き換えない事。
+  (swap! loaded-audiosource-table assoc path nil))
 
 ;;; 再生要求の内部でのロード実行。後述のプリロードとは以下が違う
 ;;; - ロードは即座に開始される(ネットワーク帯域を圧迫する可能性あり)
@@ -132,8 +138,10 @@
                  #(remove (fn [p] (= path p)) %))
           (let [real-pathes (util/expand-pathes path)]
             (if (empty? real-pathes)
-              (util/logging :error (str "cannot resolve autoext by "
-                                        (pr-str path)))
+              (do
+                (util/logging :error (str "cannot resolve autoext by "
+                                          (pr-str path)))
+                (failed-load! path))
               (let [start-real-path (first real-pathes)
                     info {:path path
                           :left-real-pathes (atom real-pathes)
@@ -169,11 +177,7 @@
                                 (when-let [bgm-channel (:bgm-channel info)]
                                   (swap! last-loading-bgm-path
                                          dissoc bgm-channel))
-                                ;; NB: エラー時は「エントリはあるが値はnil」
-                                ;;     という形式で示す。
-                                ;;     うっかりここをdissocに書き換えない事。
-                                (swap! loaded-audiosource-table assoc path nil)
-                                (swap! loading-info-table dissoc path))))))
+                                (failed-load! path))))))
                 (swap! loading-info-table assoc path info)
                 (device/call! :load-audio-source!
                               (disturb-cache-url start-real-path)

@@ -259,7 +259,12 @@
                         (.removeEventListener a "error" @h-error)
                         (reset! (:loaded? as) true)
                         (reset! (:error? as) true)
-                        (error-handle (str "cannot load url " url)))))
+                        (let [e (or e (aget a "error") #js {})
+                              code (pr-str (aget e "code"))
+                              message (pr-str (aget e "message"))]
+                          (error-handle (str "cannot load url "
+                                             url
+                                             " (" code ", " message ")"))))))
     (.addEventListener a "error" @h-error)
     (reset! h-ended (fn [e]
                       (when-let [pi @(:playing-info as)]
