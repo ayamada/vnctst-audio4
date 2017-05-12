@@ -151,7 +151,8 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
-- 0.2.0 (2017-XX-XX)
+- 0.2.0 (2017-05-12)
+    - ユーティリティ関数 `make-play-se-periodically` `make-play-se-personally` を追加
     - dependenciesのバージョン上げ
 
 - 0.1.6 (2017-03-22)

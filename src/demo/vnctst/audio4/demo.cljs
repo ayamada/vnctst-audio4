@@ -442,6 +442,28 @@
    :js "vnctst.audio4.js.currentDeviceName()"
    })
 
+(defonce s1 (atom nil))
+
+(defba :make-play-se-periodically
+  {:fn (fn []
+         (when-not @s1
+           (reset! s1 (vnctst.audio4/make-play-se-periodically 1.0 "se/launch.*")))
+         (@s1))
+   :cljs "(defonce s1 (vnctst.audio4/make-play-se-periodically 1.0 \"se/launch.*\")) (s1)"
+   :js "var s1 = vnctst.audio4.js.makePlaySePeriodically(1.0, \"se/launch.*\"); s1()"
+   })
+
+(defonce s2 (atom nil))
+
+(defba :make-play-se-personally
+  {:fn (fn []
+         (when-not @s2
+           (reset! s2 (vnctst.audio4/make-play-se-personally)))
+         (@s2 "se/launch.*"))
+   :cljs "(defonce s2 (vnctst.audio4/make-play-se-personally)) (s2 \"se/launch.*\")"
+   :js "var s2 = vnctst.audio4.js.makePlaySePersonally(); s2(\"se/launch.*\")"
+   })
+
 
 ;;; misc 2
 

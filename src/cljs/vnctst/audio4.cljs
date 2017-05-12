@@ -262,8 +262,8 @@
                      (when (string? entry)
                        (assert (util/autoext-table entry)
                                (autoext-value-msg k entry))))
-                   (stop-bgm! nil 0)
-                   (stop-se! nil 0)
+                   (stop-bgm! 0 nil)
+                   (stop-se! 0 nil)
                    (unload-all!)
                    (state/set! :resolved-autoext-list nil)
                    (state/set! k v))
@@ -278,18 +278,18 @@
    :disable-mobile? (fn [k v]
                       (state/set! k v)
                       (when (:mobile util/terminal-type)
-                        (stop-bgm! nil 0)
-                        (stop-se! nil 0)
+                        (stop-bgm! 0 nil)
+                        (stop-se! 0 nil)
                         (unload-all!)))
    :disable-webaudio? (fn [k v]
-                        (stop-bgm! nil 0)
-                        (stop-se! nil 0)
+                        (stop-bgm! 0 nil)
+                        (stop-se! 0 nil)
                         (unload-all!)
                         (state/set! k v)
                         (init-force!))
    :disable-htmlaudio? (fn [k v]
-                         (stop-bgm! nil 0)
-                         (stop-se! nil 0)
+                         (stop-bgm! 0 nil)
+                         (stop-se! 0 nil)
                          (unload-all!)
                          (state/set! k v)
                          (init-force!))
@@ -341,6 +341,43 @@
 (defn current-device-name []
   (init!)
   (device/call! :name))
+
+
+
+
+;;; エンジン音、プロペラ回転音、機関銃音のような
+;;; 「動作中は定期的に再生する」タイプのSEの為に、
+;;; 「動作中は定期的に実行するが、実行が集中しないように、指定したsec間隔
+;;; 以内での再生を抑制する」関数を生成する高階関数
+;;; (なお終了時に明示的に停止させるようなインターフェースが望ましい場合は、
+;;; 専用チャンネルでループBGMとして再生させた方がより良い)
+;;; 再生SEのパラメータは、高階関数のオプショナル引数として渡してもよいし、
+;;; 生成された関数の引数として渡してもよい(こちらに何も渡されなかった場合は、
+;;; 高階関数のオプショナル引数の方が適用される)
+(defn make-play-se-periodically [interval-sec & se-key+args]
+  (let [interval-msec (* interval-sec 1000)
+        last-play-timestamp (atom 0)
+        play-se! (fn [& override-se-key+args]
+                   (let [now (js/Date.now)]
+                     (when (< (+ @last-play-timestamp interval-msec) now)
+                       (reset! last-play-timestamp now)
+                       (apply se! (or override-se-key+args se-key+args)))))]
+    play-se!))
+
+;;; 一人のキャラが複数のボイスを再生するような場合は、同時再生を一つだけに抑制
+;;; したいケースがほとんど。これを実現する関数を再生元ごとに生成する高階関数
+;;; (あるボイスを再生中に別のボイスの再生を行う際に、fade-sec(省略可能)かけて
+;;; 先のボイスを自動停止させるようになる)
+;;; ※同じボイスを再生させようとした場合でも、先のボイスを停止させてから
+;;; 同じボイスを再生開始する処理となる。ここがBGM系と違うのでちょっと注意
+(defn make-play-se-personally [& [fade-sec]]
+  (let [latest-se-channel-id (atom nil)
+        play-se! (fn [& args]
+                   (when-let [ch @latest-se-channel-id]
+                     (stop-se! fade-sec ch))
+                   (reset! latest-se-channel-id (apply se! args)))]
+    play-se!))
+
 
 
 

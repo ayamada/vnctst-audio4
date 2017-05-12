@@ -85,6 +85,25 @@
 
 
 
+;;; 以下の二つは上手くラッピングできないので、普通に移植する
+
+(defn ^:export makePlaySePeriodically [interval-sec & path+opt]
+  (let [interval-msec (* interval-sec 1000)
+        last-play-timestamp (atom 0)
+        play-se! (fn [& override-path+opt]
+                   (let [now (js/Date.now)]
+                     (when (< (+ @last-play-timestamp interval-msec) now)
+                       (reset! last-play-timestamp now)
+                       (apply se (or override-path+opt path+opt)))))]
+    play-se!))
+
+(defn ^:export makePlaySePersonally [& [fade-sec]]
+  (let [latest-se-channel-id (atom nil)
+        play-se! (fn [& args]
+                   (when-let [ch @latest-se-channel-id]
+                     (stopSe fade-sec ch))
+                   (reset! latest-se-channel-id (apply se args)))]
+    play-se!))
 
 
 
