@@ -1,6 +1,6 @@
 {
   "name": "vnctst-audio4",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Audio playback library for html5 game",
   "homepage": "https://github.com/ayamada/vnctst-audio4",
   "main": "vnctst-audio4.js",
