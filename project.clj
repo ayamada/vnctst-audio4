@@ -40,7 +40,7 @@
 
 (def dependencies-cljs-prod
   '[[org.clojure/clojure "1.8.0"]
-    [org.clojure/clojurescript "1.9.521"]
+    [org.clojure/clojurescript "1.9.542"]
     ])
 
 (def dependencies-cljs-dev
@@ -57,7 +57,11 @@
   :dependencies [[org.clojure/core.async "0.3.442"
                   :exclusions [org.clojure/clojure]]
                  [jp.ne.tir/project-clj "0.1.7"
-                  :exclusions [org.clojure/clojure]]
+                  :exclusions [org.clojure/clojure
+                               org.codehaus.plexus/plexus-utils
+                               org.apache.maven.wagon/wagon-provider-api
+                               org.clojure/tools.macro]]
+                 [org.apache.maven.wagon/wagon-provider-api "2.12"]
                  ]
   :source-paths ["src/cljs"]
   :clean-targets ^{:protect false} [:target-path
@@ -83,10 +87,10 @@
   ;;     - lein clean && lein with-profile demo-prod cljsbuild once demo-prod
   :profiles {:ring {:source-paths ["src/ring"]
                     :dependencies [[org.clojure/clojure "1.8.0"]
-                                   [ring/ring-core "1.6.0"]
+                                   [ring/ring-core "1.6.1"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["resources"]
-                    :plugins [[lein-ring "0.11.0"]]
+                    :plugins [[lein-ring "0.12.0"]]
                     :ring {:port 8004
                            :handler vnctst.audio4.demo.server/handler}}
              :for-js {:dependencies ~dependencies-cljs-prod
@@ -116,5 +120,5 @@
              :server-ip "0.0.0.0"
              :server-port 9004
              :server-logfile "figwheel_server.log"}
-  ;:pedantic? :abort
+  :pedantic? :abort
   )
