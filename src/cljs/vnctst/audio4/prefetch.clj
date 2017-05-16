@@ -5,7 +5,8 @@
 
 ;;; 指定ディレクトリのファイル一覧取得
 (defn- get-filenames-from-dir-path [dir-path]
-  (seq (.list (io/file dir-path))))
+  (remove #(= \. (first %)) (seq (.list (io/file dir-path)))))
+
 
 
 ;;; 指定したlocal-dirからファイル一覧を読み込み、
