@@ -151,6 +151,10 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
+- 0.2.1 (2017-05-16)
+    - `vnctst.audio4.prefetch` でのファイル一覧の取得時に、ドットはじまりのファイルは除外するようにする
+    - dependenciesのバージョン上げ
+
 - 0.2.0 (2017-05-12)
     - ユーティリティ関数 `make-play-se-periodically` `make-play-se-personally` を追加
     - dependenciesのバージョン上げ
