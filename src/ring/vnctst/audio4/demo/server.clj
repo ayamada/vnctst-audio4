@@ -335,6 +335,16 @@
      "(初期値はnil)。")
   )
 
+(defdesc :set-config-path-prefix
+  (p "音響ファイル指定はページのurlからの相対位置で指定するが、"
+     "この相対位置を変化させたい場合にこれを設定する"
+     "(初期値は" [:code "\"\""] ")。")
+  (p "なお、「音源のロードよりも先に設定しておく」、"
+     "「設定する場合は末尾に"
+     [:code "/"]
+     "を必ず付ける」、この二つを厳守する事。")
+  )
+
 (defdesc :load-noise
   (p "BGMやSEの音響ファイルの初回再生時は、実は内部で"
      "ファイルのロードを行いそれが完了してから再生している。"
@@ -921,6 +931,7 @@
                  (demo-button2 :set-config-disable-htmlaudio?-false)
                  (demo-button2 :set-config-disable-htmlaudio?-true)
                  (demo-button2 :set-config-additional-query-string)
+                 (demo-button2 :set-config-path-prefix)
                  ]
                 [:hr]
                 [:div

@@ -209,12 +209,13 @@
     (empty? path) nil
     (keyword? path) (expand-pathes (path-key->path path))
     (not (string? path)) (expand-pathes (str path))
-    :else (let [[_ basename] (re-find #"^(.*)\.\*$" path)]
+    :else (let [[_ basename] (re-find #"^(.*)\.\*$" path)
+                path-prefix (state/get :path-prefix)]
             (if-not basename
-              [path]
+              [(str path-prefix path)]
               (if-let [resolved-autoext-list (get-resolved-autoext-list)]
                 (mapv (fn [[ext mime]]
-                        (str basename "." ext))
+                        (str path-prefix basename "." ext))
                       resolved-autoext-list)
                 nil)))))
 

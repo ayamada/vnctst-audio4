@@ -274,6 +274,12 @@
    :js "vnctst.audio4.js.setConfig(\"additional-query-string\", \"01234567\")"
    })
 
+(defba :set-config-path-prefix
+  {:fn #(js/alert "(実行サンプルは提供していません)")
+   :cljs "(vnctst.audio4/set-config! :path-prefix \"audio/\")"
+   :js "vnctst.audio4.js.setConfig(\"path-prefix\", \"audio/\")"
+   })
+
 
 ;;; preload / unload
 
