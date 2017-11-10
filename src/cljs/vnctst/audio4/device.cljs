@@ -32,7 +32,9 @@
     (get @init-device-table device-key)
     (let [device (entry-table/get device-key)
           ok? ((get device :init!?))]
-      (swap! init-device-table device-key (if ok? device false)))))
+      (swap! init-device-table assoc device-key (if ok? device false))
+      (when ok?
+        device))))
 
 
 
@@ -67,7 +69,8 @@
 
 ;;; 適切にデバイスの判定と初期化を行い、stateに保存する
 (defn init! [& [disable-webaudio? disable-htmlaudio?]]
-  (let [device (resolve-device (determine-device-keys disable-webaudio? disable-htmlaudio?))]
+  (let [device (resolve-device (determine-device-keys disable-webaudio?
+                                                      disable-htmlaudio?))]
     (assert device)
     (state/set! :device device)
     true))
