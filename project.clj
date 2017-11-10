@@ -31,16 +31,17 @@
           :pretty-print true
           }))
 
-(def figwheel-version "0.5.10")
+(def figwheel-version "0.5.14")
 
-(def plugins-cljs-prod '[[lein-cljsbuild "1.1.6"]])
+(def plugins-cljs-prod '[[lein-cljsbuild "1.1.7"]])
 
 (def plugins-cljs-dev (vec (concat plugins-cljs-prod
-                                   [['lein-figwheel figwheel-version]])))
+                                   [['lein-figwheel figwheel-version :exclusions '[org.clojure/clojure]]])))
+
 
 (def dependencies-cljs-prod
   '[[org.clojure/clojure "1.8.0"]
-    [org.clojure/clojurescript "1.9.542"]
+    [org.clojure/clojurescript "1.9.946"]
     ])
 
 (def dependencies-cljs-dev
@@ -54,14 +55,14 @@
   :url "https://github.com/ayamada/vnctst-audio4"
   :license {:name "Zlib License"
             :url "https://opensource.org/licenses/Zlib"}
-  :dependencies [[org.clojure/core.async "0.3.442"
+  :dependencies [[org.clojure/core.async "0.3.443"
                   :exclusions [org.clojure/clojure]]
                  [jp.ne.tir/project-clj "0.1.7"
                   :exclusions [org.clojure/clojure
                                org.codehaus.plexus/plexus-utils
                                org.apache.maven.wagon/wagon-provider-api
                                org.clojure/tools.macro]]
-                 [org.apache.maven.wagon/wagon-provider-api "2.12"]
+                 [org.apache.maven.wagon/wagon-provider-api "3.0.0"]
                  ]
   :source-paths ["src/cljs"]
   :clean-targets ^{:protect false} [:target-path
@@ -87,10 +88,10 @@
   ;;     - lein clean && lein with-profile demo-prod cljsbuild once demo-prod
   :profiles {:ring {:source-paths ["src/ring"]
                     :dependencies [[org.clojure/clojure "1.8.0"]
-                                   [ring/ring-core "1.6.1"]
+                                   [ring/ring-core "1.6.3"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["resources"]
-                    :plugins [[lein-ring "0.12.0"]]
+                    :plugins [[lein-ring "0.12.1"]]
                     :ring {:port 8004
                            :handler vnctst.audio4.demo.server/handler}}
              :for-js {:dependencies ~dependencies-cljs-prod
