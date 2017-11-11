@@ -1,8 +1,7 @@
 language: clojure
 jdk:
   - oraclejdk8
-  - oraclejdk7
-  - openjdk7
+  - openjdk8
 script:
   - lein clean && lein with-profile ring ring uberjar
   - rm -f for-npm/vnctst-audio4.js && lein clean && lein with-profile for-js cljsbuild once for-js
