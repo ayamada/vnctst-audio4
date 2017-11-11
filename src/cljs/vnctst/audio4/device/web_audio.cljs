@@ -34,8 +34,17 @@
               (aget js/window "AudioContext")
               (aget js/window "webkitAudioContext"))
           ctx (when c
+                ;; かつて、モバイル系の音割れ対策として「acを一個生成して
+                ;; closeすればよい」というバッドノウハウがあったものの、
+                ;; 最近のブラウザではclose自体が廃止されてしまったらしく、
+                ;; これが例外を投げてしまうので、
+                ;; とりあえず生成できるかどうかには無関係な扱いと
+                ;; する事にした。
                 (try
                   (.close (new c))
+                  (catch :default e
+                    nil))
+                (try
                   (new c)
                   (catch :default e
                     nil)))]
@@ -66,19 +75,23 @@
   (p 'load-audio-source! url)
   (let [xhr (js/XMLHttpRequest.)
         h (fn [e]
-            (if-not (= "2" (first (str (.. e -target -status))))
-              (error-handle (str "cannot load url " url))
-              (let [h2 (fn [buf]
-                         (if-not buf
-                           (error-handle (str "cannot decode url " url))
-                           (loaded-handle {:type :audio-source
-                                           :url url
-                                           :buffer buf
-                                           :duration (.-duration buf)
-                                           })))
-                    eh2 (fn [& _]
-                          (error-handle (str "cannot decode url " url)))]
-                (.decodeAudioData @audio-context (.-response xhr) h2 eh2))))
+            (let [first-letter (first (str (.. e -target -status)))
+                  h2 (fn [buf]
+                       (if-not buf
+                         (error-handle (str "cannot decode url " url))
+                         (loaded-handle {:type :audio-source
+                                         :url url
+                                         :buffer buf
+                                         :duration (.-duration buf)
+                                         })))
+                  eh2 (fn [& _]
+                        (error-handle (str "cannot decode url " url)))]
+              (if (#{"0" "2"} first-letter)
+                (try
+                  (.decodeAudioData @audio-context (.-response xhr) h2 eh2)
+                  (catch :default e
+                    (eh2)))
+                (error-handle (str "cannot load url " url)))))
         eh (fn [e]
              (error-handle (str "cannot load url " url)))]
     (.open xhr "GET" url)
