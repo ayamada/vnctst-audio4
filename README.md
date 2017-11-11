@@ -151,8 +151,8 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
-- 0.2.2 (2017-XX-XX)
-    - 適切にデバイスが選択されていなかった重大な問題を修正
+- 0.2.2 (2017-11-11)
+    - node-webkit環境にてWebAudioが機能しなかった問題を修正
     - `set-config!` に `:path-prefix` を追加
     - dependenciesのバージョン上げ
 
