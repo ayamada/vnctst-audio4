@@ -35,6 +35,10 @@
          :end-pos nil
          }))
 
+(defn length [as]
+  (p 'length as)
+  0)
+
 
 
 
@@ -108,6 +112,7 @@
    :set-pan! set-pan!
    :dispose-audio-channel! dispose-audio-channel!
    :name (constantly "dumb")
+   :length length
    })
 
 

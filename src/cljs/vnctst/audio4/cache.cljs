@@ -64,6 +64,10 @@
 (defn loaded? [path]
   (contains? @loaded-audiosource-table path))
 
+(defn length [path]
+  (when-let [as (get @loaded-audiosource-table path)]
+    (device/call! :length as)))
+
 ;;; ロード済かつロード異常終了であれば真値を返す
 (defn error? [path]
   (and

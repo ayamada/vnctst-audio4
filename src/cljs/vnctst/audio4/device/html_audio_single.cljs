@@ -343,6 +343,12 @@
 
 
 
+(defn length [as]
+  (p 'length (:url as))
+  (when-let [a (:audio as)]
+    (aget a "duration")))
+
+
 
 
 
@@ -500,6 +506,7 @@
    :set-pan! set-pan!
    :dispose-audio-channel! dispose-audio-channel!
    :name (constantly "html-audio-single")
+   :length length
    })
 
 

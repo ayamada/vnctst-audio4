@@ -381,5 +381,8 @@
 
 
 
+;;; ロード済音源の総再生秒数を取得する。ロード済でない等の場合はnilが返る。
+(defn length [path]
+  (cache/length (util/path-key->path path)))
 
 

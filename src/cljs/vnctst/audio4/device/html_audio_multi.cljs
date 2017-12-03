@@ -75,6 +75,8 @@
     (swap! ac-single assoc :audio a)
     ac-single))
 
+(defn length [as]
+  (apply-single-fn html-audio-single/length as))
 
 
 
@@ -130,6 +132,7 @@
    :set-pan! set-pan!
    :dispose-audio-channel! dispose-audio-channel!
    :name (constantly "html-audio-multi")
+   :length length
    })
 
 

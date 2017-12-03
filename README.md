@@ -151,6 +151,10 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
+- 0.2.3-SNAPSHOT (2017-XX-XX)
+    - `length` を追加(未テスト、未ドキュメント)
+        - TODO: 動作確認とドキュメント追加を行う事
+
 - 0.2.2 (2017-11-11)
     - node-webkit環境にてWebAudioが機能しなかった問題を修正
     - `set-config!` に `:path-prefix` を追加

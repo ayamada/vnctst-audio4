@@ -130,6 +130,11 @@
                 })))
 
 
+(defn length [as]
+  (p 'length (:url as))
+  (:duration as))
+
+
 
 
 
@@ -323,6 +328,7 @@
    :set-pan! set-pan!
    :dispose-audio-channel! dispose-audio-channel!
    :name (constantly "web-audio")
+   :length length
    })
 
 
