@@ -97,10 +97,12 @@
 
 (defn- _play-immediately! [bgm-ch state as param]
   (let [ac (device/call! :spawn-audio-channel as)
+        position (:position param)
         volume (:volume param)
         pitch (:pitch param)
         pan (:pan param)
         oneshot? (:oneshot? param)
+        loop? (not oneshot?)
         fadein (:fadein param)
         fadein (when fadein
                  (if (number? fadein)
@@ -115,6 +117,8 @@
                         (max 1 (int (* 1000 fadein))))
                      0)
         new-param (assoc param
+                         :fadein fadein
+                         :position position
                          :as as
                          :ac ac)]
     (swap! state merge {:fade-factor fade-factor
@@ -127,15 +131,16 @@
     ;; また、バックグラウンド時は明示的な再開ポイントのリセットが必要
     ;; (非バックグラウンド時はイベントリスナで設定されるので不要)
     (if (state/get :in-background?)
-      (swap! resume-pos-table assoc bgm-ch 0)
-      (device/call! :play! ac 0 (not oneshot?) i-volume i-pitch i-pan false))
+      (swap! resume-pos-table assoc bgm-ch position)
+      (device/call! :play! ac position loop? i-volume i-pitch i-pan false))
     (when fadein
       (run-fader! bgm-ch state))))
 
 
 
 ;;; NB: ロード中にキャンセルされたり、別の音源の再生要求が入る可能性がある
-(defn- _load+play! [bgm-ch state path volume pitch pan oneshot? fadein]
+(defn- _load+play!
+  [bgm-ch state path volume pitch pan oneshot? fadein position]
   (let [previous-loading-key (:path (:next-param @state))
         h-done (fn [as]
                  (when-let [next-param (:next-param @state)]
@@ -145,7 +150,8 @@
                :pan pan
                :pitch pitch
                :oneshot? oneshot?
-               :fadein fadein}]
+               :fadein fadein
+               :position position}]
     ;; とりあえず再生対象を :next-param として積んでおく
     (swap! state assoc :next-param param)
     (if (cache/loaded? path)
@@ -217,7 +223,8 @@
                                          (:pitch next-param)
                                          (:pan next-param)
                                          (:oneshot? next-param)
-                                         (:fadein next-param)))))))))))))
+                                         (:fadein next-param)
+                                         (:position next-param)))))))))))))
       (swap! state assoc :fade-process c))))
 
 
@@ -278,6 +285,7 @@
         pan (or (:pan options) 0)
         oneshot? (:oneshot? options)
         fadein (:fadein options)
+        position (or (:position options) 0)
         state (resolve-state! channel)]
     (sync-playing-state! state)
     ;; NB: これが呼ばれたタイミングで、どのパターンであっても、
@@ -290,14 +298,14 @@
       (util/logging :error (str "found error in " path))
       ;; BGM停止中(もしくはプリロード中)なら、即座に再生を開始するだけでよい
       (not @state)
-      (_load+play! channel state path volume pitch pan oneshot? fadein)
+      (_load+play! channel state path volume pitch pan oneshot? fadein position)
       ;; BGMロード中(再生準備中)なら、ロード対象を差し替える
       (and
         (not (fading? state))
         (:next-param @state))
       (do
         (cache/cancel-load-by-stop-bgm! channel)
-        (_load+play! channel state path volume pitch pan oneshot? fadein))
+        (_load+play! channel state path volume pitch pan oneshot? fadein position))
       ;; 同一BGMの場合、パラメータの変更だけで済ませる
       ;; (ただしフェード中のみ特殊処理が必要)
       (same-bgm? state path volume pitch pan)
@@ -412,6 +420,11 @@
         (stop! bgm-ch 0)))))
 
 
+(defn pos [bgm-ch]
+  (when-let [bgm-ch (or bgm-ch :BGM)]
+    (when-let [state (get @channel-state-table bgm-ch)]
+      (when-let [ac (:ac (:current-param @state))]
+        (device/call! :pos ac)))))
 
 
 

@@ -91,6 +91,8 @@
     (bgm! path options)))
 
 
+(defn bgm-pos [& [bgm-channel-id]]
+  (bgm/pos bgm-channel-id))
 
 
 (defn stop-se! [& [fade-sec se-channel-id]]
