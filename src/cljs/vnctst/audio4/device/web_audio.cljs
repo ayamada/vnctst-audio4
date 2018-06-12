@@ -49,7 +49,7 @@
                   (catch :default e
                     nil)))]
       (when ctx
-        ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1156958
+        ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1410968
         (util/register-touch-unlock-fn!
           (fn []
             (let [unlock-fn #(.start (.createBufferSource ctx) 0)]
@@ -149,7 +149,7 @@
 
 
 
-(defn _pos [ch]
+(defn _pos [ch include-loop-amount?]
   (if-let [play-start-time (:play-start-time @ch)]
     (let [play-end-time (or
                           (:play-end-time @ch)
@@ -161,17 +161,19 @@
           duration (:duration @ch)
           playtime (- play-end-time play-start-time)
           normalized-playtime (* playtime pitch)
-          pos-tmp (+ started-pos normalized-playtime)]
+          pos-total (+ started-pos normalized-playtime)]
       (if-not (pos? duration)
         0
-        (loop [p pos-tmp]
-          (if (<= duration p)
-            (recur (- p duration))
-            p))))
+        (if include-loop-amount?
+          pos-total
+          (loop [p pos-total]
+            (if (<= duration p)
+              (recur (- p duration))
+              p)))))
     0))
 
-(defn pos [ch]
-  (_pos ch))
+(defn pos [ch & [include-loop-amount?]]
+  (_pos ch include-loop-amount?))
 
 (defn- safe-disconnect! [node]
   (when node

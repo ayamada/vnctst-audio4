@@ -141,19 +141,21 @@
 
 
 
-;;; モバイルデバイスでは、タッチイベントをトリガーにして再生を行う事による
-;;; アンロック処理が必要となる
+;;; モバイルデバイスおよび最近のブラウザでは、インタラクションイベントを
+;;; トリガーにして再生を行う事によるアンロック処理が必要となる。
 ;;; unlock-fnは、アンロックに成功したら真を返す事。
 ;;; (偽値を返す事で、次にまたリトライを行う)
 ;;; アンロックは一回行えば、それ以降は行わなくてもよい(らしい)
 (defn register-touch-unlock-fn! [unlock-fn]
-  ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1156958
-  (let [event-name "touchend"
+  ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1410968
+  (let [event-names ["touchend" "mousedown" "keydown"]
         h (atom nil)]
     (reset! h (fn [e]
                 (when (unlock-fn)
-                  (js/document.removeEventListener event-name @h))))
-    (js/document.addEventListener event-name @h)))
+                  (doseq [e event-name]
+                    (js/document.removeEventListener event-name @h)))))
+    (doseq [e event-name]
+      (js/document.addEventListener e @h))))
 
 
 

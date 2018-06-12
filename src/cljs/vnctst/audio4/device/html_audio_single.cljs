@@ -370,8 +370,9 @@
 
 
 
-(defn pos [ch]
-  (p 'pos (:url @ch))
+(defn pos [ch & [include-loop-amount?]]
+  (p 'pos (:url @ch) include-loop-amount?)
+  ;; TODO: 現状だと include-loop-amount? がどうなってるのか分からない…直す事
   (or
     (try
       (when (playing? ch)

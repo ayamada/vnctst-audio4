@@ -46,8 +46,8 @@
 
 
 
-(defn pos [ch]
-  (p 'pos ch)
+(defn pos [ch & [include-loop-amount?]]
+  (p 'pos ch include-loop-amount?)
   (let [play-start-msec (or (:play-start-msec @ch) 0)
         play-stop-msec (or (:play-stop-msec @ch) (js/Date.now))]
     (* 0.001 (- play-stop-msec play-start-msec))))

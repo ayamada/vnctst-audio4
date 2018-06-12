@@ -151,12 +151,13 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
-- 0.2.3-SNAPSHOT (2017-XX-XX)
+- 0.2.3-SNAPSHOT (2018-XX-XX)
+    - http://ch.nicovideo.jp/indies-game/blomaga/ar1410968 への対応を実装
+    - `play-bgm!` の引数に `:position` を追加(未ドキュメント)
+        - TODO: ドキュメント追加を行う事
+    - `bgm-position` を追加(未ドキュメント)
+        - TODO: ドキュメント追加を行う事
     - `length` を追加(未テスト、未ドキュメント)
-        - TODO: 動作確認とドキュメント追加を行う事
-    - `bgm-pos` を追加(未テスト、未ドキュメント)
-        - TODO: 動作確認とドキュメント追加を行う事
-    - `play-bgm!` の引数に `:position` を追加(未テスト、未ドキュメント)
         - TODO: 動作確認とドキュメント追加を行う事
 
 - 0.2.2 (2017-11-11)

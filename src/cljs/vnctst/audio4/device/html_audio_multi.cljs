@@ -80,8 +80,8 @@
 
 
 
-(defn pos [ch]
-  (apply-single-fn html-audio-single/pos ch))
+(defn pos [ch & [include-loop-amount?]]
+  (apply-single-fn html-audio-single/pos ch include-loop-amount?))
 
 
 (defn play! [ch start-pos loop? volume pitch pan alarm?]

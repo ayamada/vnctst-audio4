@@ -420,11 +420,11 @@
         (stop! bgm-ch 0)))))
 
 
-(defn pos [bgm-ch]
+(defn pos [bgm-ch & [include-loop-amount?]]
   (when-let [bgm-ch (or bgm-ch :BGM)]
     (when-let [state (get @channel-state-table bgm-ch)]
       (when-let [ac (:ac (:current-param @state))]
-        (device/call! :pos ac)))))
+        (device/call! :pos ac include-loop-amount?)))))
 
 
 
