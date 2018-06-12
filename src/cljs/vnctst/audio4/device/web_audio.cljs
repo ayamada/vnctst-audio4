@@ -149,31 +149,46 @@
 
 
 
-(defn _pos [ch include-loop-amount?]
-  (if-let [play-start-time (:play-start-time @ch)]
-    (let [play-end-time (or
-                          (:play-end-time @ch)
-                          (.-currentTime @audio-context))
-          ;; NB: posは実時間ではなくpitch=1の時の秒数を返す必要があるので、
-          ;;     ここで変換する必要がある
-          pitch (:pitch @ch)
-          started-pos (:started-pos @ch)
-          duration (:duration @ch)
-          playtime (- play-end-time play-start-time)
-          normalized-playtime (* playtime pitch)
-          pos-total (+ started-pos normalized-playtime)]
-      (if-not (pos? duration)
-        0
-        (if include-loop-amount?
-          pos-total
-          (loop [p pos-total]
-            (if (<= duration p)
-              (recur (- p duration))
-              p)))))
-    0))
+;;; NB: pos と違い、この関数はnilを返してはならない
+;;;     (再生開始位置を求めるのにも使われる為。
+;;;     nil的な値を返したい場合は0を返す事)
+(defn _pos [ch & [include-loop-amount?]]
+  ;; NB: :oneshot? 時の自動停止を上手く扱う必要があるので、
+  ;;;    かなりややっこしい処理になってしまっている
+  (let [play-start-time (:play-start-time @ch)]
+    (if-not play-start-time
+      0
+      (let [duration (or (:duration @ch) 0)]
+        (if (:play-end-time @ch)
+          duration
+          (if-not (pos? duration)
+            0
+            (let [play-current-time (.-currentTime @audio-context)
+                  ;; NB: posは実時間ではなくpitch=1の時の秒数を返す必要が
+                  ;;     あるので、ここで変換する必要がある
+                  pitch (:pitch @ch)
+                  playtime (when play-current-time
+                             (- play-current-time play-start-time))
+                  normalized-playtime (when playtime
+                                        (* playtime pitch))
+                  started-pos (:started-pos @ch)
+                  pos-total (if normalized-playtime
+                              (+ started-pos normalized-playtime)
+                              duration)]
+              (if include-loop-amount?
+                pos-total
+                (loop [p pos-total]
+                  (if (<= duration p)
+                    (recur (- p duration))
+                    p))))))))))
 
 (defn pos [ch & [include-loop-amount?]]
-  (_pos ch include-loop-amount?))
+  (when-not (:play-end-time @ch)
+    (_pos ch include-loop-amount?)))
+
+
+
+
 
 (defn- safe-disconnect! [node]
   (when node

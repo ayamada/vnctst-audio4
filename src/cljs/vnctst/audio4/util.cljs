@@ -152,10 +152,10 @@
         h (atom nil)]
     (reset! h (fn [e]
                 (when (unlock-fn)
-                  (doseq [e event-name]
-                    (js/document.removeEventListener event-name @h)))))
-    (doseq [e event-name]
-      (js/document.addEventListener e @h))))
+                  (doseq [ename event-names]
+                    (js/document.removeEventListener ename @h)))))
+    (doseq [ename event-names]
+      (js/document.addEventListener ename @h))))
 
 
 

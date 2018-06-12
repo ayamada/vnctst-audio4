@@ -326,7 +326,9 @@
                               :pan pan
                               :pitch pitch
                               :oneshot? oneshot?
-                              :fadein fadein}]
+                              :fadein fadein
+                              :position position
+                              }]
               ;; フェード中に先行ロードを開始しておく
               (cache/load! path)
               ;; NB: 既にフェード中の場合の為に、 :fade-factor はいじらない
