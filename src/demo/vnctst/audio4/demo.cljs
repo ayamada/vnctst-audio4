@@ -480,6 +480,12 @@
    :js "vnstst.audio4.js.bgm(\"bgm/ny2017.*\", {\"oneshot?\": true, fadein 1.5})"
    })
 
+(defba :bgm-option-e
+  {:fn #(vnctst.audio4/bgm! "bgm/ny2017.*" :position 1)
+   :cljs "(vnctst.audio4/bgm! \"bgm/ny2017.*\" :position 1)"
+   :js "vnstst.audio4.js.bgm(\"bgm/ny2017.*\", {position: 1})"
+   })
+
 (defba :me-launch
   {:fn #(vnctst.audio4/me! "se/launch.*")
    :cljs "(vnctst.audio4/me! \"se/launch.*\")"
@@ -496,6 +502,18 @@
   {:fn #(vnctst.audio4/se! :se/kick)
    :cljs "(vnctst.audio4/se! :se/kick)"
    :js "----"
+   })
+
+(defba :bgm-position
+  {:fn #(js/alert (vnctst.audio4/bgm-position))
+   :cljs "(vnctst.audio4/bgm-position)"
+   :js "vnstst.audio4.js.getBgmPosition()"
+   })
+
+(defba :length
+  {:fn #(js/alert (vnctst.audio4/length "bgm/ny2017.*"))
+   :cljs "(vnctst.audio4/length \"bgm/ny2017.*\")"
+   :js "vnstst.audio4.js.length(\"bgm/ny2017.*\")"
    })
 
 

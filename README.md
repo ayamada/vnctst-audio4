@@ -47,11 +47,10 @@ html5環境の為の、ゲーム向け音響ファイル再生ライブラリ
     - 上記だけではなく、「ゲーム内でシーン移動したのに合わせてBGMのフェードアウトを開始したが、すぐにまたシーン移動があったので、フェードアウトはそのままで次に再生するBGMだけ差し替えたい」「すぐに元のシーンに戻ってきたので、フェードアウトを中断して、現在のフェード音量からフェードインして元の音量まで戻す」といった機能にも対応している。
         - もちろんこれらも「非常にシンプルなインターフェース」と「雑に扱っても問題の出ないシステム」の中にあり、ライブラリの利用者が内部の状態遷移を気にする必要はない。
 
-- [RPGアツマール](http://game.nicovideo.jp/atsumaru/)環境での再生にも対応(experimental)
+- 2018年頃の各ブラウザの[自動再生ポリシー変更](http://ch.nicovideo.jp/indies-game/blomaga/ar1410968)に対応
+
+- [RPGアツマール](http://game.nicovideo.jp/atsumaru/)環境での再生にも対応
     - 具体的には http://ch.nicovideo.jp/indies-game/blomaga/ar1156958 と同等の対応を行うようにしてある。
-    - ただし2017年1月現在、「ツクールMV以外で作成したゲームをRPGアツマール上で実行する」事自体がまだexperimentalな扱いである事に注意。
-        - この件についての詳細は http://qiita.com/hajimehoshi/items/2a28b16a2e587c82ac5d の記事が詳しい(2017年1月現在)。
-        - http://ch.nicovideo.jp/indies-game/blomaga/ar1163608 に「ツクールMV以外のhtml5ベースのシステムからアツマールの機能を利用する為のAPI」が公開されている。
 
 - ライセンスとして[zlib](https://ja.wikipedia.org/wiki/Zlib_License)風ライセンスを採用
     - 当ライブラリの利用時にcopyright文等を表示させる義務はない。
@@ -153,12 +152,9 @@ zlib風ライセンスとします。
 
 - 0.2.3-SNAPSHOT (2018-XX-XX)
     - http://ch.nicovideo.jp/indies-game/blomaga/ar1410968 への対応を実装
-    - `play-bgm!` の引数に `:position` を追加(未ドキュメント)
-        - TODO: ドキュメント追加を行う事
-    - `bgm-position` を追加(未ドキュメント)
-        - TODO: ドキュメント追加を行う事
-    - `length` を追加(未テスト、未ドキュメント)
-        - TODO: 動作確認とドキュメント追加を行う事
+    - `play-bgm!` の引数に `:position` を追加
+    - `bgm-position` を追加
+    - `length` を追加
 
 - 0.2.2 (2017-11-11)
     - node-webkit環境にてWebAudioが機能しなかった問題を修正

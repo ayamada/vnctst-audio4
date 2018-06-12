@@ -94,7 +94,6 @@
 (defn bgm-position [& [bgm-channel-id include-loop-amount?]]
   (bgm/pos bgm-channel-id include-loop-amount?))
 
-(def bgm-pos bgm-position)
 
 
 (defn stop-se! [& [fade-sec se-channel-id]]

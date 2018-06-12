@@ -107,3 +107,10 @@
 
 
 
+(def ^:export length audio4/length)
+
+(defn ^:export getBgmPosition [& [bgm-channel-id include-loop-amount?]]
+  (audio4/bgm-position bgm-channel-id include-loop-amount?))
+
+
+

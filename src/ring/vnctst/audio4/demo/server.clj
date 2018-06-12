@@ -465,6 +465,16 @@
      "内部でこのパラメータを設定している。")
   )
 
+(defdesc :bgm-option-e
+  (p (expand-autoext-html "bgm/ny2017.*")
+     "の1秒目の位置から、BGMとして再生する。")
+  (p [:code "position"]
+     "で秒数を指定する。")
+  (p "なお、同時に"
+     [:code "pitch"]
+     "を指定した場合であっても pitch=1 の前提で再生位置が反映される。")
+  )
+
 (defdesc :bgm-noise-ch
   (p (expand-autoext-html "bgm/noise.*")
      "を「" [:code "background-sound"] "」という名前のBGM再生チャンネルにて、"
@@ -672,6 +682,22 @@
   (p "高階関数の引数として、自動停止時のフェード秒数が指定可能"
      "(無指定の場合は通常のSEのデフォルトフェード秒数が適用される)。")
   (p "生成された関数の引数には、通常のSE再生用の引数を渡す。")
+  )
+
+(defdesc :bgm-position
+  (p "現在BGMとして再生中の音源の現在の再生位置を秒数で取得する。"
+     "追加引数としてBGMチャンネルを指定可能。"
+     "何も再生していない場合は nil / null が返る。"
+     )
+  (p "なお、再生時に" [:code "pitch"] "を指定していても、"
+     "常に pitch=1 での秒数として返される。"
+     )
+  )
+
+(defdesc :length
+  (p "プリロード済の"
+     (expand-autoext-html "bgm/ny2017.*")
+     "の音源としての全体の秒数を取得する。")
   )
 
 
@@ -947,6 +973,7 @@
                  (demo-button2 :bgm-option-b)
                  (demo-button2 :bgm-option-c)
                  (demo-button2 :bgm-option-d)
+                 (demo-button2 :bgm-option-e)
                  (demo-button2 :bgm-noise-ch)
                  (demo-button2 :stop-bgm-ch-a)
                  (demo-button2 :stop-bgm-ch-b)
@@ -959,6 +986,9 @@
                  (demo-button2 :stop-se-ch)
                  (demo-button2 :alarm-kick)
                  [:h3 "その他"]
+                 (demo-button2 :bgm-position)
+                 (demo-button2 :length)
+                 [:h3 "旧版互換インターフェース"]
                  [:p
                   "旧版であるvnctst-audio3"
                   "由来のインターフェースです"]
@@ -1206,17 +1236,17 @@
                    "再生環境側の問題なので、"
                    "ライブラリレベルでの対応は厳しいです。"]]
                  [:h4
-                  "モバイル環境で、再生開始までに"
+                  "再生開始までに"
                   "ものすごく時間のかかる時がある"]
                  [:ul
                   [:li
-                   "モバイル環境では"
-                   "「タッチイベントを実行するまでは再生できない」"
-                   "という仕様になっているブラウザが主流です。"
-                   "画面のどこかをタッチする事で再生が開始された場合、"
+                   "モバイル環境および2018年以降の多くのブラウザでは"
+                   "「インタラクションイベントを実行するまでは再生できない」"
+                   "という仕様が主流となりつつあるようです。"
+                   "画面のどこかをクリック/タッチしたり、"
+                   "キーボード入力する事で再生が開始された場合は、"
                    "この仕様に引っかかっています。"
                    [:br]
-                   "モバイル向けを意識する場合は"
                    "「タイトル画面は無音にする」等、"
                    "この仕様を意識した作りにするとよいでしょう"
                    ]]
@@ -1278,7 +1308,7 @@
                    "読んでいます。"
                    [:br]
                    "これは「"
-                   (a "http://vnctst.tir.jp/" "vnctst games")
+                   (a "http://vnctst.tir.jp/" "VNCTST games")
                    "」というインディーズゲーム作成ブランドの"
                    "名前から来ています。"
                    "しかしあまりに人間には発音しづらいので、このブランド名は"
