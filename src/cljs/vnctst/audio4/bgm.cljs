@@ -370,9 +370,12 @@
 
 
 
+(defn background-pos [bgm-ch]
+  (get @resume-pos-table bgm-ch))
+
 
 ;;; バックグラウンドに入ったので、stateの再生を停止する
-(defn- background-on! [bgm-ch state pos]
+(defn- background-on! [bgm-ch state]
   ;; acが存在する場合は基本的には論理再生中。
   ;; ただし、:oneshot?再生終了時はその限りではなく、個別に対応する必要がある
   (when-let [ac (:ac (:current-param @state))]
@@ -408,7 +411,7 @@
       (let [state (resolve-state! bgm-ch)
             pos (get @resume-pos-table bgm-ch)]
         (if now-background?
-          (background-on! bgm-ch state pos)
+          (background-on! bgm-ch state)
           (background-off! bgm-ch state pos))))))
 
 

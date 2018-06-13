@@ -92,7 +92,9 @@
 
 
 (defn bgm-position [& [bgm-channel-id include-loop-amount?]]
-  (bgm/pos bgm-channel-id include-loop-amount?))
+  (or
+    (bgm/background-pos (or bgm-channel-id :BGM))
+    (bgm/pos bgm-channel-id include-loop-amount?)))
 
 
 

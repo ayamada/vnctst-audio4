@@ -153,7 +153,8 @@
     (reset! h (fn [e]
                 (when (unlock-fn)
                   (doseq [ename event-names]
-                    (js/document.removeEventListener ename @h)))))
+                    (js/document.removeEventListener ename @h))
+                  (reset! h nil))))
     (doseq [ename event-names]
       (js/document.addEventListener ename @h))))
 
