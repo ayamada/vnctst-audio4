@@ -481,9 +481,9 @@
    })
 
 (defba :bgm-option-e
-  {:fn #(vnctst.audio4/bgm! "bgm/ny2017.*" :position 1 :oneshot? true)
-   :cljs "(vnctst.audio4/bgm! \"bgm/ny2017.*\" :position 1 :oneshot? true)"
-   :js "vnstst.audio4.js.bgm(\"bgm/ny2017.*\", {position: 1, \"oneshot?\": true})"
+  {:fn #(vnctst.audio4/bgm! "bgm/ny2017.*" :position 1.2 :oneshot? true)
+   :cljs "(vnctst.audio4/bgm! \"bgm/ny2017.*\" :position 1.2 :oneshot? true)"
+   :js "vnstst.audio4.js.bgm(\"bgm/ny2017.*\", {position: 1.2, \"oneshot?\": true})"
    })
 
 (defba :me-launch

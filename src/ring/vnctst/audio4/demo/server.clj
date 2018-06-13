@@ -467,7 +467,7 @@
 
 (defdesc :bgm-option-e
   (p (expand-autoext-html "bgm/ny2017.*")
-     "の1秒目の位置から、BGMとして再生する。")
+     "の1.2秒目の位置から、BGMとして再生する。")
   (p [:code "position"]
      "で秒数を指定する。")
   (p "なお、同時に"
