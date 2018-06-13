@@ -34,6 +34,16 @@
       s)))
 
 
+;;; NB: 遅い実装だが、あまり実行される事はないので許容範囲内
+(defn- state->bgm-ch [state]
+  (loop [left (seq @channel-state-table)]
+    (when-let [[c s] (first left)]
+      (if (= state s)
+        c
+        (recur (rest left))))))
+
+
+
 ;;; バックグラウンド復帰の再生ポイント記録用
 (defonce resume-pos-table (atom {}))
 
@@ -176,6 +186,9 @@
       ;; フェードプロセスが生きているなら、それも止める
       (when-let [fp (:fade-process @state)]
         (async/put! fp true))
+      ;; バックグラウンド中なら、resume-pos-tableからの除去も必要となる
+      (when-let [bgm-ch (state->bgm-ch state)]
+        (swap! resume-pos-table dissoc bgm-ch))
       (reset! state nil))))
 
 
