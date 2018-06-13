@@ -1,5 +1,6 @@
 (ns vnctst.audio4.device.web-audio
   (:require [vnctst.audio4.device.entry-table :as entry-table]
+            [vnctst.audio4.loaded-as :refer [loaded-audiosource-table]]
             [vnctst.audio4.util :as util]))
 
 (defn- p [& args]
@@ -23,6 +24,28 @@
 (defonce master-gain-node (atom nil))
 
 
+
+(defn- register-unlocker! [ctx]
+  (util/register-touch-unlock-fn!
+    (fn []
+      ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1410968
+      (let [unlock-fn #(.start (.createBufferSource ctx) 0)]
+        (if (and
+              (= (.-state ctx) "suspended")
+              (.-resume ctx))
+          (.then (.resume ctx) unlock-fn)
+          (unlock-fn)))
+      ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1470959
+      (doseq [as (filter identity (vals @loaded-audiosource-table))]
+        ;; asの内、アンロック以前に生成されたものをresumeする必要がある
+        ;; TODO: どうやればできる？ここで使うAudioContextは @audio-context の
+        ;;       一個だけではないのか？
+        ;; このasの内、表向きは再生状態なものの実際は再生されていないものを
+        ;; 再生開始する必要がある
+        ;; TODO: それをするには、asではなくacの一覧が必要なのでは…
+        )
+      ;; 最後に、全ての処理が完了した証として、trueを返す必要がある
+      true)))
 
 
 
@@ -49,16 +72,7 @@
                   (catch :default e
                     nil)))]
       (when ctx
-        ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1410968
-        (util/register-touch-unlock-fn!
-          (fn []
-            (let [unlock-fn #(.start (.createBufferSource ctx) 0)]
-              (if (and
-                    (= (.-state ctx) "suspended")
-                    (.-resume ctx))
-                (.then (.resume ctx) unlock-fn)
-                (unlock-fn))
-              true)))
+        (register-unlocker! ctx)
         (reset! audio-context ctx)
         (let [node (.createGain ctx)]
           (set! (.. node -gain -value) 1)
@@ -182,6 +196,7 @@
                     (recur (- p duration))
                     p))))))))))
 
+;;; TODO: include-loop-amount? への対応はまだ未実装
 (defn pos [ch & [include-loop-amount?]]
   (when-not (:play-end-time @ch)
     (_pos ch include-loop-amount?)))

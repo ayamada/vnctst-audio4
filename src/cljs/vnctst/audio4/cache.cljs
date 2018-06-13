@@ -3,6 +3,7 @@
   (:require [vnctst.audio4.state :as state]
             [vnctst.audio4.util :as util]
             [vnctst.audio4.device :as device]
+            [vnctst.audio4.loaded-as :refer [loaded-audiosource-table]]
             [cljs.core.async :as async :refer [>! <!]]
             ))
 
@@ -13,11 +14,6 @@
 ;;; BGMのロード後再生の為に、pathを記憶しておく必要がある
 ;;; (これは複数のロードによる書き換えの為に必要となる)
 (defonce ^:private last-loading-bgm-path (atom {}))
-
-
-;;; ロード済(エラー含む)のasを保持するテーブル
-;;; エラー時は「エントリはあるが値はnil」となる
-(defonce ^:private loaded-audiosource-table (atom {}))
 
 
 ;;; ロード中のasの、ロード完了時実行ハンドル等の情報を保持するテーブル
