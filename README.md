@@ -150,7 +150,7 @@ zlib風ライセンスとします。
 
 # ChangeLog
 
-- 0.2.3-SNAPSHOT (2018-XX-XX)
+- 0.3.0 (2018-06-13)
     - http://ch.nicovideo.jp/indies-game/blomaga/ar1410968 への対応を実装
     - `play-bgm!` の引数に `:position` を追加
     - `bgm-position` を追加
