@@ -154,7 +154,8 @@
                 (when (unlock-fn)
                   (doseq [ename event-names]
                     (js/document.removeEventListener ename @h))
-                  (reset! h nil))))
+                  (reset! h nil))
+                false))
     (doseq [ename event-names]
       (js/document.addEventListener ename @h))))
 

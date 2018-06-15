@@ -26,26 +26,58 @@
 
 
 (defn- register-unlocker! [ctx]
-  (util/register-touch-unlock-fn!
-    (fn []
-      ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1410968
-      (let [unlock-fn #(.start (.createBufferSource ctx) 0)]
-        (if (and
-              (= (.-state ctx) "suspended")
-              (.-resume ctx))
-          (.then (.resume ctx) unlock-fn)
-          (unlock-fn)))
-      ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1470959
-      (doseq [as (filter identity (vals @loaded-audiosource-table))]
-        ;; asの内、アンロック以前に生成されたものをresumeする必要がある
-        ;; TODO: どうやればできる？ここで使うAudioContextは @audio-context の
-        ;;       一個だけではないのか？
-        ;; このasの内、表向きは再生状態なものの実際は再生されていないものを
-        ;; 再生開始する必要がある
-        ;; TODO: それをするには、asではなくacの一覧が必要なのでは…
-        )
-      ;; 最後に、全ての処理が完了した証として、trueを返す必要がある
-      true)))
+  ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1410968
+  ;; See http://ch.nicovideo.jp/indies-game/blomaga/ar1470959
+  (let [tried? (atom false)
+        running? (atom false)
+        try-count (atom 0)
+        try-max 10
+        unlock-fn #(.start (.createBufferSource ctx) 0)
+        ]
+    (util/register-touch-unlock-fn!
+      (fn []
+        (let [suspended? (= (.-state ctx) "suspended")
+              has-resume? (.-resume ctx)]
+          (cond
+            ;; resume機能を持っていない。
+            ;; resume実行なしにアンロック処理を行うだけにする
+            (not has-resume?) (do
+                                ;(prn :has-not-resume)
+                                (unlock-fn)
+                                true)
+            ;; 既に一回以上実行されており、実行が完了しており、
+            ;; ロックが解除されているなら、正常にアンロックが完了した。
+            ;; trueを返して処理を終了できる
+            (and @tried? (not @running?) (not suspended?)) (do
+                                                             ;(prn :done)
+                                                             true)
+            ;; 既にアンロック実行中で終了を待っている場合は、
+            ;; 次回またチェックする
+            @running? (do
+                        ;(prn :running)
+                        (swap! try-count inc)
+                        false)
+            ;; アンロックに一定回数失敗した場合は諦める
+            (<= try-max @try-count) (do
+                                      ;(prn :reached-try-max)
+                                      true)
+            ;; resumeとアンロックを実行し、次回以降にその結果を確認する
+            :else (do
+                    ;(prn :run-resume)
+                    (reset! tried? true)
+                    (reset! running? true)
+                    (.then (.resume ctx)
+                           (fn [& args]
+                             ;(prn :run-resume-ok)
+                             (unlock-fn)
+                             (reset! running? false)
+                             true)
+                           (fn [& args]
+                             ;(prn :run-resume-ng)
+                             (reset! running? false)
+                             false))
+                    (swap! try-count inc)
+                    false)))))))
 
 
 
